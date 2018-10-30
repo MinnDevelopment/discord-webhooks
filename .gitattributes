@@ -1,0 +1,9 @@
+# Preserve gradlew's line ending
+gradlew binary
+
+.git* text eol=lf
+*.java text eol=lf
+*.gradle text eol=lf
+*.bat text eol=lf
+
+* text=auto

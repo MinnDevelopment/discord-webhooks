@@ -1,0 +1,3 @@
+rootProject.name = 'discord-webhooks'
+enableFeaturePreview('STABLE_PUBLISHING')
+
