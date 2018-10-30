@@ -16,6 +16,7 @@
 
 package club.minnced.discord.webhook.message;
 
+import club.minnced.discord.webhook.IOUtil;
 import okhttp3.MediaType;
 import okhttp3.MultipartBody;
 import okhttp3.RequestBody;
@@ -26,12 +27,11 @@ import org.json.JSONObject;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.ByteBuffer;
 import java.util.*;
 
 public class WebhookMessage { //TODO: Docs
     public static final MediaType JSON = MediaType.parse("application/json; charset=utf-8");
-    public static final MediaType OCTET = MediaType.parse("application/octet-stream");
+    public static final MediaType OCTET = MediaType.parse("application/octet-stream; charset=utf-8");
 
     protected final String username, avatarUrl, content;
     protected final List<WebhookEmbed> embeds;
@@ -176,11 +176,8 @@ public class WebhookMessage { //TODO: Docs
 
         @Override
         public void writeTo(BufferedSink sink) throws IOException {
-            ByteBuffer buf = ByteBuffer.allocate(1024);
-            while (in.available() > 0) {
-                buf.position(in.read(buf.array()));
-                sink.write(buf);
-            }
+            byte[] data = IOUtil.readAllBytes(in);
+            sink.write(data);
         }
     }
 }
