@@ -1,7 +1,9 @@
 package club.minnced.discord.webhook.message;
 
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 public class WebhookEmbedBuilder {
@@ -22,7 +24,7 @@ public class WebhookEmbedBuilder {
         fields = new ArrayList<>(10);
     }
 
-    public WebhookEmbedBuilder(WebhookEmbed embed) {
+    public WebhookEmbedBuilder(@Nullable WebhookEmbed embed) {
         this();
         if (embed != null) {
             timestamp = embed.getTimestamp();
@@ -37,42 +39,50 @@ public class WebhookEmbedBuilder {
         }
     }
 
-    public WebhookEmbedBuilder setTimestamp(Long timestamp) {
+    @NotNull
+    public WebhookEmbedBuilder setTimestamp(@Nullable Long timestamp) {
         this.timestamp = timestamp;
         return this;
     }
 
-    public WebhookEmbedBuilder setColor(Integer color) {
+    @NotNull
+    public WebhookEmbedBuilder setColor(@Nullable Integer color) {
         this.color = color;
         return this;
     }
 
-    public WebhookEmbedBuilder setDescription(String description) {
+    @NotNull
+    public WebhookEmbedBuilder setDescription(@Nullable String description) {
         this.description = description;
         return this;
     }
 
-    public WebhookEmbedBuilder setThumbnailUrl(String thumbnailUrl) {
+    @NotNull
+    public WebhookEmbedBuilder setThumbnailUrl(@Nullable String thumbnailUrl) {
         this.thumbnailUrl = thumbnailUrl;
         return this;
     }
 
-    public WebhookEmbedBuilder setImageUrl(String imageUrl) {
+    @NotNull
+    public WebhookEmbedBuilder setImageUrl(@Nullable String imageUrl) {
         this.imageUrl = imageUrl;
         return this;
     }
 
-    public WebhookEmbedBuilder setFooter(WebhookEmbed.EmbedFooter footer) {
+    @NotNull
+    public WebhookEmbedBuilder setFooter(@Nullable WebhookEmbed.EmbedFooter footer) {
         this.footer = footer;
         return this;
     }
 
-    public WebhookEmbedBuilder setTitle(WebhookEmbed.EmbedTitle title) {
+    @NotNull
+    public WebhookEmbedBuilder setTitle(@Nullable WebhookEmbed.EmbedTitle title) {
         this.title = title;
         return this;
     }
 
-    public WebhookEmbedBuilder setAuthor(WebhookEmbed.EmbedAuthor author) {
+    @NotNull
+    public WebhookEmbedBuilder setAuthor(@Nullable WebhookEmbed.EmbedAuthor author) {
         this.author = author;
         return this;
     }
@@ -108,6 +118,7 @@ public class WebhookEmbedBuilder {
         return fields.stream().allMatch(f -> isEmpty(f.getName()) && isEmpty(f.getValue()));
     }
 
+    @NotNull
     public WebhookEmbed build() {
         if (isEmpty())
             throw new IllegalStateException("Cannot build an empty embed");
@@ -115,7 +126,7 @@ public class WebhookEmbedBuilder {
                 timestamp, color,
                 description, thumbnailUrl, imageUrl,
                 footer, title, author,
-                Collections.unmodifiableList(new ArrayList<>(fields))
+                new ArrayList<>(fields)
         );
     }
 }

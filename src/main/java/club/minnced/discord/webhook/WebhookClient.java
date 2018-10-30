@@ -25,6 +25,8 @@ import okhttp3.RequestBody;
 import okhttp3.Response;
 import okhttp3.ResponseBody;
 import org.jetbrains.annotations.Async;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.json.JSONObject;
 import org.json.JSONTokener;
 import org.slf4j.Logger;
@@ -72,45 +74,55 @@ public class WebhookClient implements AutoCloseable { //TODO: Message Receive
         return id;
     }
 
+    @NotNull
     public String getUrl() {
         return url;
     }
 
-    public CompletableFuture<?> send(WebhookMessage message) {
+    @NotNull
+    public CompletableFuture<?> send(@NotNull WebhookMessage message) {
         Objects.requireNonNull(message, "WebhookMessage");
         return execute(message.getBody());
     }
 
-    public CompletableFuture<?> send(File file) {
+    @NotNull
+    public CompletableFuture<?> send(@NotNull File file) {
         Objects.requireNonNull(file, "File");
         return send(file, file.getName());
     }
 
-    public CompletableFuture<?> send(File file, String fileName) {
+    @NotNull
+    public CompletableFuture<?> send(@NotNull File file, @NotNull String fileName) {
         return send(new WebhookMessageBuilder().addFile(fileName, file).build());
     }
 
-    public CompletableFuture<?> send(byte[] data, String fileName) {
+    @NotNull
+    public CompletableFuture<?> send(@NotNull byte[] data, @NotNull String fileName) {
         return send(new WebhookMessageBuilder().addFile(fileName, data).build());
     }
 
-    public CompletableFuture<?> send(InputStream data, String fileName) {
+    @NotNull
+    public CompletableFuture<?> send(@NotNull InputStream data, @NotNull String fileName) {
         return send(new WebhookMessageBuilder().addFile(fileName, data).build());
     }
 
-    public CompletableFuture<?> send(WebhookEmbed[] embeds) {
+    @NotNull
+    public CompletableFuture<?> send(@NotNull WebhookEmbed[] embeds) {
         return send(WebhookMessage.embeds(Arrays.asList(embeds)));
     }
 
-    public CompletableFuture<?> send(WebhookEmbed first, WebhookEmbed... embeds) {
+    @NotNull
+    public CompletableFuture<?> send(@NotNull WebhookEmbed first, @NotNull WebhookEmbed... embeds) {
         return send(WebhookMessage.embeds(first, embeds));
     }
 
-    public CompletableFuture<?> send(Collection<WebhookEmbed> embeds) {
+    @NotNull
+    public CompletableFuture<?> send(@NotNull Collection<WebhookEmbed> embeds) {
         return send(WebhookMessage.embeds(embeds));
     }
 
-    public CompletableFuture<?> send(String content) {
+    @NotNull
+    public CompletableFuture<?> send(@NotNull String content) {
         Objects.requireNonNull(content, "Content");
         content = content.trim();
         if (content.isEmpty())
@@ -138,15 +150,18 @@ public class WebhookClient implements AutoCloseable { //TODO: Message Receive
             throw new RejectedExecutionException("Cannot send to closed client!");
     }
 
+    @NotNull
     protected static RequestBody newBody(String object) {
-        return RequestBody.create(WebhookMessage.JSON, object);
+        return RequestBody.create(IOUtil.JSON, object);
     }
 
+    @NotNull
     protected CompletableFuture<?> execute(RequestBody body) {
         checkShutdown();
         return queueRequest(body);
     }
 
+    @NotNull
     protected static HttpException failure(Response response) throws IOException {
         final InputStream stream = getBody(response);
         final String responseBody = stream == null ? "" : new String(IOUtil.readAllBytes(stream));
@@ -154,6 +169,7 @@ public class WebhookClient implements AutoCloseable { //TODO: Message Receive
         return new HttpException("Request returned failure " + response.code() + ": " + responseBody);
     }
 
+    @NotNull
     protected CompletableFuture<?> queueRequest(RequestBody body) {
         final boolean wasQueued = isQueued;
         isQueued = true;
@@ -165,6 +181,7 @@ public class WebhookClient implements AutoCloseable { //TODO: Message Receive
         return callback;
     }
 
+    @NotNull
     protected okhttp3.Request newRequest(RequestBody body) {
         return new okhttp3.Request.Builder()
                 .url(url)
@@ -221,6 +238,7 @@ public class WebhookClient implements AutoCloseable { //TODO: Message Receive
         }
     }
 
+    @Nullable
     private static InputStream getBody(okhttp3.Response req) throws IOException {
         List<String> encoding = req.headers("content-encoding");
         ResponseBody body = req.body();

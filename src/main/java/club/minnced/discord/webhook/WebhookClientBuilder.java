@@ -17,6 +17,8 @@
 package club.minnced.discord.webhook;
 
 import okhttp3.OkHttpClient;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Objects;
 import java.util.concurrent.Executors;
@@ -26,8 +28,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class WebhookClientBuilder {
-    public static final OkHttpClient.Builder DEFAULT_HTTP_BUILDER = new OkHttpClient.Builder();
-    private static final Pattern WEBHOOK_PATTERN = Pattern.compile("(?:https?://)?(?:\\w+\\.)?discordapp\\.com/api(?:/v\\d+)?/webhooks/(\\d+)/([\\w-]+)(?:/(?:\\w+)?)?");
+    public static final Pattern WEBHOOK_PATTERN = Pattern.compile("(?:https?://)?(?:\\w+\\.)?discordapp\\.com/api(?:/v\\d+)?/webhooks/(\\d+)/([\\w-]+)(?:/(?:\\w+)?)?");
 
     protected final long id;
     protected final String token;
@@ -36,13 +37,14 @@ public class WebhookClientBuilder {
     protected ThreadFactory threadFactory;
     protected boolean isDaemon;
 
-    public WebhookClientBuilder(final long id, final String token) {
+    public WebhookClientBuilder(final long id, @NotNull final String token) {
         Objects.requireNonNull(token, "Token");
         this.id = id;
         this.token = token;
     }
 
-    public WebhookClientBuilder(String url) {
+    public WebhookClientBuilder(@NotNull String url) {
+        Objects.requireNonNull(url, "Url");
         Matcher matcher = WEBHOOK_PATTERN.matcher(url);
         if (!matcher.matches()) {
             throw new IllegalArgumentException("Failed to parse webhook URL");
@@ -52,26 +54,31 @@ public class WebhookClientBuilder {
         this.token = matcher.group(2);
     }
 
-    public WebhookClientBuilder setExecutorService(ScheduledExecutorService executorService) {
+    @NotNull
+    public WebhookClientBuilder setExecutorService(@Nullable ScheduledExecutorService executorService) {
         this.pool = executorService;
         return this;
     }
 
-    public WebhookClientBuilder setHttpClient(OkHttpClient client) {
+    @NotNull
+    public WebhookClientBuilder setHttpClient(@Nullable OkHttpClient client) {
         this.client = client;
         return this;
     }
 
-    public WebhookClientBuilder setThreadFactory(ThreadFactory factory) {
+    @NotNull
+    public WebhookClientBuilder setThreadFactory(@Nullable ThreadFactory factory) {
         this.threadFactory = factory;
         return this;
     }
 
+    @NotNull
     public WebhookClientBuilder setDaemon(boolean isDaemon) {
         this.isDaemon = isDaemon;
         return this;
     }
 
+    @NotNull
     public WebhookClient build() {
         OkHttpClient client = this.client == null
                               ? new OkHttpClient()
@@ -85,7 +92,7 @@ public class WebhookClientBuilder {
         return new WebhookClient(id, token, client, pool);
     }
 
-    public final class DefaultWebhookThreadFactory implements ThreadFactory {
+    private final class DefaultWebhookThreadFactory implements ThreadFactory {
         @Override
         public Thread newThread(Runnable r) {
             final Thread thread = new Thread(r, "Webhook-RateLimit Thread WebhookID: " + id);

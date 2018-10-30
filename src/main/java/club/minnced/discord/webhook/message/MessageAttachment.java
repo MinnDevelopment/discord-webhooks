@@ -17,6 +17,7 @@
 package club.minnced.discord.webhook.message;
 
 import club.minnced.discord.webhook.IOUtil;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.*;
 
@@ -24,25 +25,27 @@ public class MessageAttachment {
     private final String name;
     private final byte[] data;
 
-    MessageAttachment(String name, byte[] data) {
+    MessageAttachment(@NotNull String name, @NotNull byte[] data) {
         this.name = name;
         this.data = data;
     }
 
-    MessageAttachment(String name, InputStream stream) throws IOException {
+    MessageAttachment(@NotNull String name, @NotNull InputStream stream) throws IOException {
         this.name = name;
         this.data = IOUtil.readAllBytes(stream);
     }
 
-    MessageAttachment(String name, File file) throws IOException {
+    MessageAttachment(@NotNull String name, @NotNull File file) throws IOException {
         this.name = name;
         this.data = IOUtil.readAllBytes(new FileInputStream(file));
     }
 
+    @NotNull
     public String getName() {
         return name;
     }
 
+    @NotNull
     public InputStream getData() {
         return new ByteArrayInputStream(data);
     }

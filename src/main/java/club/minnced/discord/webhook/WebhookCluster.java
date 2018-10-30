@@ -21,6 +21,8 @@ import club.minnced.discord.webhook.message.WebhookMessage;
 import club.minnced.discord.webhook.message.WebhookMessageBuilder;
 import okhttp3.OkHttpClient;
 import okhttp3.RequestBody;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.json.JSONObject;
 
 import java.io.File;
@@ -38,7 +40,8 @@ public class WebhookCluster implements AutoCloseable { //TODO: Message Receive
     protected ThreadFactory threadFactory;
     protected boolean isDaemon;
 
-    public WebhookCluster(Collection<? extends WebhookClient> initialClients) {
+    public WebhookCluster(@NotNull Collection<? extends WebhookClient> initialClients) {
+        Objects.requireNonNull(initialClients, "List");
         webhooks = new ArrayList<>(initialClients.size());
         for (WebhookClient client : initialClients) {
             addWebhooks(client);
@@ -55,21 +58,25 @@ public class WebhookCluster implements AutoCloseable { //TODO: Message Receive
 
     // Default builder values
 
-    public WebhookCluster setDefaultHttpClient(OkHttpClient defaultHttpClient) {
+    @NotNull
+    public WebhookCluster setDefaultHttpClient(@Nullable OkHttpClient defaultHttpClient) {
         this.defaultHttpClient = defaultHttpClient;
         return this;
     }
 
-    public WebhookCluster setDefaultExecutorService(ScheduledExecutorService executorService) {
+    @NotNull
+    public WebhookCluster setDefaultExecutorService(@Nullable ScheduledExecutorService executorService) {
         this.defaultPool = executorService;
         return this;
     }
 
-    public WebhookCluster setDefaultThreadFactory(ThreadFactory factory) {
+    @NotNull
+    public WebhookCluster setDefaultThreadFactory(@Nullable ThreadFactory factory) {
         this.threadFactory = factory;
         return this;
     }
 
+    @NotNull
     public WebhookCluster setDefaultDaemon(boolean isDaemon) {
         this.isDaemon = isDaemon;
         return this;
@@ -77,12 +84,14 @@ public class WebhookCluster implements AutoCloseable { //TODO: Message Receive
 
     // Webhook creation/add/remove
 
-    public WebhookCluster buildWebhook(long id, String token) {
+    @NotNull
+    public WebhookCluster buildWebhook(long id, @NotNull String token) {
         this.webhooks.add(newBuilder(id, token).build());
         return this;
     }
 
-    public WebhookClientBuilder newBuilder(long id, String token) {
+    @NotNull
+    public WebhookClientBuilder newBuilder(long id, @NotNull String token) {
         WebhookClientBuilder builder = new WebhookClientBuilder(id, token);
         builder.setExecutorService(defaultPool)
                .setHttpClient(defaultHttpClient)
@@ -91,7 +100,8 @@ public class WebhookCluster implements AutoCloseable { //TODO: Message Receive
         return builder;
     }
 
-    public WebhookCluster addWebhooks(WebhookClient... clients) {
+    @NotNull
+    public WebhookCluster addWebhooks(@NotNull WebhookClient... clients) {
         Objects.requireNonNull(clients, "Clients");
         for (WebhookClient client : clients) {
             Objects.requireNonNull(client, "Client");
@@ -102,7 +112,8 @@ public class WebhookCluster implements AutoCloseable { //TODO: Message Receive
         return this;
     }
 
-    public WebhookCluster addWebhooks(Collection<WebhookClient> clients) {
+    @NotNull
+    public WebhookCluster addWebhooks(@NotNull Collection<WebhookClient> clients) {
         Objects.requireNonNull(clients, "Clients");
         for (WebhookClient client : clients) {
             Objects.requireNonNull(client, "Client");
@@ -113,19 +124,22 @@ public class WebhookCluster implements AutoCloseable { //TODO: Message Receive
         return this;
     }
 
-    public WebhookCluster removeWebhooks(WebhookClient... clients) {
+    @NotNull
+    public WebhookCluster removeWebhooks(@NotNull WebhookClient... clients) {
         Objects.requireNonNull(clients, "Clients");
         webhooks.removeAll(Arrays.asList(clients));
         return this;
     }
 
-    public WebhookCluster removeWebhooks(Collection<WebhookClient> clients) {
+    @NotNull
+    public WebhookCluster removeWebhooks(@NotNull Collection<WebhookClient> clients) {
         Objects.requireNonNull(clients, "Clients");
         webhooks.removeAll(clients);
         return this;
     }
 
-    public List<WebhookClient> removeIf(Predicate<WebhookClient> predicate) {
+    @NotNull
+    public List<WebhookClient> removeIf(@NotNull Predicate<WebhookClient> predicate) {
         Objects.requireNonNull(predicate, "Predicate");
         List<WebhookClient> clients = new ArrayList<>();
         for (WebhookClient client : webhooks) {
@@ -136,7 +150,8 @@ public class WebhookCluster implements AutoCloseable { //TODO: Message Receive
         return clients;
     }
 
-    public List<WebhookClient> closeIf(Predicate<WebhookClient> predicate) {
+    @NotNull
+    public List<WebhookClient> closeIf(@NotNull Predicate<WebhookClient> predicate) {
         Objects.requireNonNull(predicate, "Filter");
         List<WebhookClient> clients = new ArrayList<>();
         for (WebhookClient client : webhooks) {
@@ -148,13 +163,15 @@ public class WebhookCluster implements AutoCloseable { //TODO: Message Receive
         return clients;
     }
 
+    @NotNull
     public List<WebhookClient> getWebhooks() {
         return Collections.unmodifiableList(new ArrayList<>(webhooks));
     }
 
     // Broadcasting / Multicasting
 
-    public List<CompletableFuture<?>> multicast(Predicate<WebhookClient> filter, WebhookMessage message) {
+    @NotNull
+    public List<CompletableFuture<?>> multicast(@NotNull Predicate<WebhookClient> filter, @NotNull WebhookMessage message) {
         Objects.requireNonNull(filter, "Filter");
         Objects.requireNonNull(message, "Message");
         final RequestBody body = message.getBody();
@@ -166,7 +183,8 @@ public class WebhookCluster implements AutoCloseable { //TODO: Message Receive
         return callbacks;
     }
 
-    public List<CompletableFuture<?>> broadcast(WebhookMessage message) {
+    @NotNull
+    public List<CompletableFuture<?>> broadcast(@NotNull WebhookMessage message) {
         Objects.requireNonNull(message, "Message");
         RequestBody body = message.getBody();
         final List<CompletableFuture<?>> callbacks = new ArrayList<>(webhooks.size());
@@ -178,19 +196,23 @@ public class WebhookCluster implements AutoCloseable { //TODO: Message Receive
         return callbacks;
     }
 
-    public List<CompletableFuture<?>> broadcast(WebhookEmbed[] embeds) {
+    @NotNull
+    public List<CompletableFuture<?>> broadcast(@NotNull WebhookEmbed[] embeds) {
         return broadcast(WebhookMessage.embeds(Arrays.asList(embeds)));
     }
 
-    public List<CompletableFuture<?>> broadcast(WebhookEmbed first, WebhookEmbed... embeds) {
+    @NotNull
+    public List<CompletableFuture<?>> broadcast(@NotNull WebhookEmbed first, @NotNull WebhookEmbed... embeds) {
         return broadcast(WebhookMessage.embeds(first, embeds));
     }
 
-    public List<CompletableFuture<?>> broadcast(Collection<WebhookEmbed> embeds) {
+    @NotNull
+    public List<CompletableFuture<?>> broadcast(@NotNull Collection<WebhookEmbed> embeds) {
         return broadcast(WebhookMessage.embeds(embeds));
     }
 
-    public List<CompletableFuture<?>> broadcast(String content) {
+    @NotNull
+    public List<CompletableFuture<?>> broadcast(@NotNull String content) {
         Objects.requireNonNull(content, "Content");
         if (content.length() > 2000)
             throw new IllegalArgumentException("Content may not exceed 2000 characters!");
@@ -202,23 +224,27 @@ public class WebhookCluster implements AutoCloseable { //TODO: Message Receive
         return callbacks;
     }
 
-    public List<CompletableFuture<?>> broadcast(File file) {
+    @NotNull
+    public List<CompletableFuture<?>> broadcast(@NotNull File file) {
         Objects.requireNonNull(file, "File");
-        return broadcast(file, file.getName());
+        return broadcast(file.getName(), file);
     }
 
-    public List<CompletableFuture<?>> broadcast(File file, String fileName) {
+    @NotNull
+    public List<CompletableFuture<?>> broadcast(@NotNull String fileName, @NotNull File file) {
         Objects.requireNonNull(file, "File");
         if (file.length() > 10)
             throw new IllegalArgumentException("Provided File exceeds the maximum size of 8MB!");
         return broadcast(new WebhookMessageBuilder().addFile(fileName, file).build());
     }
 
-    public List<CompletableFuture<?>> broadcast(InputStream data, String fileName) {
+    @NotNull
+    public List<CompletableFuture<?>> broadcast(@NotNull String fileName, @NotNull InputStream data) {
         return broadcast(new WebhookMessageBuilder().addFile(fileName, data).build());
     }
 
-    public List<CompletableFuture<?>> broadcast(byte[] data, String fileName) {
+    @NotNull
+    public List<CompletableFuture<?>> broadcast(@NotNull String fileName, @NotNull byte[] data) {
         Objects.requireNonNull(data, "Data");
         if (data.length > 10)
             throw new IllegalArgumentException("Provided data exceeds the maximum size of 8MB!");

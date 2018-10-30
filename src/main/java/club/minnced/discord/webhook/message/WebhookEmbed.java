@@ -1,10 +1,13 @@
 package club.minnced.discord.webhook.message;
 
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.json.JSONObject;
 import org.json.JSONString;
 
 import java.time.Instant;
 import java.time.format.DateTimeFormatter;
+import java.util.Collections;
 import java.util.List;
 
 public class WebhookEmbed implements JSONString {
@@ -22,10 +25,11 @@ public class WebhookEmbed implements JSONString {
     private final EmbedAuthor author;
     private final List<EmbedField> fields;
 
-    public WebhookEmbed(Long timestamp, Integer color,
-                        String description, String thumbnailUrl, String imageUrl,
-                        EmbedFooter footer, EmbedTitle title, EmbedAuthor author,
-                        List<EmbedField> fields) {
+    public WebhookEmbed(
+            @Nullable Long timestamp, @Nullable Integer color,
+            @Nullable String description, @Nullable String thumbnailUrl, @Nullable String imageUrl,
+            @Nullable EmbedFooter footer, @Nullable EmbedTitle title, @Nullable EmbedAuthor author,
+            @NotNull List<EmbedField> fields) {
         this.timestamp = timestamp;
         this.color = color;
         this.description = description;
@@ -34,41 +38,50 @@ public class WebhookEmbed implements JSONString {
         this.footer = footer;
         this.title = title;
         this.author = author;
-        this.fields = fields;
+        this.fields = Collections.unmodifiableList(fields);
     }
 
-    public long getTimestamp() {
+    @Nullable
+    public Long getTimestamp() {
         return timestamp;
     }
 
-    public int getColor() {
+    @Nullable
+    public Integer getColor() {
         return color;
     }
 
+    @Nullable
     public String getDescription() {
         return description;
     }
 
+    @Nullable
     public String getThumbnailUrl() {
         return thumbnailUrl;
     }
 
+    @Nullable
     public String getImageUrl() {
         return imageUrl;
     }
 
+    @Nullable
     public EmbedFooter getFooter() {
         return footer;
     }
 
+    @Nullable
     public EmbedTitle getTitle() {
         return title;
     }
 
+    @Nullable
     public EmbedAuthor getAuthor() {
         return author;
     }
 
+    @NotNull
     public List<EmbedField> getFields() {
         return fields;
     }
@@ -118,10 +131,12 @@ public class WebhookEmbed implements JSONString {
             return inline;
         }
 
+        @NotNull
         public String getName() {
             return name;
         }
 
+        @NotNull
         public String getValue() {
             return value;
         }
@@ -130,20 +145,23 @@ public class WebhookEmbed implements JSONString {
     public static class EmbedAuthor {
         private final String name, icon, url;
 
-        public EmbedAuthor(String name, String icon, String url) {
+        public EmbedAuthor(@NotNull String name, @Nullable String icon, @Nullable String url) {
             this.name = name;
             this.icon = icon;
             this.url = url;
         }
 
+        @NotNull
         public String getName() {
             return name;
         }
 
+        @Nullable
         public String getIcon() {
             return icon;
         }
 
+        @Nullable
         public String getUrl() {
             return url;
         }
@@ -152,15 +170,17 @@ public class WebhookEmbed implements JSONString {
     public static class EmbedFooter {
         private final String text, icon;
 
-        public EmbedFooter(String text, String icon) {
+        public EmbedFooter(@NotNull String text, @Nullable String icon) {
             this.text = text;
             this.icon = icon;
         }
 
+        @NotNull
         public String getText() {
             return text;
         }
 
+        @Nullable
         public String getIcon() {
             return icon;
         }
@@ -169,15 +189,17 @@ public class WebhookEmbed implements JSONString {
     public static class EmbedTitle {
         private final String text, url;
 
-        public EmbedTitle(String text, String url) {
+        public EmbedTitle(@NotNull String text, @Nullable String url) {
             this.text = text;
             this.url = url;
         }
 
+        @NotNull
         public String getText() {
             return text;
         }
 
+        @Nullable
         public String getUrl() {
             return url;
         }

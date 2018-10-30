@@ -16,6 +16,9 @@
 
 package club.minnced.discord.webhook.message;
 
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -39,6 +42,7 @@ public class WebhookMessageBuilder {
         return fileIndex;
     }
 
+    @NotNull
     public WebhookMessageBuilder reset() {
         content.setLength(0);
         embeds.clear();
@@ -49,6 +53,7 @@ public class WebhookMessageBuilder {
         return this;
     }
 
+    @NotNull
     public WebhookMessageBuilder resetFiles() {
         for (int i = 0; i < MAX_FILES; i++) {
             files[i] = null;
@@ -57,12 +62,14 @@ public class WebhookMessageBuilder {
         return this;
     }
 
+    @NotNull
     public WebhookMessageBuilder resetEmbeds() {
         this.embeds.clear();
         return this;
     }
 
-    public WebhookMessageBuilder addEmbeds(WebhookEmbed... embeds) {
+    @NotNull
+    public WebhookMessageBuilder addEmbeds(@NotNull WebhookEmbed... embeds) {
         Objects.requireNonNull(embeds, "Embeds");
         for (WebhookEmbed embed : embeds) {
             Objects.requireNonNull(embed, "Embed");
@@ -71,7 +78,8 @@ public class WebhookMessageBuilder {
         return this;
     }
 
-    public WebhookMessageBuilder addEmbeds(Collection<WebhookEmbed> embeds) {
+    @NotNull
+    public WebhookMessageBuilder addEmbeds(@NotNull Collection<WebhookEmbed> embeds) {
         Objects.requireNonNull(embeds, "Embeds");
         for (WebhookEmbed embed : embeds) {
             Objects.requireNonNull(embed, "Embed");
@@ -80,7 +88,8 @@ public class WebhookMessageBuilder {
         return this;
     }
 
-    public WebhookMessageBuilder setContent(String content) {
+    @NotNull
+    public WebhookMessageBuilder setContent(@Nullable String content) {
         if (content != null && content.length() > 2000)
             throw new IllegalArgumentException("Content may not exceed 2000 characters!");
         if (content != null)
@@ -90,7 +99,8 @@ public class WebhookMessageBuilder {
         return this;
     }
 
-    public WebhookMessageBuilder append(String content) {
+    @NotNull
+    public WebhookMessageBuilder append(@NotNull String content) {
         Objects.requireNonNull(content, "Content");
         if (this.content.length() + content.length() > 2000)
             throw new IllegalArgumentException("Content may not exceed 2000 characters!");
@@ -98,22 +108,26 @@ public class WebhookMessageBuilder {
         return this;
     }
 
-    public WebhookMessageBuilder setUsername(String username) {
+    @NotNull
+    public WebhookMessageBuilder setUsername(@Nullable String username) {
         this.username = username == null || username.trim().isEmpty() ? null : username.trim();
         return this;
     }
 
-    public WebhookMessageBuilder setAvatarUrl(String avatarUrl) {
+    @NotNull
+    public WebhookMessageBuilder setAvatarUrl(@Nullable String avatarUrl) {
         this.avatarUrl = avatarUrl == null || avatarUrl.trim().isEmpty() ? null : avatarUrl.trim();
         return this;
     }
 
-    public WebhookMessageBuilder addFile(File file) {
+    @NotNull
+    public WebhookMessageBuilder addFile(@NotNull File file) {
         Objects.requireNonNull(file, "File");
         return addFile(file.getName(), file);
     }
 
-    public WebhookMessageBuilder addFile(String name, File file) {
+    @NotNull
+    public WebhookMessageBuilder addFile(@NotNull String name, @NotNull File file) {
         Objects.requireNonNull(file, "File");
         Objects.requireNonNull(name, "Name");
         if (!file.exists() || !file.canRead()) throw new IllegalArgumentException("File must exist and be readable");
@@ -130,7 +144,8 @@ public class WebhookMessageBuilder {
         }
     }
 
-    public WebhookMessageBuilder addFile(String name, byte[] data) {
+    @NotNull
+    public WebhookMessageBuilder addFile(@NotNull String name, @NotNull byte[] data) {
         Objects.requireNonNull(data, "Data");
         Objects.requireNonNull(name, "Name");
         if (fileIndex >= MAX_FILES)
@@ -141,7 +156,8 @@ public class WebhookMessageBuilder {
         return this;
     }
 
-    public WebhookMessageBuilder addFile(String name, InputStream data) {
+    @NotNull
+    public WebhookMessageBuilder addFile(@NotNull String name, @NotNull InputStream data) {
         Objects.requireNonNull(data, "InputStream");
         Objects.requireNonNull(name, "Name");
         if (fileIndex >= MAX_FILES)
@@ -157,11 +173,13 @@ public class WebhookMessageBuilder {
         }
     }
 
+    @NotNull
     public WebhookMessageBuilder setTTS(boolean tts) {
         isTTS = tts;
         return this;
     }
 
+    @NotNull
     public WebhookMessage build() {
         if (isEmpty())
             throw new IllegalStateException("Cannot build an empty message!");

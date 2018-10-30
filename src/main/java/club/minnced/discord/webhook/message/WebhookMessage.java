@@ -17,10 +17,9 @@
 package club.minnced.discord.webhook.message;
 
 import club.minnced.discord.webhook.IOUtil;
-import okhttp3.MediaType;
 import okhttp3.MultipartBody;
 import okhttp3.RequestBody;
-import okio.BufferedSink;
+import org.jetbrains.annotations.NotNull;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -30,8 +29,6 @@ import java.io.InputStream;
 import java.util.*;
 
 public class WebhookMessage { //TODO: Docs
-    public static final MediaType JSON = MediaType.parse("application/json; charset=utf-8");
-    public static final MediaType OCTET = MediaType.parse("application/octet-stream; charset=utf-8");
 
     protected final String username, avatarUrl, content;
     protected final List<WebhookEmbed> embeds;
@@ -50,7 +47,8 @@ public class WebhookMessage { //TODO: Docs
     }
 
     // forcing first embed as we expect at least one entry (Effective Java 3rd. Edition - Item 53)
-    public static WebhookMessage embeds(WebhookEmbed first, WebhookEmbed... embeds) {
+    @NotNull
+    public static WebhookMessage embeds(@NotNull WebhookEmbed first, @NotNull WebhookEmbed... embeds) {
         Objects.requireNonNull(embeds, "Embeds");
         for (WebhookEmbed e : embeds) {
             Objects.requireNonNull(e);
@@ -61,13 +59,15 @@ public class WebhookMessage { //TODO: Docs
         return new WebhookMessage(null, null, null, list, false, null);
     }
 
-    public static WebhookMessage embeds(Collection<WebhookEmbed> embeds) {
+    @NotNull
+    public static WebhookMessage embeds(@NotNull Collection<WebhookEmbed> embeds) {
         Objects.requireNonNull(embeds, "Embeds");
         embeds.forEach(Objects::requireNonNull);
         return new WebhookMessage(null, null, null, new ArrayList<>(embeds), false, null);
     }
 
-    public static WebhookMessage files(Map<String, ?> attachments) {
+    @NotNull
+    public static WebhookMessage files(@NotNull Map<String, ?> attachments) {
         Objects.requireNonNull(attachments, "Attachments");
 
         int fileAmount = attachments.size();
@@ -88,7 +88,8 @@ public class WebhookMessage { //TODO: Docs
     }
 
     // forcing first pair as we expect at least one entry (Effective Java 3rd. Edition - Item 53)
-    public static WebhookMessage files(String name1, Object data1, Object... attachments) {
+    @NotNull
+    public static WebhookMessage files(@NotNull String name1, @NotNull Object data1, @NotNull Object... attachments) {
         Objects.requireNonNull(name1, "Name");
         Objects.requireNonNull(data1, "Data");
         Objects.requireNonNull(attachments, "Attachments");
@@ -113,6 +114,7 @@ public class WebhookMessage { //TODO: Docs
         return attachments != null;
     }
 
+    @NotNull
     public RequestBody getBody() {
         final JSONObject payload = new JSONObject();
         if (content != null)
@@ -136,14 +138,16 @@ public class WebhookMessage { //TODO: Docs
                 final MessageAttachment attachment = attachments[i];
                 if (attachment == null)
                     break;
-                builder.addFormDataPart("file" + i, attachment.getName(), new OctetBody(attachment.getData()));
+                builder.addFormDataPart("file" + i, attachment.getName(), new IOUtil.OctetBody(attachment.getData()));
             }
             return builder.addFormDataPart("payload_json", payload.toString()).build();
         }
-        return RequestBody.create(JSON, payload.toString());
+        return RequestBody.create(IOUtil.JSON, payload.toString());
     }
 
-    private static MessageAttachment convertAttachment(String name, Object data) {
+    @NotNull
+    private static MessageAttachment convertAttachment(@NotNull String name, @NotNull Object data) {
+        Objects.requireNonNull(name, "Name");
         Objects.requireNonNull(data, "Data");
         try {
             MessageAttachment a;
@@ -159,25 +163,6 @@ public class WebhookMessage { //TODO: Docs
         }
         catch (IOException ex) {
             throw new IllegalArgumentException(ex);
-        }
-    }
-
-    private static class OctetBody extends RequestBody {
-        private final InputStream in;
-
-        private OctetBody(InputStream in) {
-            this.in = in;
-        }
-
-        @Override
-        public MediaType contentType() {
-            return OCTET;
-        }
-
-        @Override
-        public void writeTo(BufferedSink sink) throws IOException {
-            byte[] data = IOUtil.readAllBytes(in);
-            sink.write(data);
         }
     }
 }
