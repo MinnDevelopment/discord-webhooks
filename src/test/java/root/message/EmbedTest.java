@@ -1,7 +1,7 @@
 package root.message;
 
-import club.minnced.discord.webhook.message.WebhookEmbed;
-import club.minnced.discord.webhook.message.WebhookEmbedBuilder;
+import club.minnced.discord.webhook.send.WebhookEmbed;
+import club.minnced.discord.webhook.send.WebhookEmbedBuilder;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;

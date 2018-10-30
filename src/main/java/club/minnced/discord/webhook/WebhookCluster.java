@@ -16,9 +16,10 @@
 
 package club.minnced.discord.webhook;
 
-import club.minnced.discord.webhook.message.WebhookEmbed;
-import club.minnced.discord.webhook.message.WebhookMessage;
-import club.minnced.discord.webhook.message.WebhookMessageBuilder;
+import club.minnced.discord.webhook.receive.ReadonlyMessage;
+import club.minnced.discord.webhook.send.WebhookEmbed;
+import club.minnced.discord.webhook.send.WebhookMessage;
+import club.minnced.discord.webhook.send.WebhookMessageBuilder;
 import okhttp3.OkHttpClient;
 import okhttp3.RequestBody;
 import org.jetbrains.annotations.NotNull;
@@ -171,11 +172,11 @@ public class WebhookCluster implements AutoCloseable { //TODO: Message Receive
     // Broadcasting / Multicasting
 
     @NotNull
-    public List<CompletableFuture<?>> multicast(@NotNull Predicate<WebhookClient> filter, @NotNull WebhookMessage message) {
+    public List<CompletableFuture<ReadonlyMessage>> multicast(@NotNull Predicate<WebhookClient> filter, @NotNull WebhookMessage message) {
         Objects.requireNonNull(filter, "Filter");
         Objects.requireNonNull(message, "Message");
         final RequestBody body = message.getBody();
-        final List<CompletableFuture<?>> callbacks = new ArrayList<>();
+        final List<CompletableFuture<ReadonlyMessage>> callbacks = new ArrayList<>();
         for (WebhookClient client : webhooks) {
             if (filter.test(client))
                 callbacks.add(client.execute(body));
@@ -184,10 +185,10 @@ public class WebhookCluster implements AutoCloseable { //TODO: Message Receive
     }
 
     @NotNull
-    public List<CompletableFuture<?>> broadcast(@NotNull WebhookMessage message) {
+    public List<CompletableFuture<ReadonlyMessage>> broadcast(@NotNull WebhookMessage message) {
         Objects.requireNonNull(message, "Message");
         RequestBody body = message.getBody();
-        final List<CompletableFuture<?>> callbacks = new ArrayList<>(webhooks.size());
+        final List<CompletableFuture<ReadonlyMessage>> callbacks = new ArrayList<>(webhooks.size());
         for (WebhookClient webhook : webhooks) {
             callbacks.add(webhook.execute(body));
             if (message.isFile()) // for files we have to make new data sets
@@ -197,27 +198,27 @@ public class WebhookCluster implements AutoCloseable { //TODO: Message Receive
     }
 
     @NotNull
-    public List<CompletableFuture<?>> broadcast(@NotNull WebhookEmbed[] embeds) {
+    public List<CompletableFuture<ReadonlyMessage>> broadcast(@NotNull WebhookEmbed[] embeds) {
         return broadcast(WebhookMessage.embeds(Arrays.asList(embeds)));
     }
 
     @NotNull
-    public List<CompletableFuture<?>> broadcast(@NotNull WebhookEmbed first, @NotNull WebhookEmbed... embeds) {
+    public List<CompletableFuture<ReadonlyMessage>> broadcast(@NotNull WebhookEmbed first, @NotNull WebhookEmbed... embeds) {
         return broadcast(WebhookMessage.embeds(first, embeds));
     }
 
     @NotNull
-    public List<CompletableFuture<?>> broadcast(@NotNull Collection<WebhookEmbed> embeds) {
+    public List<CompletableFuture<ReadonlyMessage>> broadcast(@NotNull Collection<WebhookEmbed> embeds) {
         return broadcast(WebhookMessage.embeds(embeds));
     }
 
     @NotNull
-    public List<CompletableFuture<?>> broadcast(@NotNull String content) {
+    public List<CompletableFuture<ReadonlyMessage>> broadcast(@NotNull String content) {
         Objects.requireNonNull(content, "Content");
         if (content.length() > 2000)
             throw new IllegalArgumentException("Content may not exceed 2000 characters!");
         final RequestBody body = WebhookClient.newBody(new JSONObject().put("content", content).toString());
-        final List<CompletableFuture<?>> callbacks = new ArrayList<>(webhooks.size());
+        final List<CompletableFuture<ReadonlyMessage>> callbacks = new ArrayList<>(webhooks.size());
         for (WebhookClient webhook : webhooks) {
             callbacks.add(webhook.execute(body));
         }
@@ -225,13 +226,13 @@ public class WebhookCluster implements AutoCloseable { //TODO: Message Receive
     }
 
     @NotNull
-    public List<CompletableFuture<?>> broadcast(@NotNull File file) {
+    public List<CompletableFuture<ReadonlyMessage>> broadcast(@NotNull File file) {
         Objects.requireNonNull(file, "File");
         return broadcast(file.getName(), file);
     }
 
     @NotNull
-    public List<CompletableFuture<?>> broadcast(@NotNull String fileName, @NotNull File file) {
+    public List<CompletableFuture<ReadonlyMessage>> broadcast(@NotNull String fileName, @NotNull File file) {
         Objects.requireNonNull(file, "File");
         if (file.length() > 10)
             throw new IllegalArgumentException("Provided File exceeds the maximum size of 8MB!");
@@ -239,12 +240,12 @@ public class WebhookCluster implements AutoCloseable { //TODO: Message Receive
     }
 
     @NotNull
-    public List<CompletableFuture<?>> broadcast(@NotNull String fileName, @NotNull InputStream data) {
+    public List<CompletableFuture<ReadonlyMessage>> broadcast(@NotNull String fileName, @NotNull InputStream data) {
         return broadcast(new WebhookMessageBuilder().addFile(fileName, data).build());
     }
 
     @NotNull
-    public List<CompletableFuture<?>> broadcast(@NotNull String fileName, @NotNull byte[] data) {
+    public List<CompletableFuture<ReadonlyMessage>> broadcast(@NotNull String fileName, @NotNull byte[] data) {
         Objects.requireNonNull(data, "Data");
         if (data.length > 10)
             throw new IllegalArgumentException("Provided data exceeds the maximum size of 8MB!");

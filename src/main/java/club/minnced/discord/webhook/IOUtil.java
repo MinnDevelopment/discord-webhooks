@@ -2,12 +2,17 @@ package club.minnced.discord.webhook;
 
 import okhttp3.MediaType;
 import okhttp3.RequestBody;
+import okhttp3.ResponseBody;
 import okio.BufferedSink;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.json.JSONObject;
+import org.json.JSONTokener;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.List;
+import java.util.zip.GZIPInputStream;
 
 public class IOUtil {
     public static final MediaType JSON = MediaType.parse("application/json; charset=utf-8");
@@ -31,6 +36,21 @@ public class IOUtil {
             }
         }
         return output;
+    }
+
+    @Nullable
+    public static InputStream getBody(okhttp3.Response req) throws IOException {
+        List<String> encoding = req.headers("content-encoding");
+        ResponseBody body = req.body();
+        if (!encoding.isEmpty() && body != null) {
+            return new GZIPInputStream(body.byteStream());
+        }
+        return body != null ? body.byteStream() : null;
+    }
+
+    @NotNull
+    public static JSONObject toJSON(@NotNull InputStream input) {
+        return new JSONObject(new JSONTokener(input));
     }
 
     public interface SilentSupplier<T> {

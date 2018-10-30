@@ -17,18 +17,17 @@
 package club.minnced.discord.webhook;
 
 import club.minnced.discord.webhook.exception.HttpException;
-import club.minnced.discord.webhook.message.WebhookEmbed;
-import club.minnced.discord.webhook.message.WebhookMessage;
-import club.minnced.discord.webhook.message.WebhookMessageBuilder;
+import club.minnced.discord.webhook.receive.EntityFactory;
+import club.minnced.discord.webhook.receive.ReadonlyMessage;
+import club.minnced.discord.webhook.send.WebhookEmbed;
+import club.minnced.discord.webhook.send.WebhookMessage;
+import club.minnced.discord.webhook.send.WebhookMessageBuilder;
 import okhttp3.OkHttpClient;
 import okhttp3.RequestBody;
 import okhttp3.Response;
-import okhttp3.ResponseBody;
 import org.jetbrains.annotations.Async;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import org.json.JSONObject;
-import org.json.JSONTokener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -41,14 +40,12 @@ import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.*;
-import java.util.zip.GZIPInputStream;
 
-public class WebhookClient implements AutoCloseable { //TODO: Message Receive
+public class WebhookClient implements AutoCloseable { //TODO: Flag to disable message receive
     public static final String WEBHOOK_URL = "https://discordapp.com/api/v7/webhooks/%s/%s";
-    public static final String USER_AGENT = "Webhook(https://github.com/MinnDevelopment/discord-webhooks | 1.0.0)"; //TODO
+    public static final String USER_AGENT = "Webhook(https://github.com/MinnDevelopment/discord-webhooks | 0.1.0)";
     public static final Logger LOG = LoggerFactory.getLogger(WebhookClient.class);
 
     protected final String url;
@@ -80,49 +77,49 @@ public class WebhookClient implements AutoCloseable { //TODO: Message Receive
     }
 
     @NotNull
-    public CompletableFuture<?> send(@NotNull WebhookMessage message) {
+    public CompletableFuture<ReadonlyMessage> send(@NotNull WebhookMessage message) {
         Objects.requireNonNull(message, "WebhookMessage");
         return execute(message.getBody());
     }
 
     @NotNull
-    public CompletableFuture<?> send(@NotNull File file) {
+    public CompletableFuture<ReadonlyMessage> send(@NotNull File file) {
         Objects.requireNonNull(file, "File");
         return send(file, file.getName());
     }
 
     @NotNull
-    public CompletableFuture<?> send(@NotNull File file, @NotNull String fileName) {
+    public CompletableFuture<ReadonlyMessage> send(@NotNull File file, @NotNull String fileName) {
         return send(new WebhookMessageBuilder().addFile(fileName, file).build());
     }
 
     @NotNull
-    public CompletableFuture<?> send(@NotNull byte[] data, @NotNull String fileName) {
+    public CompletableFuture<ReadonlyMessage> send(@NotNull byte[] data, @NotNull String fileName) {
         return send(new WebhookMessageBuilder().addFile(fileName, data).build());
     }
 
     @NotNull
-    public CompletableFuture<?> send(@NotNull InputStream data, @NotNull String fileName) {
+    public CompletableFuture<ReadonlyMessage> send(@NotNull InputStream data, @NotNull String fileName) {
         return send(new WebhookMessageBuilder().addFile(fileName, data).build());
     }
 
     @NotNull
-    public CompletableFuture<?> send(@NotNull WebhookEmbed[] embeds) {
+    public CompletableFuture<ReadonlyMessage> send(@NotNull WebhookEmbed[] embeds) {
         return send(WebhookMessage.embeds(Arrays.asList(embeds)));
     }
 
     @NotNull
-    public CompletableFuture<?> send(@NotNull WebhookEmbed first, @NotNull WebhookEmbed... embeds) {
+    public CompletableFuture<ReadonlyMessage> send(@NotNull WebhookEmbed first, @NotNull WebhookEmbed... embeds) {
         return send(WebhookMessage.embeds(first, embeds));
     }
 
     @NotNull
-    public CompletableFuture<?> send(@NotNull Collection<WebhookEmbed> embeds) {
+    public CompletableFuture<ReadonlyMessage> send(@NotNull Collection<WebhookEmbed> embeds) {
         return send(WebhookMessage.embeds(embeds));
     }
 
     @NotNull
-    public CompletableFuture<?> send(@NotNull String content) {
+    public CompletableFuture<ReadonlyMessage> send(@NotNull String content) {
         Objects.requireNonNull(content, "Content");
         content = content.trim();
         if (content.isEmpty())
@@ -156,24 +153,24 @@ public class WebhookClient implements AutoCloseable { //TODO: Message Receive
     }
 
     @NotNull
-    protected CompletableFuture<?> execute(RequestBody body) {
+    protected CompletableFuture<ReadonlyMessage> execute(RequestBody body) {
         checkShutdown();
         return queueRequest(body);
     }
 
     @NotNull
     protected static HttpException failure(Response response) throws IOException {
-        final InputStream stream = getBody(response);
+        final InputStream stream = IOUtil.getBody(response);
         final String responseBody = stream == null ? "" : new String(IOUtil.readAllBytes(stream));
 
         return new HttpException("Request returned failure " + response.code() + ": " + responseBody);
     }
 
     @NotNull
-    protected CompletableFuture<?> queueRequest(RequestBody body) {
+    protected CompletableFuture<ReadonlyMessage> queueRequest(RequestBody body) {
         final boolean wasQueued = isQueued;
         isQueued = true;
-        CompletableFuture<?> callback = new CompletableFuture<>();
+        CompletableFuture<ReadonlyMessage> callback = new CompletableFuture<>();
         Request req = new Request(callback, body);
         enqueuePair(req);
         if (!wasQueued)
@@ -226,7 +223,10 @@ public class WebhookClient implements AutoCloseable { //TODO: Message Receive
                 queue.poll().future.completeExceptionally(exception);
                 return;
             }
-            queue.poll().future.complete(null);
+            InputStream body = IOUtil.getBody(response);
+            JSONObject json = IOUtil.toJSON(body);
+            ReadonlyMessage message = EntityFactory.makeMessage(json);
+            queue.poll().future.complete(message);
             if (bucket.isRateLimit()) {
                 backoffQueue();
                 return;
@@ -236,16 +236,6 @@ public class WebhookClient implements AutoCloseable { //TODO: Message Receive
             LOG.error("There was some error while sending a webhook message", e);
             queue.poll().future.completeExceptionally(e);
         }
-    }
-
-    @Nullable
-    private static InputStream getBody(okhttp3.Response req) throws IOException {
-        List<String> encoding = req.headers("content-encoding");
-        ResponseBody body = req.body();
-        if (!encoding.isEmpty() && body != null) {
-            return new GZIPInputStream(body.byteStream());
-        }
-        return body != null ? body.byteStream() : null;
     }
 
     protected static final class Bucket {
@@ -268,7 +258,8 @@ public class WebhookClient implements AutoCloseable { //TODO: Message Receive
             final String retryAfter = response.header("Retry-After");
             long delay;
             if (retryAfter == null) {
-                final JSONObject body = new JSONObject(new JSONTokener(getBody(response)));
+                InputStream stream = IOUtil.getBody(response);
+                final JSONObject body = IOUtil.toJSON(stream);
                 delay = body.getLong("retry_after");
             }
             else {
@@ -285,7 +276,7 @@ public class WebhookClient implements AutoCloseable { //TODO: Message Receive
             }
             else if (!response.isSuccessful()) {
                 LOG.debug("Failed to update buckets due to unsuccessful response with code: {} and body: \n{}",
-                          response.code(), new IOUtil.Lazy(() -> new String(IOUtil.readAllBytes(getBody(response)))));
+                          response.code(), new IOUtil.Lazy(() -> new String(IOUtil.readAllBytes(IOUtil.getBody(response)))));
                 return;
             }
             remainingUses = Integer.parseInt(response.header("X-RateLimit-Remaining"));
@@ -311,10 +302,10 @@ public class WebhookClient implements AutoCloseable { //TODO: Message Receive
     }
 
     private static final class Request {
-        private final CompletableFuture<?> future;
+        private final CompletableFuture<ReadonlyMessage> future;
         private final RequestBody body;
 
-        public Request(CompletableFuture<?> future, RequestBody body) {
+        public Request(CompletableFuture<ReadonlyMessage> future, RequestBody body) {
             this.future = future;
             this.body = body;
         }

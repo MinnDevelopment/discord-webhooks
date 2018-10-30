@@ -1,4 +1,4 @@
-package club.minnced.discord.webhook.message;
+package club.minnced.discord.webhook.send;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;

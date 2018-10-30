@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package club.minnced.discord.webhook.message;
+package club.minnced.discord.webhook.send;
 
 import club.minnced.discord.webhook.IOUtil;
 import okhttp3.MultipartBody;
