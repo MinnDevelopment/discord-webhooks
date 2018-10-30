@@ -1,10 +1,17 @@
 package club.minnced.discord.webhook.message;
 
+import org.json.JSONObject;
+import org.json.JSONString;
+
+import java.time.Instant;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 
-public class WebhookEmbed implements Sendable {
-    private final long timestamp;
-    private final int color;
+public class WebhookEmbed implements JSONString {
+    public static final DateTimeFormatter TIMESTAMP_FORMAT = DateTimeFormatter.BASIC_ISO_DATE;
+
+    private final Long timestamp;
+    private final Integer color;
 
     private final String description;
     private final String thumbnailUrl;
@@ -15,7 +22,7 @@ public class WebhookEmbed implements Sendable {
     private final EmbedAuthor author;
     private final List<EmbedField> fields;
 
-    public WebhookEmbed(long timestamp, int color,
+    public WebhookEmbed(Long timestamp, Integer color,
                         String description, String thumbnailUrl, String imageUrl,
                         EmbedFooter footer, EmbedTitle title, EmbedAuthor author,
                         List<EmbedField> fields) {
@@ -67,13 +74,34 @@ public class WebhookEmbed implements Sendable {
     }
 
     @Override
-    public Type getType() {
-        return Type.EMBED;
-    }
-
-    @Override
     public String toJSONString() {
-        return null;
+        JSONObject json = new JSONObject();
+        if (description != null)
+            json.put("description", description);
+        if (timestamp != null)
+            json.put("timestamp", TIMESTAMP_FORMAT.format(Instant.ofEpochMilli(timestamp)));
+        if (color != null)
+            json.put("color", color & 0xFFFFFF);
+        if (author != null)
+            json.put("author", author);
+        if (footer != null)
+            json.put("footer", footer);
+        if (thumbnailUrl != null)
+            json.put("thumbnail",
+                     new JSONObject()
+                             .put("url", thumbnailUrl));
+        if (imageUrl != null)
+            json.put("image",
+                     new JSONObject()
+                             .put("url", imageUrl));
+        if (!fields.isEmpty())
+            json.put("fields", fields);
+        if (title != null) {
+            if (title.getUrl() != null)
+                json.put("url", title.url);
+            json.put("title", title.text);
+        }
+        return json.toString();
     }
 
     public static class EmbedField {

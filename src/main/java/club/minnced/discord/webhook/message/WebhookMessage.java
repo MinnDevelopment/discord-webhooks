@@ -29,7 +29,7 @@ import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.util.*;
 
-public class WebhookMessage { //TODO: Tests
+public class WebhookMessage { //TODO: Docs
     public static final MediaType JSON = MediaType.parse("application/json; charset=utf-8");
     public static final MediaType OCTET = MediaType.parse("application/octet-stream");
 

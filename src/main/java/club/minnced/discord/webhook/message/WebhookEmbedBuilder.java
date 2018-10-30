@@ -7,8 +7,8 @@ import java.util.List;
 public class WebhookEmbedBuilder {
     private final List<WebhookEmbed.EmbedField> fields;
 
-    private long timestamp;
-    private int color;
+    private Long timestamp;
+    private Integer color;
 
     private String description;
     private String thumbnailUrl;
@@ -37,36 +37,44 @@ public class WebhookEmbedBuilder {
         }
     }
 
-    public void setTimestamp(long timestamp) {
+    public WebhookEmbedBuilder setTimestamp(Long timestamp) {
         this.timestamp = timestamp;
+        return this;
     }
 
-    public void setColor(int color) {
+    public WebhookEmbedBuilder setColor(Integer color) {
         this.color = color;
+        return this;
     }
 
-    public void setDescription(String description) {
+    public WebhookEmbedBuilder setDescription(String description) {
         this.description = description;
+        return this;
     }
 
-    public void setThumbnailUrl(String thumbnailUrl) {
+    public WebhookEmbedBuilder setThumbnailUrl(String thumbnailUrl) {
         this.thumbnailUrl = thumbnailUrl;
+        return this;
     }
 
-    public void setImageUrl(String imageUrl) {
+    public WebhookEmbedBuilder setImageUrl(String imageUrl) {
         this.imageUrl = imageUrl;
+        return this;
     }
 
-    public void setFooter(WebhookEmbed.EmbedFooter footer) {
+    public WebhookEmbedBuilder setFooter(WebhookEmbed.EmbedFooter footer) {
         this.footer = footer;
+        return this;
     }
 
-    public void setTitle(WebhookEmbed.EmbedTitle title) {
+    public WebhookEmbedBuilder setTitle(WebhookEmbed.EmbedTitle title) {
         this.title = title;
+        return this;
     }
 
-    public void setAuthor(WebhookEmbed.EmbedAuthor author) {
+    public WebhookEmbedBuilder setAuthor(WebhookEmbed.EmbedAuthor author) {
         this.author = author;
+        return this;
     }
 
     public boolean isEmpty() {
