@@ -55,13 +55,17 @@ public class WebhookClient implements AutoCloseable { //TODO: Flag to disable me
     protected final ScheduledExecutorService pool;
     protected final Bucket bucket;
     protected final BlockingQueue<Request> queue;
+    protected final boolean parseMessage;
     protected volatile boolean isQueued;
     protected boolean isShutdown;
 
-    protected WebhookClient(final long id, final String token, final OkHttpClient client, final ScheduledExecutorService pool) {
+    protected WebhookClient(
+            final long id, final String token, final boolean parseMessage,
+            final OkHttpClient client, final ScheduledExecutorService pool) {
         this.client = client;
         this.id = id;
-        this.url = String.format(WEBHOOK_URL, Long.toUnsignedString(id), token, true);
+        this.parseMessage = parseMessage;
+        this.url = String.format(WEBHOOK_URL, Long.toUnsignedString(id), token, parseMessage);
         this.pool = pool;
         this.bucket = new Bucket();
         this.queue = new LinkedBlockingQueue<>();
@@ -224,9 +228,12 @@ public class WebhookClient implements AutoCloseable { //TODO: Flag to disable me
                 queue.poll().future.completeExceptionally(exception);
                 return;
             }
-            InputStream body = IOUtil.getBody(response);
-            JSONObject json = IOUtil.toJSON(body);
-            ReadonlyMessage message = EntityFactory.makeMessage(json);
+            ReadonlyMessage message = null;
+            if (parseMessage) {
+                InputStream body = IOUtil.getBody(response);
+                JSONObject json = IOUtil.toJSON(body);
+                message = EntityFactory.makeMessage(json);
+            }
             queue.poll().future.complete(message);
             if (bucket.isRateLimit()) {
                 backoffQueue();

@@ -36,6 +36,7 @@ public class WebhookClientBuilder {
     protected OkHttpClient client;
     protected ThreadFactory threadFactory;
     protected boolean isDaemon;
+    protected boolean parseMessage = true;
 
     public WebhookClientBuilder(final long id, @NotNull final String token) {
         Objects.requireNonNull(token, "Token");
@@ -79,6 +80,12 @@ public class WebhookClientBuilder {
     }
 
     @NotNull
+    public WebhookClientBuilder setWait(boolean waitForMessage) {
+        this.parseMessage = waitForMessage;
+        return this;
+    }
+
+    @NotNull
     public WebhookClient build() {
         OkHttpClient client = this.client == null
                               ? new OkHttpClient()
@@ -89,7 +96,7 @@ public class WebhookClientBuilder {
                 threadFactory == null
                 ? new DefaultWebhookThreadFactory()
                 : threadFactory);
-        return new WebhookClient(id, token, client, pool);
+        return new WebhookClient(id, token, parseMessage, client, pool);
     }
 
     private final class DefaultWebhookThreadFactory implements ThreadFactory {
