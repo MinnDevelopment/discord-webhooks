@@ -30,7 +30,7 @@ public class WebhookMessageBuilder {//TODO: Docs
     protected final StringBuilder content = new StringBuilder();
     protected final List<WebhookEmbed> embeds = new LinkedList<>();
     protected final MessageAttachment[] files = new MessageAttachment[MAX_FILES];
-    protected String username, avatarUrl;
+    protected String username, avatarUrl, nonce;
     protected boolean isTTS;
     private int fileIndex = 0;
 
@@ -96,6 +96,12 @@ public class WebhookMessageBuilder {//TODO: Docs
             this.content.replace(0, content.length(), content);
         else
             this.content.setLength(0);
+        return this;
+    }
+
+    @NotNull
+    public WebhookMessageBuilder setNonce(@Nullable String nonce) {
+        this.nonce = nonce;
         return this;
     }
 
@@ -183,6 +189,6 @@ public class WebhookMessageBuilder {//TODO: Docs
     public WebhookMessage build() {
         if (isEmpty())
             throw new IllegalStateException("Cannot build an empty message!");
-        return new WebhookMessage(username, avatarUrl, content.toString(), embeds, isTTS, fileIndex == 0 ? null : Arrays.copyOf(files, fileIndex));
+        return new WebhookMessage(username, avatarUrl, content.toString(), nonce, embeds, isTTS, fileIndex == 0 ? null : Arrays.copyOf(files, fileIndex));
     }
 }

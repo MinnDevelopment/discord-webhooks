@@ -17,6 +17,7 @@
 package club.minnced.discord.webhook.receive;
 
 import club.minnced.discord.webhook.send.WebhookEmbed;
+import club.minnced.discord.webhook.send.WebhookMessage;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -105,5 +106,10 @@ public class ReadonlyMessage { //TODO: Create ReadonlyEmbed with more info, Docs
     @NotNull
     public List<Long> getMentionedRoles() {
         return mentionedRoles;
+    }
+
+    @NotNull
+    public WebhookMessage toWebhookMessage() {
+        return WebhookMessage.from(this);
     }
 }

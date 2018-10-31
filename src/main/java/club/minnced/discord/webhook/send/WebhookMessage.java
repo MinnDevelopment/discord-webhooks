@@ -17,6 +17,7 @@
 package club.minnced.discord.webhook.send;
 
 import club.minnced.discord.webhook.IOUtil;
+import club.minnced.discord.webhook.receive.ReadonlyMessage;
 import okhttp3.MultipartBody;
 import okhttp3.RequestBody;
 import org.jetbrains.annotations.NotNull;
@@ -30,20 +31,33 @@ import java.util.*;
 
 public class WebhookMessage { //TODO: Docs
 
-    protected final String username, avatarUrl, content;
+    protected final String username, avatarUrl, content, nonce;
     protected final List<WebhookEmbed> embeds;
     protected final boolean isTTS;
     protected final MessageAttachment[] attachments;
 
-    protected WebhookMessage(final String username, final String avatarUrl, final String content,
+    protected WebhookMessage(final String username, final String avatarUrl, final String content, final String nonce,
                              final List<WebhookEmbed> embeds, final boolean isTTS,
                              final MessageAttachment[] files) {
         this.username = username;
         this.avatarUrl = avatarUrl;
         this.content = content;
+        this.nonce = nonce;
         this.embeds = embeds;
         this.isTTS = isTTS;
         this.attachments = files;
+    }
+
+    @NotNull
+    public static WebhookMessage from(@NotNull ReadonlyMessage message) {
+        Objects.requireNonNull(message, "Message");
+        WebhookMessageBuilder builder = new WebhookMessageBuilder();
+        builder.setAvatarUrl(message.getAuthor().getAvatar());
+        builder.setUsername(message.getAuthor().getName());
+        builder.setContent(message.getContent());
+        builder.setTTS(message.isTTS());
+        builder.addEmbeds(message.getEmbeds());
+        return builder.build();
     }
 
     // forcing first embed as we expect at least one entry (Effective Java 3rd. Edition - Item 53)
@@ -56,14 +70,14 @@ public class WebhookMessage { //TODO: Docs
         List<WebhookEmbed> list = new ArrayList<>(1 + embeds.length);
         list.add(first);
         Collections.addAll(list, embeds);
-        return new WebhookMessage(null, null, null, list, false, null);
+        return new WebhookMessage(null, null, null, null, list, false, null);
     }
 
     @NotNull
     public static WebhookMessage embeds(@NotNull Collection<WebhookEmbed> embeds) {
         Objects.requireNonNull(embeds, "Embeds");
         embeds.forEach(Objects::requireNonNull);
-        return new WebhookMessage(null, null, null, new ArrayList<>(embeds), false, null);
+        return new WebhookMessage(null, null, null, null, new ArrayList<>(embeds), false, null);
     }
 
     @NotNull
@@ -84,7 +98,7 @@ public class WebhookMessage { //TODO: Docs
             Object data = attachment.getValue();
             files[i++] = convertAttachment(name, data);
         }
-        return new WebhookMessage(null, null, null, null, false, files);
+        return new WebhookMessage(null, null, null, null, null, false, files);
     }
 
     // forcing first pair as we expect at least one entry (Effective Java 3rd. Edition - Item 53)
@@ -107,7 +121,7 @@ public class WebhookMessage { //TODO: Docs
                 throw new IllegalArgumentException("Provided arguments must be pairs for (String, Data). Expected String and found " + (name == null ? null : name.getClass().getName()));
             files[j] = convertAttachment((String) name, data);
         }
-        return new WebhookMessage(null, null, null, null, false, files);
+        return new WebhookMessage(null, null, null, null, null, false, files);
     }
 
     public boolean isFile() {
