@@ -22,7 +22,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
-public class ReadonlyMessage { //TODO: Create ReadonlyEmbed with more info
+public class ReadonlyMessage { //TODO: Create ReadonlyEmbed with more info, Docs
     private final long id;
     private final long channelId;
     private final boolean mentionsEveryone;

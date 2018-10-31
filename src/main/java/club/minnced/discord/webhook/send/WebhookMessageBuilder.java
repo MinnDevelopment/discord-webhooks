@@ -24,8 +24,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.*;
 
-public class WebhookMessageBuilder {
-    public static final int MAX_FILES = 10;
+public class WebhookMessageBuilder {//TODO: Docs
+    public static final int MAX_FILES = 10; //TODO: Use this more
 
     protected final StringBuilder content = new StringBuilder();
     protected final List<WebhookEmbed> embeds = new LinkedList<>();

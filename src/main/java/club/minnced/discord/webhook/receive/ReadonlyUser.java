@@ -19,7 +19,7 @@ package club.minnced.discord.webhook.receive;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-public class ReadonlyUser {
+public class ReadonlyUser { //TODO: Docs
     private final long id;
     private final short discriminator;
     private final boolean bot;

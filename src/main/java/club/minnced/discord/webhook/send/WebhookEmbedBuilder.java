@@ -22,7 +22,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 
-public class WebhookEmbedBuilder {
+public class WebhookEmbedBuilder { //TODO: Docs
     private final List<WebhookEmbed.EmbedField> fields;
 
     private Long timestamp;

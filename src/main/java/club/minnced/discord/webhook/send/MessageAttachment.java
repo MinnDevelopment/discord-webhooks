@@ -21,7 +21,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.io.*;
 
-public class MessageAttachment {
+public class MessageAttachment { //TODO: Docs
     private final String name;
     private final byte[] data;
 

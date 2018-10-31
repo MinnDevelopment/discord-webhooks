@@ -26,7 +26,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.Collections;
 import java.util.List;
 
-public class WebhookEmbed implements JSONString {
+public class WebhookEmbed implements JSONString { //TODO: Docs
     public static final DateTimeFormatter TIMESTAMP_FORMAT = DateTimeFormatter.BASIC_ISO_DATE;
 
     private final Long timestamp;

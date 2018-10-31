@@ -44,7 +44,7 @@ import java.util.Collection;
 import java.util.Objects;
 import java.util.concurrent.*;
 
-public class WebhookClient implements AutoCloseable {
+public class WebhookClient implements AutoCloseable { //TODO: docs
     public static final String WEBHOOK_URL = "https://discordapp.com/api/v7/webhooks/%s/%s?wait=%s";
     public static final String USER_AGENT = "Webhook(https://github.com/MinnDevelopment/discord-webhooks | 0.1.0)";
     public static final Logger LOG = LoggerFactory.getLogger(WebhookClient.class);

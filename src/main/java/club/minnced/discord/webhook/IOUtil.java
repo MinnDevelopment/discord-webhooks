@@ -30,7 +30,7 @@ import java.io.InputStream;
 import java.util.List;
 import java.util.zip.GZIPInputStream;
 
-public class IOUtil {
+public class IOUtil { //TODO: Docs, test json
     public static final MediaType JSON = MediaType.parse("application/json; charset=utf-8");
     public static final MediaType OCTET = MediaType.parse("application/octet-stream; charset=utf-8");
     public static final byte[] EMPTY_BYTES = new byte[0];

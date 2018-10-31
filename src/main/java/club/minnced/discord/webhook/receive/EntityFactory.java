@@ -26,7 +26,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.function.Function;
 
-public class EntityFactory { //TODO: Implement
+public class EntityFactory { //TODO: Write Tests, Documentation
     public static ReadonlyUser makeUser(JSONObject json) {
         final long id = Long.parseUnsignedLong(json.getString("id"));
         final String name = json.getString("username");

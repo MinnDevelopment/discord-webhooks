@@ -18,7 +18,7 @@ package club.minnced.discord.webhook.receive;
 
 import org.jetbrains.annotations.NotNull;
 
-public class ReadonlyAttachment {
+public class ReadonlyAttachment { //TODO: Docs
     private final String url;
     private final String proxyUrl;
     private final String fileName;

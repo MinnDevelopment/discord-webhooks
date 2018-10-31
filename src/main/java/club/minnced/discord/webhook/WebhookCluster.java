@@ -34,7 +34,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ThreadFactory;
 import java.util.function.Predicate;
 
-public class WebhookCluster implements AutoCloseable { //TODO: Message Receive
+public class WebhookCluster implements AutoCloseable { //TODO: docs, tests
     protected final List<WebhookClient> webhooks;
     protected OkHttpClient defaultHttpClient;
     protected ScheduledExecutorService defaultPool;
