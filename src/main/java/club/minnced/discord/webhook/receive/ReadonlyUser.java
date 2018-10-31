@@ -22,8 +22,8 @@ public class ReadonlyUser {
         return id;
     }
 
-    public short getDiscriminator() {
-        return discriminator;
+    public String getDiscriminator() {
+        return String.format("%04d", discriminator);
     }
 
     public boolean isBot() {

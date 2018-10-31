@@ -18,6 +18,7 @@ dependencies {
     api("org.json:json:20160810")
     implementation("org.jetbrains:annotations:16.0.1")
     testCompile("junit:junit:4.12")
+    testCompile("ch.qos.logback:logback-classic:1.2.3")
 }
 
 configure<JavaPluginConvention> {

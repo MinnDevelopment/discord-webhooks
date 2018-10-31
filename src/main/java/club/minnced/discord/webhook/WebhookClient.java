@@ -27,6 +27,7 @@ import okhttp3.RequestBody;
 import okhttp3.Response;
 import org.jetbrains.annotations.Async;
 import org.jetbrains.annotations.NotNull;
+import org.json.JSONException;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -44,7 +45,7 @@ import java.util.Objects;
 import java.util.concurrent.*;
 
 public class WebhookClient implements AutoCloseable { //TODO: Flag to disable message receive
-    public static final String WEBHOOK_URL = "https://discordapp.com/api/v7/webhooks/%s/%s";
+    public static final String WEBHOOK_URL = "https://discordapp.com/api/v7/webhooks/%s/%s?wait=%s";
     public static final String USER_AGENT = "Webhook(https://github.com/MinnDevelopment/discord-webhooks | 0.1.0)";
     public static final Logger LOG = LoggerFactory.getLogger(WebhookClient.class);
 
@@ -60,7 +61,7 @@ public class WebhookClient implements AutoCloseable { //TODO: Flag to disable me
     protected WebhookClient(final long id, final String token, final OkHttpClient client, final ScheduledExecutorService pool) {
         this.client = client;
         this.id = id;
-        this.url = String.format(WEBHOOK_URL, Long.toUnsignedString(id), token);
+        this.url = String.format(WEBHOOK_URL, Long.toUnsignedString(id), token, true);
         this.pool = pool;
         this.bucket = new Bucket();
         this.queue = new LinkedBlockingQueue<>();
@@ -232,7 +233,7 @@ public class WebhookClient implements AutoCloseable { //TODO: Flag to disable me
                 return;
             }
         }
-        catch (IOException e) {
+        catch (JSONException | IOException e) {
             LOG.error("There was some error while sending a webhook message", e);
             queue.poll().future.completeExceptionally(e);
         }
