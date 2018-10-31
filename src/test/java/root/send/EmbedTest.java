@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package root.message;
+package root.send;
 
 import club.minnced.discord.webhook.send.WebhookEmbed;
 import club.minnced.discord.webhook.send.WebhookEmbedBuilder;
