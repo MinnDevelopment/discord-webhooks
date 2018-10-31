@@ -44,7 +44,7 @@ import java.util.Collection;
 import java.util.Objects;
 import java.util.concurrent.*;
 
-public class WebhookClient implements AutoCloseable { //TODO: Flag to disable message receive
+public class WebhookClient implements AutoCloseable {
     public static final String WEBHOOK_URL = "https://discordapp.com/api/v7/webhooks/%s/%s?wait=%s";
     public static final String USER_AGENT = "Webhook(https://github.com/MinnDevelopment/discord-webhooks | 0.1.0)";
     public static final Logger LOG = LoggerFactory.getLogger(WebhookClient.class);
@@ -137,7 +137,8 @@ public class WebhookClient implements AutoCloseable { //TODO: Flag to disable me
     @Override
     public void close() {
         isShutdown = true;
-        pool.shutdown();
+        if (queue.isEmpty())
+            pool.shutdown();
     }
 
     @Override
@@ -194,25 +195,33 @@ public class WebhookClient implements AutoCloseable { //TODO: Flag to disable me
     }
 
     protected void backoffQueue() {
-        pool.schedule(this::drainQueue, bucket.retryAfter(), TimeUnit.MILLISECONDS);
+        long delay = bucket.retryAfter();
+        if (delay > 0)
+            LOG.debug("Backing off queue for {}", delay);
+        pool.schedule(this::drainQueue, delay, TimeUnit.MILLISECONDS);
     }
 
-    protected void drainQueue() {
+    protected synchronized void drainQueue() {
+        boolean graceful = true;
         while (!queue.isEmpty()) {
             final Request pair = queue.peek();
-            executePair(pair);
+            graceful = executePair(pair);
+            if (!graceful)
+                break;
         }
-        isQueued = false;
+        isQueued = !graceful;
+        if (isShutdown && graceful)
+            pool.shutdown();
     }
 
     private boolean enqueuePair(@Async.Schedule Request pair) {
         return queue.add(pair);
     }
 
-    private void executePair(@Async.Execute Request req) {
+    private boolean executePair(@Async.Execute Request req) {
         if (req.future.isCancelled()) {
             queue.poll();
-            return;
+            return true;
         }
 
         final okhttp3.Request request = newRequest(req.body);
@@ -220,13 +229,13 @@ public class WebhookClient implements AutoCloseable { //TODO: Flag to disable me
             bucket.update(response);
             if (response.code() == Bucket.RATE_LIMIT_CODE) {
                 backoffQueue();
-                return;
+                return false;
             }
             else if (!response.isSuccessful()) {
                 final HttpException exception = failure(response);
                 LOG.error("Sending a webhook message failed with non-OK http response", exception);
                 queue.poll().future.completeExceptionally(exception);
-                return;
+                return true;
             }
             ReadonlyMessage message = null;
             if (parseMessage) {
@@ -237,13 +246,14 @@ public class WebhookClient implements AutoCloseable { //TODO: Flag to disable me
             queue.poll().future.complete(message);
             if (bucket.isRateLimit()) {
                 backoffQueue();
-                return;
+                return false;
             }
         }
         catch (JSONException | IOException e) {
             LOG.error("There was some error while sending a webhook message", e);
             queue.poll().future.completeExceptionally(e);
         }
+        return true;
     }
 
     protected static final class Bucket {
@@ -273,6 +283,7 @@ public class WebhookClient implements AutoCloseable { //TODO: Flag to disable me
             else {
                 delay = Long.parseLong(retryAfter);
             }
+            LOG.error("Encountered 429, retrying after {}", delay);
             resetTime = current + delay;
         }
 
