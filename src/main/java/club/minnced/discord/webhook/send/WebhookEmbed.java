@@ -19,17 +19,16 @@ package club.minnced.discord.webhook.send;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.json.JSONObject;
+import org.json.JSONPropertyIgnore;
+import org.json.JSONPropertyName;
 import org.json.JSONString;
 
-import java.time.Instant;
-import java.time.format.DateTimeFormatter;
+import java.time.OffsetDateTime;
 import java.util.Collections;
 import java.util.List;
 
 public class WebhookEmbed implements JSONString { //TODO: Docs
-    public static final DateTimeFormatter TIMESTAMP_FORMAT = DateTimeFormatter.BASIC_ISO_DATE;
-
-    private final Long timestamp;
+    private final OffsetDateTime timestamp;
     private final Integer color;
 
     private final String description;
@@ -42,7 +41,7 @@ public class WebhookEmbed implements JSONString { //TODO: Docs
     private final List<EmbedField> fields;
 
     public WebhookEmbed(
-            @Nullable Long timestamp, @Nullable Integer color,
+            @Nullable OffsetDateTime timestamp, @Nullable Integer color,
             @Nullable String description, @Nullable String thumbnailUrl, @Nullable String imageUrl,
             @Nullable EmbedFooter footer, @Nullable EmbedTitle title, @Nullable EmbedAuthor author,
             @NotNull List<EmbedField> fields) {
@@ -58,8 +57,26 @@ public class WebhookEmbed implements JSONString { //TODO: Docs
     }
 
     @Nullable
-    public Long getTimestamp() {
+    @JSONPropertyIgnore
+    public String getThumbnailUrl() {
+        return thumbnailUrl;
+    }
+
+    @Nullable
+    @JSONPropertyIgnore
+    public String getImageUrl() {
+        return imageUrl;
+    }
+
+    @Nullable
+    public OffsetDateTime getTimestamp() {
         return timestamp;
+    }
+
+    @Nullable
+    @JSONPropertyIgnore
+    public EmbedTitle getTitle() {
+        return title;
     }
 
     @Nullable
@@ -73,23 +90,8 @@ public class WebhookEmbed implements JSONString { //TODO: Docs
     }
 
     @Nullable
-    public String getThumbnailUrl() {
-        return thumbnailUrl;
-    }
-
-    @Nullable
-    public String getImageUrl() {
-        return imageUrl;
-    }
-
-    @Nullable
     public EmbedFooter getFooter() {
         return footer;
-    }
-
-    @Nullable
-    public EmbedTitle getTitle() {
-        return title;
     }
 
     @Nullable
@@ -100,6 +102,11 @@ public class WebhookEmbed implements JSONString { //TODO: Docs
     @NotNull
     public List<EmbedField> getFields() {
         return fields;
+    }
+
+    @NotNull
+    public WebhookEmbed reduced() {
+        return this;
     }
 
     @Override
@@ -113,7 +120,7 @@ public class WebhookEmbed implements JSONString { //TODO: Docs
         if (description != null)
             json.put("description", description);
         if (timestamp != null)
-            json.put("timestamp", TIMESTAMP_FORMAT.format(Instant.ofEpochMilli(timestamp)));
+            json.put("timestamp", timestamp);
         if (color != null)
             json.put("color", color & 0xFFFFFF);
         if (author != null)
@@ -138,7 +145,7 @@ public class WebhookEmbed implements JSONString { //TODO: Docs
         return json.toString();
     }
 
-    public static class EmbedField {
+    public static class EmbedField implements JSONString {
         private final boolean inline;
         private final String name, value;
 
@@ -164,11 +171,16 @@ public class WebhookEmbed implements JSONString { //TODO: Docs
 
         @Override
         public String toString() {
+            return toJSONString();
+        }
+
+        @Override
+        public String toJSONString() {
             return new JSONObject(this).toString();
         }
     }
 
-    public static class EmbedAuthor {
+    public static class EmbedAuthor implements JSONString {
         private final String name, icon, url;
 
         public EmbedAuthor(@NotNull String name, @Nullable String icon, @Nullable String url) {
@@ -183,6 +195,7 @@ public class WebhookEmbed implements JSONString { //TODO: Docs
         }
 
         @Nullable
+        @JSONPropertyName("icon_url")
         public String getIcon() {
             return icon;
         }
@@ -194,11 +207,16 @@ public class WebhookEmbed implements JSONString { //TODO: Docs
 
         @Override
         public String toString() {
+            return toJSONString();
+        }
+
+        @Override
+        public String toJSONString() {
             return new JSONObject(this).toString();
         }
     }
 
-    public static class EmbedFooter {
+    public static class EmbedFooter implements JSONString {
         private final String text, icon;
 
         public EmbedFooter(@NotNull String text, @Nullable String icon) {
@@ -212,8 +230,19 @@ public class WebhookEmbed implements JSONString { //TODO: Docs
         }
 
         @Nullable
-        public String getIcon() {
+        @JSONPropertyName("icon_url")
+        public String getIconUrl() {
             return icon;
+        }
+
+        @Override
+        public String toString() {
+            return toJSONString();
+        }
+
+        @Override
+        public String toJSONString() {
+            return new JSONObject(this).toString();
         }
     }
 

@@ -23,6 +23,8 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
+import java.time.OffsetDateTime;
+
 public class EmbedTest {
     @Rule
     public ExpectedException expectedException = ExpectedException.none();
@@ -42,7 +44,7 @@ public class EmbedTest {
         builder.setImageUrl(null);
         builder.setThumbnailUrl(null);
         builder.setTitle(new WebhookEmbed.EmbedTitle("Title", null));
-        builder.setTimestamp(System.currentTimeMillis());
+        builder.setTimestamp(OffsetDateTime.now());
         builder.build();
     }
 

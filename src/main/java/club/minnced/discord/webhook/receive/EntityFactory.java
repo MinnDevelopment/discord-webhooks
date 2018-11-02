@@ -100,20 +100,30 @@ public class EntityFactory { //TODO: Write Tests, Documentation
         return new ReadonlyEmbed.EmbedProvider(name, url);
     }
 
+    public static ReadonlyEmbed.EmbedVideo makeEmbedVideo(JSONObject json) {
+        if (json == null)
+            return null;
+        final String url = json.getString("url");
+        final int height = json.getInt("height");
+        final int width = json.getInt("width");
+        return new ReadonlyEmbed.EmbedVideo(url, width, height);
+    }
+
     public static ReadonlyEmbed makeEmbed(JSONObject json) { //TODO: ReadonlyEmbed
         final String description = json.optString("description", null);
         final Integer color = json.isNull("color") ? null : json.getInt("color");
         final ReadonlyEmbed.EmbedImage image = makeEmbedImage(json.optJSONObject("image"));
         final ReadonlyEmbed.EmbedImage thumbnail = makeEmbedImage(json.optJSONObject("thumbnail"));
         final ReadonlyEmbed.EmbedProvider provider = makeEmbedProvider(json.optJSONObject("provider"));
+        final ReadonlyEmbed.EmbedVideo video = makeEmbedVideo(json.optJSONObject("video"));
         final WebhookEmbed.EmbedFooter footer = makeEmbedFooter(json.optJSONObject("footer"));
         final WebhookEmbed.EmbedAuthor author = makeEmbedAuthor(json.optJSONObject("author"));
         final WebhookEmbed.EmbedTitle title = makeEmbedTitle(json);
-        final Long timestamp;
+        final OffsetDateTime timestamp;
         if (json.isNull("timestamp"))
             timestamp = null;
         else
-            timestamp = OffsetDateTime.parse(json.getString("timestamp")).toInstant().toEpochMilli();
+            timestamp = OffsetDateTime.parse(json.getString("timestamp"));
         final JSONArray fieldArray = json.optJSONArray("fields");
         final List<WebhookEmbed.EmbedField> fields = new ArrayList<>();
         if (fieldArray != null) {
@@ -124,7 +134,7 @@ public class EntityFactory { //TODO: Write Tests, Documentation
                     fields.add(field);
             }
         }
-        return new ReadonlyEmbed(timestamp, color, description, thumbnail, image, footer, title, author, fields, provider);
+        return new ReadonlyEmbed(timestamp, color, description, thumbnail, image, footer, title, author, fields, provider, video);
     }
 
     public static ReadonlyMessage makeMessage(JSONObject json) {

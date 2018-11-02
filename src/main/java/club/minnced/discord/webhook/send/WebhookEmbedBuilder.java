@@ -19,13 +19,15 @@ package club.minnced.discord.webhook.send;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.time.OffsetDateTime;
+import java.time.temporal.TemporalAccessor;
 import java.util.ArrayList;
 import java.util.List;
 
 public class WebhookEmbedBuilder { //TODO: Docs
     private final List<WebhookEmbed.EmbedField> fields;
 
-    private Long timestamp;
+    private OffsetDateTime timestamp;
     private Integer color;
 
     private String description;
@@ -56,8 +58,8 @@ public class WebhookEmbedBuilder { //TODO: Docs
     }
 
     @NotNull
-    public WebhookEmbedBuilder setTimestamp(@Nullable Long timestamp) {
-        this.timestamp = timestamp;
+    public WebhookEmbedBuilder setTimestamp(@Nullable TemporalAccessor timestamp) {
+        this.timestamp = timestamp == null ? null : OffsetDateTime.from(timestamp);
         return this;
     }
 

@@ -20,18 +20,22 @@ import club.minnced.discord.webhook.send.WebhookEmbed;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.json.JSONObject;
+import org.json.JSONPropertyName;
+import org.json.JSONString;
 
+import java.time.OffsetDateTime;
 import java.util.List;
 
 public class ReadonlyEmbed extends WebhookEmbed {
     private final EmbedProvider provider;
     private final EmbedImage thumbnail, image;
+    private final EmbedVideo video;
 
     public ReadonlyEmbed(
-            @Nullable Long timestamp, @Nullable Integer color, @Nullable String description,
+            @Nullable OffsetDateTime timestamp, @Nullable Integer color, @Nullable String description,
             @Nullable EmbedImage thumbnail, @Nullable EmbedImage image, @Nullable EmbedFooter footer,
             @Nullable EmbedTitle title, @Nullable EmbedAuthor author, @NotNull List<EmbedField> fields,
-            @Nullable EmbedProvider provider) {
+            @Nullable EmbedProvider provider, @Nullable EmbedVideo video) {
         super(timestamp, color, description,
               thumbnail == null ? null : thumbnail.getUrl(),
               image == null ? null : image.getUrl(),
@@ -39,6 +43,7 @@ public class ReadonlyEmbed extends WebhookEmbed {
         this.thumbnail = thumbnail;
         this.image = image;
         this.provider = provider;
+        this.video = video;
     }
 
     @Nullable
@@ -56,16 +61,41 @@ public class ReadonlyEmbed extends WebhookEmbed {
         return image;
     }
 
-    @Override
-    public String toString() {
-        JSONObject current = new JSONObject(this);
-        JSONObject base = new JSONObject(super.toJSONString());
-        base.keySet()
-            .forEach(it -> current.put(it, base.opt(it)));
-        return current.toString();
+    @Nullable
+    public EmbedVideo getVideo() {
+        return video;
     }
 
-    public static class EmbedProvider {
+    @Override
+    @NotNull
+    public WebhookEmbed reduced() {
+        return new WebhookEmbed(
+                getTimestamp(), getColor(), getDescription(),
+                thumbnail == null ? null : thumbnail.getUrl(),
+                image == null ? null : image.getUrl(),
+                getFooter(), getTitle(), getAuthor(), getFields());
+    }
+
+    @Override
+    public String toJSONString() {
+        JSONObject base = new JSONObject(super.toJSONString());
+        base.put("provider", provider)
+            .put("thumbnail", thumbnail)
+            .put("video", video)
+            .put("image", image);
+        if (getTitle() != null) {
+            base.put("title", getTitle().getText());
+            base.put("url", getTitle().getUrl());
+        }
+        return base.toString();
+    }
+
+    @Override
+    public String toString() {
+        return toJSONString();
+    }
+
+    public static class EmbedProvider implements JSONString {
         private final String name, url;
 
         public EmbedProvider(@NotNull String name, @NotNull String url) {
@@ -85,11 +115,16 @@ public class ReadonlyEmbed extends WebhookEmbed {
 
         @Override
         public String toString() {
+            return toJSONString();
+        }
+
+        @Override
+        public String toJSONString() {
             return new JSONObject(this).toString();
         }
     }
 
-    public static class EmbedVideo {
+    public static class EmbedVideo implements JSONString {
         private final String url;
         private final int width, height;
 
@@ -114,11 +149,16 @@ public class ReadonlyEmbed extends WebhookEmbed {
 
         @Override
         public String toString() {
+            return toJSONString();
+        }
+
+        @Override
+        public String toJSONString() {
             return new JSONObject(this).toString();
         }
     }
 
-    public static class EmbedImage {
+    public static class EmbedImage implements JSONString {
         private final String url, proxyUrl;
         private final int width, height;
 
@@ -137,6 +177,7 @@ public class ReadonlyEmbed extends WebhookEmbed {
         }
 
         @NotNull
+        @JSONPropertyName("proxy_url")
         public String getProxyUrl() {
             return proxyUrl;
         }
@@ -151,6 +192,11 @@ public class ReadonlyEmbed extends WebhookEmbed {
 
         @Override
         public String toString() {
+            return toJSONString();
+        }
+
+        @Override
+        public String toJSONString() {
             return new JSONObject(this).toString();
         }
     }

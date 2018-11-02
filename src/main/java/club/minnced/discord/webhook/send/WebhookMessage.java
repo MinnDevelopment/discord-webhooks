@@ -136,7 +136,7 @@ public class WebhookMessage { //TODO: Docs
         if (embeds != null && !embeds.isEmpty()) {
             final JSONArray array = new JSONArray();
             for (WebhookEmbed embed : embeds) {
-                array.put(embed);
+                array.put(embed.reduced());
             }
             payload.put("embeds", array);
         }
