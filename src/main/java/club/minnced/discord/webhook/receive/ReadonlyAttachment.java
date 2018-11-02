@@ -17,8 +17,11 @@
 package club.minnced.discord.webhook.receive;
 
 import org.jetbrains.annotations.NotNull;
+import org.json.JSONObject;
+import org.json.JSONPropertyName;
+import org.json.JSONString;
 
-public class ReadonlyAttachment { //TODO: Docs
+public class ReadonlyAttachment implements JSONString { //TODO: Docs
     private final String url;
     private final String proxyUrl;
     private final String fileName;
@@ -44,11 +47,13 @@ public class ReadonlyAttachment { //TODO: Docs
     }
 
     @NotNull
+    @JSONPropertyName("proxy_url")
     public String getProxyUrl() {
         return proxyUrl;
     }
 
     @NotNull
+    @JSONPropertyName("filename")
     public String getFileName() {
         return fileName;
     }
@@ -67,5 +72,15 @@ public class ReadonlyAttachment { //TODO: Docs
 
     public long getId() {
         return id;
+    }
+
+    @Override
+    public String toString() {
+        return toJSONString();
+    }
+
+    @Override
+    public String toJSONString() {
+        return new JSONObject(this).toString();
     }
 }

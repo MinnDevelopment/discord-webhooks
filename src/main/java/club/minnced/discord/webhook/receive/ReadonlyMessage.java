@@ -128,6 +128,7 @@ public class ReadonlyMessage implements JSONString { //TODO: Create ReadonlyEmbe
             .put("mention_roles", mentionedRoles)
             .put("attachments", attachments)
             .put("nonce", nonce)
+            .put("author", author)
             .put("tts", tts)
             .put("id", Long.toUnsignedString(id))
             .put("channel_id", Long.toUnsignedString(channelId))

@@ -18,8 +18,11 @@ package club.minnced.discord.webhook.receive;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.json.JSONObject;
+import org.json.JSONPropertyName;
+import org.json.JSONString;
 
-public class ReadonlyUser { //TODO: Docs
+public class ReadonlyUser implements JSONString { //TODO: Docs
     private final long id;
     private final short discriminator;
     private final boolean bot;
@@ -52,7 +55,18 @@ public class ReadonlyUser { //TODO: Docs
     }
 
     @Nullable
+    @JSONPropertyName("avatar_id")
     public String getAvatar() {
         return avatar;
+    }
+
+    @Override
+    public String toString() {
+        return toJSONString();
+    }
+
+    @Override
+    public String toJSONString() {
+        return new JSONObject(this).toString();
     }
 }
