@@ -26,7 +26,7 @@ import org.json.JSONString;
  * <br>This does not actually contain the file but only meta-data
  * useful to retrieve the actual attachment.
  */
-public class ReadonlyAttachment implements JSONString { //TODO: Docs
+public class ReadonlyAttachment implements JSONString {
     private final String url;
     private final String proxyUrl;
     private final String fileName;
