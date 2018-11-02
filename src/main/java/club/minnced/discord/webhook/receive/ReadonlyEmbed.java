@@ -26,6 +26,10 @@ import org.json.JSONString;
 import java.time.OffsetDateTime;
 import java.util.List;
 
+/**
+ * Extension of {@link club.minnced.discord.webhook.send.WebhookEmbed}
+ * with additional meta-data on receivable embeds.
+ */
 public class ReadonlyEmbed extends WebhookEmbed {
     private final EmbedProvider provider;
     private final EmbedImage thumbnail, image;
@@ -46,26 +50,57 @@ public class ReadonlyEmbed extends WebhookEmbed {
         this.video = video;
     }
 
+    /**
+     * The {@link club.minnced.discord.webhook.receive.ReadonlyEmbed.EmbedProvider}
+     * <br>Used for services that are automatically embedded by discord when posting a link,
+     * this includes services like youtube or twitter.
+     *
+     * @return Possibly-null embed provider
+     */
     @Nullable
     public EmbedProvider getProvider() {
         return provider;
     }
 
+    /**
+     * The thumbnail of this embed.
+     *
+     * @return Possibly-null {@link club.minnced.discord.webhook.receive.ReadonlyEmbed.EmbedImage} for the thumbnail
+     */
     @Nullable
     public EmbedImage getThumbnail() {
         return thumbnail;
     }
 
+    /**
+     * The image of this embed.
+     *
+     * @return Possibly-null {@link club.minnced.discord.webhook.receive.ReadonlyEmbed.EmbedImage} for the image
+     */
     @Nullable
     public EmbedImage getImage() {
         return image;
     }
 
+    /**
+     * The video of this embed.
+     * <br>This is a whitelisted feature only available for services like youtube
+     * and is only populated for link embeds.
+     *
+     * @return Possibly-null {@link club.minnced.discord.webhook.receive.ReadonlyEmbed.EmbedVideo}
+     */
     @Nullable
     public EmbedVideo getVideo() {
         return video;
     }
 
+    /**
+     * Reduces this embed to a simpler {@link club.minnced.discord.webhook.send.WebhookEmbed}
+     * instance that can be used for sending, this is done implicitly
+     * when trying to send an instance of a readonly-embed.
+     *
+     * @return The reduced embed instance
+     */
     @Override
     @NotNull
     public WebhookEmbed reduced() {
@@ -74,6 +109,17 @@ public class ReadonlyEmbed extends WebhookEmbed {
                 thumbnail == null ? null : thumbnail.getUrl(),
                 image == null ? null : image.getUrl(),
                 getFooter(), getTitle(), getAuthor(), getFields());
+    }
+
+    /**
+     * JSON representation of this embed.
+     * <br>Note that received embeds look different compared to sent ones.
+     *
+     * @return The JSON representation
+     */
+    @Override
+    public String toString() {
+        return toJSONString();
     }
 
     @Override
@@ -90,11 +136,11 @@ public class ReadonlyEmbed extends WebhookEmbed {
         return base.toString();
     }
 
-    @Override
-    public String toString() {
-        return toJSONString();
-    }
-
+    /**
+     * POJO containing meta-data for an embed provider
+     *
+     * @see #getProvider()
+     */
     public static class EmbedProvider implements JSONString {
         private final String name, url;
 
@@ -103,16 +149,31 @@ public class ReadonlyEmbed extends WebhookEmbed {
             this.url = url;
         }
 
+        /**
+         * The name of the provider
+         *
+         * @return The name
+         */
         @NotNull
         public String getName() {
             return name;
         }
 
+        /**
+         * The url of the provider
+         *
+         * @return The url
+         */
         @NotNull
         public String getUrl() {
             return url;
         }
 
+        /**
+         * JSON representation of this provider
+         *
+         * @return The JSON representation
+         */
         @Override
         public String toString() {
             return toJSONString();
@@ -124,6 +185,11 @@ public class ReadonlyEmbed extends WebhookEmbed {
         }
     }
 
+    /**
+     * POJO containing meta-data about an embed video
+     *
+     * @see #getVideo()
+     */
     public static class EmbedVideo implements JSONString {
         private final String url;
         private final int width, height;
@@ -134,19 +200,39 @@ public class ReadonlyEmbed extends WebhookEmbed {
             this.height = height;
         }
 
+        /**
+         * The URL fot this video
+         *
+         * @return The URL
+         */
         @NotNull
         public String getUrl() {
             return url;
         }
 
+        /**
+         * The width of this video
+         *
+         * @return The width
+         */
         public int getWidth() {
             return width;
         }
 
+        /**
+         * The height of this video
+         *
+         * @return The height
+         */
         public int getHeight() {
             return height;
         }
 
+        /**
+         * JSON representation of this video
+         *
+         * @return The JSON representation
+         */
         @Override
         public String toString() {
             return toJSONString();
@@ -158,6 +244,12 @@ public class ReadonlyEmbed extends WebhookEmbed {
         }
     }
 
+    /**
+     * POJO containing meta-data about an embed image component
+     *
+     * @see #getThumbnail()
+     * @see #getImage()
+     */
     public static class EmbedImage implements JSONString {
         private final String url, proxyUrl;
         private final int width, height;
@@ -171,25 +263,51 @@ public class ReadonlyEmbed extends WebhookEmbed {
             this.height = height;
         }
 
+        /**
+         * The URL fot this image
+         *
+         * @return The URL
+         */
         @NotNull
         public String getUrl() {
             return url;
         }
 
+        /**
+         * The proxy url for this image, this is used
+         * to render previews in the discord client.
+         *
+         * @return The proxy url
+         */
         @NotNull
         @JSONPropertyName("proxy_url")
         public String getProxyUrl() {
             return proxyUrl;
         }
 
+        /**
+         * The width of this image
+         *
+         * @return The width
+         */
         public int getWidth() {
             return width;
         }
 
+        /**
+         * The height of this image
+         *
+         * @return The height
+         */
         public int getHeight() {
             return height;
         }
 
+        /**
+         * JSON representation of this provider
+         *
+         * @return The JSON representation
+         */
         @Override
         public String toString() {
             return toJSONString();

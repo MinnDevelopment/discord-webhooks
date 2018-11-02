@@ -24,7 +24,13 @@ import org.json.JSONString;
 
 import java.util.List;
 
-public class ReadonlyMessage implements JSONString { //TODO: Docs
+/**
+ * Readonly message representation used for responses
+ * of {@link club.minnced.discord.webhook.WebhookClient} send methods.
+ *
+ * @see #toWebhookMessage()
+ */
+public class ReadonlyMessage implements JSONString {
     private final long id;
     private final long channelId;
     private final boolean mentionsEveryone;
@@ -58,62 +64,134 @@ public class ReadonlyMessage implements JSONString { //TODO: Docs
         this.mentionedRoles = mentionedRoles;
     }
 
+    /**
+     * The id of this message
+     *
+     * @return The id
+     */
     public long getId() {
         return id;
     }
 
+    /**
+     * The channel id for the channel this message was sent in
+     *
+     * @return The channel id
+     */
     public long getChannelId() {
         return channelId;
     }
 
+    /**
+     * Whether this message mentioned everyone/here
+     *
+     * @return True, if this message mentioned everyone/here
+     */
     public boolean isMentionsEveryone() {
         return mentionsEveryone;
     }
 
+    /**
+     * Whether this message used Text-to-Speech (TTS)
+     *
+     * @return True, if this message used TTS
+     */
     public boolean isTTS() {
         return tts;
     }
 
+    /**
+     * The nonce of this message, used for testing RTT with a bot account.
+     * <br>Webhooks have no use for this.
+     *
+     * @return Possibly-null nonce of the message
+     */
     @Nullable
     public String getNonce() {
         return nonce;
     }
 
+    /**
+     * The author of this message, represented by a {@link club.minnced.discord.webhook.receive.ReadonlyUser} instance.
+     *
+     * @return The author
+     */
     @NotNull
     public ReadonlyUser getAuthor() {
         return author;
     }
 
+    /**
+     * The content of this message, this is displayed above embeds and attachments.
+     *
+     * @return The content
+     */
     @NotNull
     public String getContent() {
         return content;
     }
 
+    /**
+     * The embeds in this message, a webhook can send up to 10 embeds
+     * in one message. Additionally this contains embeds generated from links.
+     *
+     * @return List of embeds for this message
+     */
     @NotNull
     public List<ReadonlyEmbed> getEmbeds() {
         return embeds;
     }
 
+    /**
+     * The attachments of this message. This contains files
+     * added through methods such as {@link club.minnced.discord.webhook.send.WebhookMessageBuilder#addFile(java.io.File)}.
+     * <br>The attachments only contain meta-data and not the actual files.
+     *
+     * @return List of attachments
+     */
     @NotNull
     public List<ReadonlyAttachment> getAttachments() {
         return attachments;
     }
 
+    /**
+     * Users mentioned by this message.
+     * <br>This will not contain all users when using an everyone/here mention,
+     * it only contains directly mentioned users.
+     *
+     * @return List of mentioned users.
+     */
     @NotNull
     public List<ReadonlyUser> getMentionedUsers() {
         return mentionedUsers;
     }
 
+    /**
+     * List of mentioned role ids
+     *
+     * @return List of ids for directly mentioned roles
+     */
     @NotNull
     public List<Long> getMentionedRoles() {
         return mentionedRoles;
     }
 
+    /**
+     * Converts this message to a reduced webhook message.
+     * <br>This can be used for sending.
+     *
+     * @return {@link club.minnced.discord.webhook.send.WebhookMessage}
+     */
     @NotNull
     public WebhookMessage toWebhookMessage() {
         return WebhookMessage.from(this);
     }
 
+    /**
+     * JSON representation of this provider
+     *
+     * @return The JSON representation
+     */
     @Override
     public String toString() {
         return toJSONString();
