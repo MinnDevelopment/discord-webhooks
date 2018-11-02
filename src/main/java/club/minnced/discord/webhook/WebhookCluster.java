@@ -34,6 +34,19 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ThreadFactory;
 import java.util.function.Predicate;
 
+/**
+ * Collection of webhooks, useful for subscriber pattern.
+ * <br>Register several webhooks and broadcast to all of them with a single call.
+ *
+ * <p>Webhook created by the cluster through {@link #buildWebhook(long, String)}
+ * are initialized with defaults specified by
+ * <ul>
+ * <li>{@link #setDefaultHttpClient(okhttp3.OkHttpClient)}</li>
+ * <li>{@link #setDefaultExecutorService(java.util.concurrent.ScheduledExecutorService)}</li>
+ * <li>{@link #setDefaultThreadFactory(java.util.concurrent.ThreadFactory)}</li>
+ * <li>{@link #setDefaultDaemon(boolean)}</li>
+ * </ul>
+ */
 public class WebhookCluster implements AutoCloseable { //TODO: docs, tests
     protected final List<WebhookClient> webhooks;
     protected OkHttpClient defaultHttpClient;
@@ -41,6 +54,15 @@ public class WebhookCluster implements AutoCloseable { //TODO: docs, tests
     protected ThreadFactory threadFactory;
     protected boolean isDaemon;
 
+    /**
+     * Creates a new WebhookCluster with the provided clients
+     *
+     * @param  initialClients
+     *         Clients to add to the cluster
+     *
+     * @throws java.lang.NullPointerException
+     *         If provided with null
+     */
     public WebhookCluster(@NotNull Collection<? extends WebhookClient> initialClients) {
         Objects.requireNonNull(initialClients, "List");
         webhooks = new ArrayList<>(initialClients.size());
@@ -49,34 +71,94 @@ public class WebhookCluster implements AutoCloseable { //TODO: docs, tests
         }
     }
 
+    /**
+     * Creates a webhook cluster with the specified capacity.
+     * <br>Note that this capacity can be expanded dynamically by
+     * building/adding more clients.
+     *
+     * @param  initialCapacity
+     *         The initial capacity
+     *
+     * @throws java.lang.IllegalArgumentException
+     *         If the capacity is illegal
+     *
+     * @see    java.util.ArrayList#ArrayList(int)
+     */
     public WebhookCluster(int initialCapacity) {
         webhooks = new ArrayList<>(initialCapacity);
     }
 
+    /**
+     * Default initializes a new WebhookCluster.
+     * <br>This cluster will be empty.
+     */
     public WebhookCluster() {
         webhooks = new ArrayList<>();
     }
 
     // Default builder values
 
+    /**
+     * Configures the default http client that will be used to build
+     * {@link club.minnced.discord.webhook.WebhookClient} instances.
+     *
+     * @param  defaultHttpClient
+     *         The default http client
+     *
+     * @return WebhookCluster instance for chaining convenience
+     *
+     * @see    club.minnced.discord.webhook.WebhookClientBuilder#setHttpClient(okhttp3.OkHttpClient)
+     */
     @NotNull
     public WebhookCluster setDefaultHttpClient(@Nullable OkHttpClient defaultHttpClient) {
         this.defaultHttpClient = defaultHttpClient;
         return this;
     }
 
+    /**
+     * Configures the default executor service that will be used to build
+     * {@link club.minnced.discord.webhook.WebhookClient} instances.
+     *
+     * @param  executorService
+     *         The default executor service
+     *
+     * @return WebhookCluster instance for chaining convenience
+     *
+     * @see    club.minnced.discord.webhook.WebhookClientBuilder#setExecutorService(java.util.concurrent.ScheduledExecutorService)
+     */
     @NotNull
     public WebhookCluster setDefaultExecutorService(@Nullable ScheduledExecutorService executorService) {
         this.defaultPool = executorService;
         return this;
     }
 
+    /**
+     * Configures the default thread factory that will be used to build
+     * {@link club.minnced.discord.webhook.WebhookClient} instances.
+     *
+     * @param  factory
+     *         The default thread factory
+     *
+     * @return WebhookCluster instance for chaining convenience
+     *
+     * @see    club.minnced.discord.webhook.WebhookClientBuilder#setThreadFactory(java.util.concurrent.ThreadFactory)
+     */
     @NotNull
     public WebhookCluster setDefaultThreadFactory(@Nullable ThreadFactory factory) {
         this.threadFactory = factory;
         return this;
     }
 
+    /**
+     * Configures whether {@link club.minnced.discord.webhook.WebhookClient} instances should be daemon by default.
+     *
+     * @param  isDaemon
+     *         True, if clients should be daemon
+     *
+     * @return WebhookCluster instance for chaining convenience
+     *
+     * @see    club.minnced.discord.webhook.WebhookClientBuilder#setDaemon(boolean)
+     */
     @NotNull
     public WebhookCluster setDefaultDaemon(boolean isDaemon) {
         this.isDaemon = isDaemon;
@@ -85,12 +167,41 @@ public class WebhookCluster implements AutoCloseable { //TODO: docs, tests
 
     // Webhook creation/add/remove
 
+    /**
+     * Builds a {@link club.minnced.discord.webhook.WebhookClient} instance with the provided
+     * components and specified default configurations.
+     *
+     * @param  id
+     *         The id of the webhook
+     * @param  token
+     *         The token of the webhook
+     *
+     * @throws java.lang.NullPointerException
+     *         If the token is null
+     *
+     * @return WebhookCluster instance for chaining convenience
+     */
     @NotNull
     public WebhookCluster buildWebhook(long id, @NotNull String token) {
         this.webhooks.add(newBuilder(id, token).build());
         return this;
     }
 
+    /**
+     * Creates a {@link club.minnced.discord.webhook.WebhookClientBuilder} instance with the provided
+     * components and specified default configurations.
+     * <br>The webhook client must be explicitly added to the cluster after building.
+     *
+     * @param  id
+     *         The id of the webhook
+     * @param  token
+     *         The token of the webhook
+     *
+     * @throws java.lang.NullPointerException
+     *         If the token is null
+     *
+     * @return WebhookClientBuilder instance
+     */
     @NotNull
     public WebhookClientBuilder newBuilder(long id, @NotNull String token) {
         WebhookClientBuilder builder = new WebhookClientBuilder(id, token);
@@ -101,6 +212,19 @@ public class WebhookCluster implements AutoCloseable { //TODO: docs, tests
         return builder;
     }
 
+    /**
+     * Adds the provided webhooks to the cluster.
+     *
+     * @param  clients
+     *         The clients to add
+     *
+     * @throws java.lang.NullPointerException
+     *         If provided with null
+     * @throws java.lang.IllegalArgumentException
+     *         If at least one of the clients is already shutdown
+     *
+     * @return WebhookCluster instance for chaining convenience
+     */
     @NotNull
     public WebhookCluster addWebhooks(@NotNull WebhookClient... clients) {
         Objects.requireNonNull(clients, "Clients");
@@ -113,6 +237,19 @@ public class WebhookCluster implements AutoCloseable { //TODO: docs, tests
         return this;
     }
 
+    /**
+     * Adds the provided webhooks to the cluster.
+     *
+     * @param  clients
+     *         The clients to add
+     *
+     * @throws java.lang.NullPointerException
+     *         If provided with null
+     * @throws java.lang.IllegalArgumentException
+     *         If at least one of the clients is already shutdown
+     *
+     * @return WebhookCluster instance for chaining convenience
+     */
     @NotNull
     public WebhookCluster addWebhooks(@NotNull Collection<WebhookClient> clients) {
         Objects.requireNonNull(clients, "Clients");
@@ -125,6 +262,17 @@ public class WebhookCluster implements AutoCloseable { //TODO: docs, tests
         return this;
     }
 
+    /**
+     * Removes the provided webhooks from the cluster.
+     *
+     * @param  clients
+     *         The clients to remove
+     *
+     * @throws java.lang.NullPointerException
+     *         If provided with null
+     *
+     * @return WebhookCluster instance for chaining convenience
+     */
     @NotNull
     public WebhookCluster removeWebhooks(@NotNull WebhookClient... clients) {
         Objects.requireNonNull(clients, "Clients");
@@ -132,6 +280,17 @@ public class WebhookCluster implements AutoCloseable { //TODO: docs, tests
         return this;
     }
 
+    /**
+     * Removes the provided webhooks from the cluster.
+     *
+     * @param  clients
+     *         The clients to remove
+     *
+     * @throws java.lang.NullPointerException
+     *         If provided with null
+     *
+     * @return WebhookCluster instance for chaining convenience
+     */
     @NotNull
     public WebhookCluster removeWebhooks(@NotNull Collection<WebhookClient> clients) {
         Objects.requireNonNull(clients, "Clients");
@@ -139,6 +298,17 @@ public class WebhookCluster implements AutoCloseable { //TODO: docs, tests
         return this;
     }
 
+    /**
+     * Removes webhooks from the cluster based on the specified filter.
+     *
+     * @param  predicate
+     *         The filter to decide whether to remove a client or not
+     *
+     * @throws java.lang.NullPointerException
+     *         If provided with null
+     *
+     * @return {@link java.util.List} of the removed webhooks
+     */
     @NotNull
     public List<WebhookClient> removeIf(@NotNull Predicate<WebhookClient> predicate) {
         Objects.requireNonNull(predicate, "Predicate");
@@ -151,6 +321,17 @@ public class WebhookCluster implements AutoCloseable { //TODO: docs, tests
         return clients;
     }
 
+    /**
+     * Closes and removes webhook clients based on the specified filter.
+     *
+     * @param  predicate
+     *         The filter to decide whether to close and remove the client
+     *
+     * @throws java.lang.NullPointerException
+     *         If provided with null
+     *
+     * @return {@link java.util.List} of the removed webhooks
+     */
     @NotNull
     public List<WebhookClient> closeIf(@NotNull Predicate<WebhookClient> predicate) {
         Objects.requireNonNull(predicate, "Filter");
@@ -164,6 +345,11 @@ public class WebhookCluster implements AutoCloseable { //TODO: docs, tests
         return clients;
     }
 
+    /**
+     * Unmodifiable list of currently registered clients
+     *
+     * @return List of clients
+     */
     @NotNull
     public List<WebhookClient> getWebhooks() {
         return Collections.unmodifiableList(new ArrayList<>(webhooks));
@@ -171,6 +357,19 @@ public class WebhookCluster implements AutoCloseable { //TODO: docs, tests
 
     // Broadcasting / Multicasting
 
+    /**
+     * Sends a message to a filtered set of clients.
+     *
+     * @param  filter
+     *         The filter to decide whether a client should be targeted
+     * @param  message
+     *         The message to send
+     *
+     * @throws java.lang.NullPointerException
+     *         If provided with null
+     *
+     * @return List of futures for each client execution
+     */
     @NotNull
     public List<CompletableFuture<ReadonlyMessage>> multicast(@NotNull Predicate<WebhookClient> filter, @NotNull WebhookMessage message) {
         Objects.requireNonNull(filter, "Filter");
@@ -184,6 +383,17 @@ public class WebhookCluster implements AutoCloseable { //TODO: docs, tests
         return callbacks;
     }
 
+    /**
+     * Sends a message to all registered clients.
+     *
+     * @param  message
+     *         The message to send
+     *
+     * @throws java.lang.NullPointerException
+     *         If provided with null
+     *
+     * @return List of futures for each client execution
+     */
     @NotNull
     public List<CompletableFuture<ReadonlyMessage>> broadcast(@NotNull WebhookMessage message) {
         Objects.requireNonNull(message, "Message");
@@ -197,21 +407,51 @@ public class WebhookCluster implements AutoCloseable { //TODO: docs, tests
         return callbacks;
     }
 
-    @NotNull
-    public List<CompletableFuture<ReadonlyMessage>> broadcast(@NotNull WebhookEmbed[] embeds) {
-        return broadcast(WebhookMessage.embeds(Arrays.asList(embeds)));
-    }
-
+    /**
+     * Sends a message to all registered clients.
+     *
+     * @param  first
+     *         The first embed to send
+     * @param  embeds
+     *         Optional additional embeds to send, up to 10
+     *
+     * @throws java.lang.NullPointerException
+     *         If provided with null
+     *
+     * @return List of futures for each client execution
+     */
     @NotNull
     public List<CompletableFuture<ReadonlyMessage>> broadcast(@NotNull WebhookEmbed first, @NotNull WebhookEmbed... embeds) {
         return broadcast(WebhookMessage.embeds(first, embeds));
     }
 
+    /**
+     * Sends a message to all registered clients.
+     *
+     * @param  embeds
+     *         The embeds to send, up to 10
+     *
+     * @throws java.lang.NullPointerException
+     *         If provided with null
+     *
+     * @return List of futures for each client execution
+     */
     @NotNull
     public List<CompletableFuture<ReadonlyMessage>> broadcast(@NotNull Collection<WebhookEmbed> embeds) {
         return broadcast(WebhookMessage.embeds(embeds));
     }
 
+    /**
+     * Sends a message to all registered clients.
+     *
+     * @param  content
+     *         The message to send
+     *
+     * @throws java.lang.NullPointerException
+     *         If provided with null
+     *
+     * @return List of futures for each client execution
+     */
     @NotNull
     public List<CompletableFuture<ReadonlyMessage>> broadcast(@NotNull String content) {
         Objects.requireNonNull(content, "Content");
@@ -225,12 +465,36 @@ public class WebhookCluster implements AutoCloseable { //TODO: docs, tests
         return callbacks;
     }
 
+    /**
+     * Sends a message to all registered clients.
+     *
+     * @param  file
+     *         The file to send
+     *
+     * @throws java.lang.NullPointerException
+     *         If provided with null
+     *
+     * @return List of futures for each client execution
+     */
     @NotNull
     public List<CompletableFuture<ReadonlyMessage>> broadcast(@NotNull File file) {
         Objects.requireNonNull(file, "File");
         return broadcast(file.getName(), file);
     }
 
+    /**
+     * Sends a message to all registered clients.
+     *
+     * @param  fileName
+     *         The alternative file name to use
+     * @param  file
+     *         The file to send
+     *
+     * @throws java.lang.NullPointerException
+     *         If provided with null
+     *
+     * @return List of futures for each client execution
+     */
     @NotNull
     public List<CompletableFuture<ReadonlyMessage>> broadcast(@NotNull String fileName, @NotNull File file) {
         Objects.requireNonNull(file, "File");
@@ -239,11 +503,37 @@ public class WebhookCluster implements AutoCloseable { //TODO: docs, tests
         return broadcast(new WebhookMessageBuilder().addFile(fileName, file).build());
     }
 
+    /**
+     * Sends a message to all registered clients.
+     *
+     * @param  fileName
+     *         The alternative file name to use
+     * @param  data
+     *         The data to send
+     *
+     * @throws java.lang.NullPointerException
+     *         If provided with null
+     *
+     * @return List of futures for each client execution
+     */
     @NotNull
     public List<CompletableFuture<ReadonlyMessage>> broadcast(@NotNull String fileName, @NotNull InputStream data) {
         return broadcast(new WebhookMessageBuilder().addFile(fileName, data).build());
     }
 
+    /**
+     * Sends a message to all registered clients.
+     *
+     * @param  fileName
+     *         The alternative file name to use
+     * @param  data
+     *         The data to send
+     *
+     * @throws java.lang.NullPointerException
+     *         If provided with null
+     *
+     * @return List of futures for each client execution
+     */
     @NotNull
     public List<CompletableFuture<ReadonlyMessage>> broadcast(@NotNull String fileName, @NotNull byte[] data) {
         Objects.requireNonNull(data, "Data");
@@ -252,6 +542,11 @@ public class WebhookCluster implements AutoCloseable { //TODO: docs, tests
         return broadcast(new WebhookMessageBuilder().addFile(fileName, data).build());
     }
 
+    /**
+     * Performs cascade closing on current webhook clients,
+     * all clients will be closed and removed after this returns.
+     * <br>The cluster may still be used after calls to this method occurred.
+     */
     @Override
     public void close() {
         webhooks.forEach(WebhookClient::close);
