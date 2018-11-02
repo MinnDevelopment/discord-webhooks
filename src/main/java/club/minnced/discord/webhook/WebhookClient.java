@@ -39,15 +39,22 @@ import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Objects;
 import java.util.concurrent.*;
 
-public class WebhookClient implements AutoCloseable { //TODO: docs
+/**
+ * Client used to execute webhooks. All send methods are async and return a {@link java.util.concurrent.CompletableFuture}
+ * representing the execution. If provided with {@code null} an {@link java.lang.NullPointerException} is thrown instead.
+ */
+public class WebhookClient implements AutoCloseable {
+    /**
+     * Format for webhook execution endpoint
+     */
     public static final String WEBHOOK_URL = "https://discordapp.com/api/v7/webhooks/%s/%s?wait=%s";
+    /** User-Agent used for REST requests */
     public static final String USER_AGENT = "Webhook(https://github.com/MinnDevelopment/discord-webhooks | 0.1.0)";
-    public static final Logger LOG = LoggerFactory.getLogger(WebhookClient.class);
+    private static final Logger LOG = LoggerFactory.getLogger(WebhookClient.class);
 
     protected final String url;
     protected final long id;
@@ -72,57 +79,185 @@ public class WebhookClient implements AutoCloseable { //TODO: docs
         this.isQueued = false;
     }
 
+    /**
+     * The id for this webhook
+     *
+     * @return The id
+     */
     public long getId() {
         return id;
     }
 
+    /**
+     * The URL for this webhook formatted using {@link #WEBHOOK_URL} unless
+     * specified by {@link club.minnced.discord.webhook.WebhookClientBuilder#WebhookClientBuilder(String)} explicitly
+     *
+     * @return The URL for this webhook
+     */
     @NotNull
     public String getUrl() {
         return url;
     }
 
+    /**
+     * Whether futures will receive {@link club.minnced.discord.webhook.receive.ReadonlyMessage} instances
+     * or {@code null}.
+     *
+     * @return True, if messages will be received - false otherwise
+     */
+    public boolean isWait() {
+        return parseMessage;
+    }
+
+    /**
+     * Sends the provided {@link club.minnced.discord.webhook.send.WebhookMessage}
+     * to the webhook.
+     * <br>The returned future receives {@code null} if {@link club.minnced.discord.webhook.WebhookClientBuilder#setWait(boolean)}
+     * was set to false.
+     *
+     * @param  message
+     *         The message to send
+     *
+     * @return {@link java.util.concurrent.CompletableFuture}
+     *
+     * @see    #isWait()
+     */
     @NotNull
     public CompletableFuture<ReadonlyMessage> send(@NotNull WebhookMessage message) {
         Objects.requireNonNull(message, "WebhookMessage");
         return execute(message.getBody());
     }
 
+    /**
+     * Sends the provided {@link java.io.File} to the webhook.
+     * <br>The returned future receives {@code null} if {@link club.minnced.discord.webhook.WebhookClientBuilder#setWait(boolean)}
+     * was set to false.
+     *
+     * @param  file
+     *         The file to send
+     *
+     * @return {@link java.util.concurrent.CompletableFuture}
+     *
+     * @see    #isWait()
+     * @see    #send(club.minnced.discord.webhook.send.WebhookMessage)
+     */
     @NotNull
     public CompletableFuture<ReadonlyMessage> send(@NotNull File file) {
         Objects.requireNonNull(file, "File");
         return send(file, file.getName());
     }
 
+    /**
+     * Sends the provided {@link java.io.File} to the webhook.
+     * <br>The returned future receives {@code null} if {@link club.minnced.discord.webhook.WebhookClientBuilder#setWait(boolean)}
+     * was set to false.
+     *
+     * @param  file
+     *         The file to send
+     * @param  fileName
+     *         The alternative name to use for this file
+     *
+     * @return {@link java.util.concurrent.CompletableFuture}
+     *
+     * @see    #isWait()
+     * @see    #send(club.minnced.discord.webhook.send.WebhookMessage)
+     */
     @NotNull
     public CompletableFuture<ReadonlyMessage> send(@NotNull File file, @NotNull String fileName) {
         return send(new WebhookMessageBuilder().addFile(fileName, file).build());
     }
 
+    /**
+     * Sends the provided {@code byte[]} to the webhook.
+     * <br>The returned future receives {@code null} if {@link club.minnced.discord.webhook.WebhookClientBuilder#setWait(boolean)}
+     * was set to false.
+     *
+     * @param  data
+     *         The data to send as a file
+     * @param  fileName
+     *         The file name to use
+     *
+     * @return {@link java.util.concurrent.CompletableFuture}
+     *
+     * @see    #isWait()
+     * @see    #send(club.minnced.discord.webhook.send.WebhookMessage)
+     */
     @NotNull
     public CompletableFuture<ReadonlyMessage> send(@NotNull byte[] data, @NotNull String fileName) {
         return send(new WebhookMessageBuilder().addFile(fileName, data).build());
     }
 
+    /**
+     * Sends the provided {@link java.io.InputStream} to the webhook.
+     * <br>The returned future receives {@code null} if {@link club.minnced.discord.webhook.WebhookClientBuilder#setWait(boolean)}
+     * was set to false.
+     *
+     * @param  data
+     *         The data to send as a file
+     * @param  fileName
+     *         The file name to use
+     *
+     * @return {@link java.util.concurrent.CompletableFuture}
+     *
+     * @see    #isWait()
+     * @see    #send(club.minnced.discord.webhook.send.WebhookMessage)
+     */
     @NotNull
     public CompletableFuture<ReadonlyMessage> send(@NotNull InputStream data, @NotNull String fileName) {
         return send(new WebhookMessageBuilder().addFile(fileName, data).build());
     }
 
-    @NotNull
-    public CompletableFuture<ReadonlyMessage> send(@NotNull WebhookEmbed[] embeds) {
-        return send(WebhookMessage.embeds(Arrays.asList(embeds)));
-    }
-
+    /**
+     * Sends the provided {@link club.minnced.discord.webhook.send.WebhookEmbed} to the webhook.
+     * <br>The returned future receives {@code null} if {@link club.minnced.discord.webhook.WebhookClientBuilder#setWait(boolean)}
+     * was set to false.
+     *
+     * @param  first
+     *         The first embed to send
+     * @param  embeds
+     *         Optional additional embeds to send, up to 10
+     *
+     * @return {@link java.util.concurrent.CompletableFuture}
+     *
+     * @see    #isWait()
+     * @see    #send(club.minnced.discord.webhook.send.WebhookMessage)
+     */
     @NotNull
     public CompletableFuture<ReadonlyMessage> send(@NotNull WebhookEmbed first, @NotNull WebhookEmbed... embeds) {
         return send(WebhookMessage.embeds(first, embeds));
     }
 
+    /**
+     * Sends the provided {@link club.minnced.discord.webhook.send.WebhookEmbed} to the webhook.
+     * <br>The returned future receives {@code null} if {@link club.minnced.discord.webhook.WebhookClientBuilder#setWait(boolean)}
+     * was set to false.
+     *
+     * @param  embeds
+     *         The embeds to send
+     *
+     * @return {@link java.util.concurrent.CompletableFuture}
+     *
+     * @see    #isWait()
+     * @see    #send(club.minnced.discord.webhook.send.WebhookMessage)
+     */
     @NotNull
     public CompletableFuture<ReadonlyMessage> send(@NotNull Collection<WebhookEmbed> embeds) {
         return send(WebhookMessage.embeds(embeds));
     }
 
+    /**
+     * Sends the provided content as normal message to the webhook.
+     * <br>The returned future receives {@code null} if {@link club.minnced.discord.webhook.WebhookClientBuilder#setWait(boolean)}
+     * was set to false.
+     *
+     * @param  content
+     *         The content to send
+     *
+     * @return {@link java.util.concurrent.CompletableFuture}
+     *
+     * @see    #isWait()
+     * @see    #send(club.minnced.discord.webhook.send.WebhookMessage)
+     */
     @NotNull
     public CompletableFuture<ReadonlyMessage> send(@NotNull String content) {
         Objects.requireNonNull(content, "Content");
@@ -134,18 +269,14 @@ public class WebhookClient implements AutoCloseable { //TODO: docs
         return execute(newBody(new JSONObject().put("content", content).toString()));
     }
 
+    /**
+     * Stops the executor used by this pool
+     */
     @Override
     public void close() {
         isShutdown = true;
         if (queue.isEmpty())
             pool.shutdown();
-    }
-
-    @Override
-    @SuppressWarnings("deprecation")
-    protected void finalize() {
-        if (!isShutdown)
-            LOG.warn("Detected unclosed WebhookClient! Did you forget to close it?");
     }
 
     protected void checkShutdown() {

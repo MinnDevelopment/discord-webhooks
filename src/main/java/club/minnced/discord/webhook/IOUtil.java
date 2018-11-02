@@ -30,11 +30,30 @@ import java.io.InputStream;
 import java.util.List;
 import java.util.zip.GZIPInputStream;
 
-public class IOUtil { //TODO: Docs, test json
+/**
+ * Utility for various I/O operations used within library internals
+ */
+public class IOUtil { //TODO: test json
+    /**
+     * application/json
+     */
     public static final MediaType JSON = MediaType.parse("application/json; charset=utf-8");
+    /** application/octet-stream */
     public static final MediaType OCTET = MediaType.parse("application/octet-stream; charset=utf-8");
+    /** Empty byte-array, used for {@link #readAllBytes(java.io.InputStream)} */
     public static final byte[] EMPTY_BYTES = new byte[0];
 
+    /**
+     * Reads all bytes from an {@link java.io.InputStream}
+     *
+     * @param  stream
+     *         The InputStream
+     *
+     * @throws IOException
+     *         If some I/O error occurs
+     *
+     * @return {@code byte[]} containing all bytes of the stream
+     */
     @NotNull
     public static byte[] readAllBytes(@NotNull InputStream stream) throws IOException {
         int count = 0, pos = 0;
@@ -54,8 +73,19 @@ public class IOUtil { //TODO: Docs, test json
         return output;
     }
 
+    /**
+     * Helper method which handles gzip encoded response bodies
+     *
+     * @param  req
+     *         {@link okhttp3.Response} instance
+     *
+     * @throws IOException
+     *         If some I/O error occurs
+     *
+     * @return {@link java.io.InputStream} representing the response body
+     */
     @Nullable
-    public static InputStream getBody(okhttp3.Response req) throws IOException {
+    public static InputStream getBody(@NotNull okhttp3.Response req) throws IOException {
         List<String> encoding = req.headers("content-encoding");
         ResponseBody body = req.body();
         if (!encoding.isEmpty() && body != null) {
@@ -64,16 +94,39 @@ public class IOUtil { //TODO: Docs, test json
         return body != null ? body.byteStream() : null;
     }
 
+    /**
+     * Converts an {@link java.io.InputStream} to a {@link org.json.JSONObject}
+     *
+     * @param  input
+     *         The {@link java.io.InputStream}
+     *
+     * @throws org.json.JSONException
+     *         If parsing fails
+     *
+     * @return {@link org.json.JSONObject} for the provided input
+     */
     @NotNull
     public static JSONObject toJSON(@NotNull InputStream input) {
         return new JSONObject(new JSONTokener(input));
     }
 
+    /**
+     * Supplier that can throw checked-exceptions
+     *
+     * @param <T>
+     *        The component type
+     */
     public interface SilentSupplier<T> {
         @Nullable
         T get() throws Exception;
     }
 
+    /**
+     * Lazy evaluation for logging complex objects
+     *
+     * <h1>Example</h1>
+     * {@code LOG.debug("Suspicious json found", new Lazy(() -> json.toString()));}
+     */
     public static class Lazy {
         private final SilentSupplier<?> supply;
 
@@ -93,6 +146,9 @@ public class IOUtil { //TODO: Docs, test json
         }
     }
 
+    /**
+     * Wrapper for an {@link #OCTET} request body
+     */
     public static class OctetBody extends RequestBody {
         private final InputStream in;
 

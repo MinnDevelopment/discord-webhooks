@@ -27,7 +27,11 @@ import java.util.concurrent.ThreadFactory;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class WebhookClientBuilder { //TODO: docs, tests
+public class WebhookClientBuilder { //TODO: tests
+    /**
+     * Pattern used to validate webhook urls
+     * {@code (?:https?://)?(?:\w+\.)?discordapp\.com/api(?:/v\d+)?/webhooks/(\d+)/([\w-]+)(?:/(?:\w+)?)?}
+     */
     public static final Pattern WEBHOOK_PATTERN = Pattern.compile("(?:https?://)?(?:\\w+\\.)?discordapp\\.com/api(?:/v\\d+)?/webhooks/(\\d+)/([\\w-]+)(?:/(?:\\w+)?)?");
 
     protected final long id;
@@ -38,12 +42,35 @@ public class WebhookClientBuilder { //TODO: docs, tests
     protected boolean isDaemon;
     protected boolean parseMessage = true;
 
+    /**
+     * Creates a new WebhookClientBuilder for the specified webhook components
+     *
+     * @param  id
+     *         The webhook id
+     * @param  token
+     *         The webhook token
+     *
+     * @throws java.lang.NullPointerException
+     *         If the token is null
+     */
     public WebhookClientBuilder(final long id, @NotNull final String token) {
         Objects.requireNonNull(token, "Token");
         this.id = id;
         this.token = token;
     }
 
+    /**
+     * Creates a new WebhookClientBuilder for the specified webhook url
+     * <br>The url is verified using {@link #WEBHOOK_PATTERN}.
+     *
+     * @param  url
+     *         The url to use
+     *
+     * @throws java.lang.NullPointerException
+     *         If the url is null
+     * @throws java.lang.IllegalArgumentException
+     *         If the url is not valid
+     */
     public WebhookClientBuilder(@NotNull String url) {
         Objects.requireNonNull(url, "Url");
         Matcher matcher = WEBHOOK_PATTERN.matcher(url);
@@ -55,36 +82,92 @@ public class WebhookClientBuilder { //TODO: docs, tests
         this.token = matcher.group(2);
     }
 
+    /**
+     * The {@link java.util.concurrent.ScheduledExecutorService} that is used to execute
+     * send requests in the resulting {@link club.minnced.discord.webhook.WebhookClient}.
+     * <br>This will be closed by a call to {@link WebhookClient#close()}.
+     *
+     * @param  executorService
+     *         The executor service to use
+     *
+     * @return The current builder, for chaining convenience
+     */
     @NotNull
     public WebhookClientBuilder setExecutorService(@Nullable ScheduledExecutorService executorService) {
         this.pool = executorService;
         return this;
     }
 
+    /**
+     * The {@link okhttp3.OkHttpClient} that is used to execute
+     * send requests in the resulting {@link club.minnced.discord.webhook.WebhookClient}.
+     * <br>It is usually not necessary to use multiple different clients in one application
+     *
+     * @param  client
+     *         The http client to use
+     *
+     * @return The current builder, for chaining convenience
+     */
     @NotNull
     public WebhookClientBuilder setHttpClient(@Nullable OkHttpClient client) {
         this.client = client;
         return this;
     }
 
+    /**
+     * The {@link java.util.concurrent.ThreadFactory} that is used to initialize
+     * the default {@link java.util.concurrent.ScheduledExecutorService} used if
+     * {@link #setExecutorService(java.util.concurrent.ScheduledExecutorService)} is not configured.
+     *
+     * @param  factory
+     *         The factory to use
+     *
+     * @return The current builder, for chaining convenience
+     */
     @NotNull
     public WebhookClientBuilder setThreadFactory(@Nullable ThreadFactory factory) {
         this.threadFactory = factory;
         return this;
     }
 
+    /**
+     * Whether the default executor should use daemon threads.
+     * <br>This has no effect if either {@link #setExecutorService(java.util.concurrent.ScheduledExecutorService)}
+     * or {@link #setThreadFactory(java.util.concurrent.ThreadFactory)} are configured to non-null values.
+     *
+     * @param  isDaemon
+     *         Whether to use daemon threads or not
+     *
+     * @return The current builder, for chaining convenience
+     */
     @NotNull
     public WebhookClientBuilder setDaemon(boolean isDaemon) {
         this.isDaemon = isDaemon;
         return this;
     }
 
+    /**
+     * Whether resulting messages should be parsed after sending,
+     * if this is set to {@code false} the futures returned by {@link club.minnced.discord.webhook.WebhookClient}
+     * will receive {@code null} instead of instances of {@link club.minnced.discord.webhook.receive.ReadonlyMessage}.
+     *
+     * @param  waitForMessage
+     *         True, if the client should parse resulting messages (default behavior)
+     *
+     * @return The current builder, for chaining convenience
+     */
     @NotNull
     public WebhookClientBuilder setWait(boolean waitForMessage) {
         this.parseMessage = waitForMessage;
         return this;
     }
 
+    /**
+     * Builds the {@link club.minnced.discord.webhook.WebhookClient}
+     * with the current settings
+     *
+     * @return {@link club.minnced.discord.webhook.WebhookClient} instance
+     */
     @NotNull
     public WebhookClient build() {
         OkHttpClient client = this.client == null
