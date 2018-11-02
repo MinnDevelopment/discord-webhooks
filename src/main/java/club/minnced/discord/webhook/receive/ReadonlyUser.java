@@ -22,7 +22,10 @@ import org.json.JSONObject;
 import org.json.JSONPropertyName;
 import org.json.JSONString;
 
-public class ReadonlyUser implements JSONString { //TODO: Docs
+/**
+ * Readonly POJO of a discord user
+ */
+public class ReadonlyUser implements JSONString { //TODO: Member details?
     private final long id;
     private final short discriminator;
     private final boolean bot;
@@ -37,29 +40,60 @@ public class ReadonlyUser implements JSONString { //TODO: Docs
         this.avatar = avatar;
     }
 
+    /**
+     * The id of this user
+     *
+     * @return The id
+     */
     public long getId() {
         return id;
     }
 
+    /**
+     * The 4 digit discriminator of this user
+     * <br>This is show in the client after the {@code #} when viewing profiles.
+     *
+     * @return The discriminator
+     */
     public String getDiscriminator() {
         return String.format("%04d", discriminator);
     }
 
+    /**
+     * Whether this is a bot or not, webhook authors are always bots.
+     *
+     * @return True, if this is a bot
+     */
     public boolean isBot() {
         return bot;
     }
 
+    /**
+     * The name of this user, this is the username and not the guild-specific nickname.
+     *
+     * @return The name of this user
+     */
     @NotNull
     public String getName() {
         return name;
     }
 
+    /**
+     * The avatar id of this user, or {@code null} if no avatar is set.
+     *
+     * @return The avatar id
+     */
     @Nullable
     @JSONPropertyName("avatar_id")
-    public String getAvatar() {
+    public String getAvatarId() {
         return avatar;
     }
 
+    /**
+     * JSON representation of this user
+     *
+     * @return THe JSON representation of this user
+     */
     @Override
     public String toString() {
         return toJSONString();

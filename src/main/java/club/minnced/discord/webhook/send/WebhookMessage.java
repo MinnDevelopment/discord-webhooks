@@ -52,7 +52,7 @@ public class WebhookMessage { //TODO: Docs
     public static WebhookMessage from(@NotNull ReadonlyMessage message) {
         Objects.requireNonNull(message, "Message");
         WebhookMessageBuilder builder = new WebhookMessageBuilder();
-        builder.setAvatarUrl(message.getAuthor().getAvatar());
+        builder.setAvatarUrl(message.getAuthor().getAvatarId());
         builder.setUsername(message.getAuthor().getName());
         builder.setContent(message.getContent());
         builder.setTTS(message.isTTS());

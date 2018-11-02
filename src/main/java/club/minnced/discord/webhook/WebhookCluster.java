@@ -47,7 +47,7 @@ import java.util.function.Predicate;
  * <li>{@link #setDefaultDaemon(boolean)}</li>
  * </ul>
  */
-public class WebhookCluster implements AutoCloseable { //TODO: docs, tests
+public class WebhookCluster implements AutoCloseable { //TODO: tests
     protected final List<WebhookClient> webhooks;
     protected OkHttpClient defaultHttpClient;
     protected ScheduledExecutorService defaultPool;

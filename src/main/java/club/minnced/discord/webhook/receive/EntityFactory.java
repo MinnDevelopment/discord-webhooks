@@ -17,6 +17,8 @@
 package club.minnced.discord.webhook.receive;
 
 import club.minnced.discord.webhook.send.WebhookEmbed;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -26,8 +28,21 @@ import java.util.Collections;
 import java.util.List;
 import java.util.function.Function;
 
-public class EntityFactory { //TODO: Write Tests, Documentation
-    public static ReadonlyUser makeUser(JSONObject json) {
+/**
+ * Internal factory used to convert JSON representations
+ * into java objects.
+ */
+public class EntityFactory {
+    /**
+     * Converts a user json into a {@link club.minnced.discord.webhook.receive.ReadonlyUser}
+     *
+     * @param json
+     *         The JSON representation
+     *
+     * @return {@link club.minnced.discord.webhook.receive.ReadonlyUser}
+     */
+    @NotNull
+    public static ReadonlyUser makeUser(@NotNull JSONObject json) {
         final long id = Long.parseUnsignedLong(json.getString("id"));
         final String name = json.getString("username");
         final String avatar = json.optString("avatar", null);
@@ -37,7 +52,16 @@ public class EntityFactory { //TODO: Write Tests, Documentation
         return new ReadonlyUser(id, discriminator, bot, name, avatar);
     }
 
-    public static ReadonlyAttachment makeAttachment(JSONObject json) {
+    /**
+     * Converts a attachment json into a {@link club.minnced.discord.webhook.receive.ReadonlyAttachment}
+     *
+     * @param json
+     *         The JSON representation
+     *
+     * @return {@link club.minnced.discord.webhook.receive.ReadonlyAttachment}
+     */
+    @NotNull
+    public static ReadonlyAttachment makeAttachment(@NotNull JSONObject json) {
         final String url = json.getString("url");
         final String proxy = json.getString("proxy_url");
         final String name = json.getString("filename");
@@ -48,7 +72,16 @@ public class EntityFactory { //TODO: Write Tests, Documentation
         return new ReadonlyAttachment(url, proxy, name, width, height, size, id);
     }
 
-    public static WebhookEmbed.EmbedField makeEmbedField(JSONObject json) {
+    /**
+     * Converts a field json into a {@link club.minnced.discord.webhook.send.WebhookEmbed.EmbedField}
+     *
+     * @param json
+     *         The JSON representation
+     *
+     * @return {@link club.minnced.discord.webhook.send.WebhookEmbed.EmbedField}
+     */
+    @Nullable
+    public static WebhookEmbed.EmbedField makeEmbedField(@Nullable JSONObject json) {
         if (json == null)
             return null;
         final String name = json.getString("name");
@@ -57,7 +90,16 @@ public class EntityFactory { //TODO: Write Tests, Documentation
         return new WebhookEmbed.EmbedField(inline, name, value);
     }
 
-    public static WebhookEmbed.EmbedAuthor makeEmbedAuthor(JSONObject json) {
+    /**
+     * Converts an author json into a {@link club.minnced.discord.webhook.send.WebhookEmbed.EmbedAuthor}
+     *
+     * @param json
+     *         The JSON representation
+     *
+     * @return {@link club.minnced.discord.webhook.send.WebhookEmbed.EmbedAuthor}
+     */
+    @Nullable
+    public static WebhookEmbed.EmbedAuthor makeEmbedAuthor(@Nullable JSONObject json) {
         if (json == null)
             return null;
         final String name = json.getString("name");
@@ -66,7 +108,16 @@ public class EntityFactory { //TODO: Write Tests, Documentation
         return new WebhookEmbed.EmbedAuthor(name, icon, url);
     }
 
-    public static WebhookEmbed.EmbedFooter makeEmbedFooter(JSONObject json) {
+    /**
+     * Converts a footer json into a {@link club.minnced.discord.webhook.send.WebhookEmbed.EmbedFooter}
+     *
+     * @param json
+     *         The JSON representation
+     *
+     * @return {@link club.minnced.discord.webhook.send.WebhookEmbed.EmbedFooter}
+     */
+    @Nullable
+    public static WebhookEmbed.EmbedFooter makeEmbedFooter(@Nullable JSONObject json) {
         if (json == null)
             return null;
         final String text = json.getString("text");
@@ -74,7 +125,16 @@ public class EntityFactory { //TODO: Write Tests, Documentation
         return new WebhookEmbed.EmbedFooter(text, icon);
     }
 
-    public static WebhookEmbed.EmbedTitle makeEmbedTitle(JSONObject json) {
+    /**
+     * Converts an embed json into a {@link club.minnced.discord.webhook.send.WebhookEmbed.EmbedTitle}
+     *
+     * @param  json
+     *         The JSON representation
+     *
+     * @return {@link club.minnced.discord.webhook.send.WebhookEmbed.EmbedTitle}
+     */
+    @Nullable
+    public static WebhookEmbed.EmbedTitle makeEmbedTitle(@NotNull JSONObject json) {
         final String text = json.optString("title", null);
         if (text == null)
             return null;
@@ -82,7 +142,16 @@ public class EntityFactory { //TODO: Write Tests, Documentation
         return new WebhookEmbed.EmbedTitle(text, url);
     }
 
-    public static ReadonlyEmbed.EmbedImage makeEmbedImage(JSONObject json) {
+    /**
+     * Converts a image/thumbnail json into a {@link club.minnced.discord.webhook.receive.ReadonlyEmbed.EmbedImage}
+     *
+     * @param  json
+     *         The JSON representation
+     *
+     * @return {@link club.minnced.discord.webhook.receive.ReadonlyEmbed.EmbedImage}
+     */
+    @Nullable
+    public static ReadonlyEmbed.EmbedImage makeEmbedImage(@Nullable JSONObject json) {
         if (json == null)
             return null;
         final String url = json.getString("url");
@@ -92,7 +161,16 @@ public class EntityFactory { //TODO: Write Tests, Documentation
         return new ReadonlyEmbed.EmbedImage(url, proxyUrl, width, height);
     }
 
-    public static ReadonlyEmbed.EmbedProvider makeEmbedProvider(JSONObject json) {
+    /**
+     * Converts a provider json into a {@link club.minnced.discord.webhook.receive.ReadonlyEmbed.EmbedProvider}
+     *
+     * @param  json
+     *         The JSON representation
+     *
+     * @return {@link club.minnced.discord.webhook.receive.ReadonlyEmbed.EmbedProvider}
+     */
+    @Nullable
+    public static ReadonlyEmbed.EmbedProvider makeEmbedProvider(@Nullable JSONObject json) {
         if (json == null)
             return null;
         final String url = json.getString("url");
@@ -100,7 +178,16 @@ public class EntityFactory { //TODO: Write Tests, Documentation
         return new ReadonlyEmbed.EmbedProvider(name, url);
     }
 
-    public static ReadonlyEmbed.EmbedVideo makeEmbedVideo(JSONObject json) {
+    /**
+     * Converts a video json into a {@link club.minnced.discord.webhook.receive.ReadonlyEmbed.EmbedVideo}
+     *
+     * @param  json
+     *         The JSON representation
+     *
+     * @return {@link club.minnced.discord.webhook.receive.ReadonlyEmbed.EmbedVideo}
+     */
+    @Nullable
+    public static ReadonlyEmbed.EmbedVideo makeEmbedVideo(@Nullable JSONObject json) {
         if (json == null)
             return null;
         final String url = json.getString("url");
@@ -109,7 +196,16 @@ public class EntityFactory { //TODO: Write Tests, Documentation
         return new ReadonlyEmbed.EmbedVideo(url, width, height);
     }
 
-    public static ReadonlyEmbed makeEmbed(JSONObject json) {
+    /**
+     * Converts an embed json into a {@link club.minnced.discord.webhook.receive.ReadonlyEmbed}
+     *
+     * @param  json
+     *         The JSON representation
+     *
+     * @return {@link club.minnced.discord.webhook.receive.ReadonlyEmbed}
+     */
+    @NotNull
+    public static ReadonlyEmbed makeEmbed(@NotNull JSONObject json) {
         final String description = json.optString("description", null);
         final Integer color = json.isNull("color") ? null : json.getInt("color");
         final ReadonlyEmbed.EmbedImage image = makeEmbedImage(json.optJSONObject("image"));
@@ -137,7 +233,16 @@ public class EntityFactory { //TODO: Write Tests, Documentation
         return new ReadonlyEmbed(timestamp, color, description, thumbnail, image, footer, title, author, fields, provider, video);
     }
 
-    public static ReadonlyMessage makeMessage(JSONObject json) {
+    /**
+     * Converts a message json into a {@link club.minnced.discord.webhook.receive.ReadonlyMessage}
+     *
+     * @param  json
+     *         The JSON representation
+     *
+     * @return {@link club.minnced.discord.webhook.receive.ReadonlyMessage}
+     */
+    @NotNull
+    public static ReadonlyMessage makeMessage(@NotNull JSONObject json) {
         final long id = Long.parseUnsignedLong(json.getString("id"));
         final long channelId = Long.parseUnsignedLong(json.getString("channel_id"));
         final ReadonlyUser author = makeUser(json.getJSONObject("author"));

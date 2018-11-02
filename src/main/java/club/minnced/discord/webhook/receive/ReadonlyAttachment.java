@@ -21,6 +21,11 @@ import org.json.JSONObject;
 import org.json.JSONPropertyName;
 import org.json.JSONString;
 
+/**
+ * Readonly message attachment meta-data.
+ * <br>This does not actually contain the file but only meta-data
+ * useful to retrieve the actual attachment.
+ */
 public class ReadonlyAttachment implements JSONString { //TODO: Docs
     private final String url;
     private final String proxyUrl;
@@ -41,39 +46,80 @@ public class ReadonlyAttachment implements JSONString { //TODO: Docs
         this.id = id;
     }
 
+    /**
+     * The URL for this attachment
+     *
+     * @return The url
+     */
     @NotNull
     public String getUrl() {
         return url;
     }
 
+    /**
+     * The proxy url for this attachment, this is used by the client
+     * to generate previews of images.
+     *
+     * @return The proxy url
+     */
     @NotNull
     @JSONPropertyName("proxy_url")
     public String getProxyUrl() {
         return proxyUrl;
     }
 
+    /**
+     * The name of this attachment
+     *
+     * @return The file name
+     */
     @NotNull
     @JSONPropertyName("filename")
     public String getFileName() {
         return fileName;
     }
 
+    /**
+     * The approximated size of this embed in bytes
+     *
+     * @return The approximated size in bytes
+     */
     public int getSize() {
         return size;
     }
 
+    /**
+     * Width of the attachment, this is only relevant to images and videos
+     *
+     * @return Width of this image, or -1 if not an image or video
+     */
     public int getWidth() {
         return width;
     }
 
+    /**
+     * Height of the attachment, this is only relevant to images and videos
+     *
+     * @return Height of this image, or -1 if not an image or video
+     */
     public int getHeight() {
         return height;
     }
 
+    /**
+     * The id of this attachment
+     *
+     * @return The idi
+     */
     public long getId() {
         return id;
     }
 
+    /**
+     * JSON representation of this attachment
+     *
+     * @return The JSON representation
+     */
     @Override
     public String toString() {
         return toJSONString();

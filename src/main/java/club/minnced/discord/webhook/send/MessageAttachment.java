@@ -21,7 +21,10 @@ import org.jetbrains.annotations.NotNull;
 
 import java.io.*;
 
-public class MessageAttachment { //TODO: Docs
+/**
+ * Internal representation of attachments for outgoing messages
+ */
+public class MessageAttachment {
     private final String name;
     private final byte[] data;
 
