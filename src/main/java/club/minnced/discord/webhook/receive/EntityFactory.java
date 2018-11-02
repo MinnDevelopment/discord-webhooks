@@ -109,7 +109,7 @@ public class EntityFactory { //TODO: Write Tests, Documentation
         return new ReadonlyEmbed.EmbedVideo(url, width, height);
     }
 
-    public static ReadonlyEmbed makeEmbed(JSONObject json) { //TODO: ReadonlyEmbed
+    public static ReadonlyEmbed makeEmbed(JSONObject json) {
         final String description = json.optString("description", null);
         final Integer color = json.isNull("color") ? null : json.getInt("color");
         final ReadonlyEmbed.EmbedImage image = makeEmbedImage(json.optJSONObject("image"));

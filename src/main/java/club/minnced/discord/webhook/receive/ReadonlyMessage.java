@@ -24,7 +24,7 @@ import org.json.JSONString;
 
 import java.util.List;
 
-public class ReadonlyMessage implements JSONString { //TODO: Create ReadonlyEmbed with more info, Docs
+public class ReadonlyMessage implements JSONString { //TODO: Docs
     private final long id;
     private final long channelId;
     private final boolean mentionsEveryone;
