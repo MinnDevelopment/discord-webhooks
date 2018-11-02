@@ -103,6 +103,11 @@ public class WebhookEmbed implements JSONString { //TODO: Docs
     }
 
     @Override
+    public String toString() {
+        return toJSONString();
+    }
+
+    @Override
     public String toJSONString() {
         JSONObject json = new JSONObject();
         if (description != null)
@@ -156,6 +161,11 @@ public class WebhookEmbed implements JSONString { //TODO: Docs
         public String getValue() {
             return value;
         }
+
+        @Override
+        public String toString() {
+            return new JSONObject(this).toString();
+        }
     }
 
     public static class EmbedAuthor {
@@ -180,6 +190,11 @@ public class WebhookEmbed implements JSONString { //TODO: Docs
         @Nullable
         public String getUrl() {
             return url;
+        }
+
+        @Override
+        public String toString() {
+            return new JSONObject(this).toString();
         }
     }
 
@@ -218,6 +233,11 @@ public class WebhookEmbed implements JSONString { //TODO: Docs
         @Nullable
         public String getUrl() {
             return url;
+        }
+
+        @Override
+        public String toString() {
+            return new JSONObject(this).toString();
         }
     }
 }

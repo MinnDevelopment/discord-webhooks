@@ -82,23 +82,30 @@ public class EntityFactory { //TODO: Write Tests, Documentation
         return new WebhookEmbed.EmbedTitle(text, url);
     }
 
-    public static String makeEmbedImage(JSONObject json) {
+    public static ReadonlyEmbed.EmbedImage makeEmbedImage(JSONObject json) {
         if (json == null)
             return null;
-        return json.getString("url");
+        final String url = json.getString("url");
+        final String proxyUrl = json.getString("proxy_url");
+        final int width = json.getInt("width");
+        final int height = json.getInt("height");
+        return new ReadonlyEmbed.EmbedImage(url, proxyUrl, width, height);
     }
 
-    public static String makeEmbedThumbnail(JSONObject json) {
+    public static ReadonlyEmbed.EmbedProvider makeEmbedProvider(JSONObject json) {
         if (json == null)
             return null;
-        return json.getString("url");
+        final String url = json.getString("url");
+        final String name = json.getString("name");
+        return new ReadonlyEmbed.EmbedProvider(name, url);
     }
 
-    public static WebhookEmbed makeEmbed(JSONObject json) { //TODO: ReadonlyEmbed
+    public static ReadonlyEmbed makeEmbed(JSONObject json) { //TODO: ReadonlyEmbed
         final String description = json.optString("description", null);
         final Integer color = json.isNull("color") ? null : json.getInt("color");
-        final String image = makeEmbedImage(json.optJSONObject("image"));
-        final String thumbnail = makeEmbedThumbnail(json.optJSONObject("thumbnail"));
+        final ReadonlyEmbed.EmbedImage image = makeEmbedImage(json.optJSONObject("image"));
+        final ReadonlyEmbed.EmbedImage thumbnail = makeEmbedImage(json.optJSONObject("thumbnail"));
+        final ReadonlyEmbed.EmbedProvider provider = makeEmbedProvider(json.optJSONObject("provider"));
         final WebhookEmbed.EmbedFooter footer = makeEmbedFooter(json.optJSONObject("footer"));
         final WebhookEmbed.EmbedAuthor author = makeEmbedAuthor(json.optJSONObject("author"));
         final WebhookEmbed.EmbedTitle title = makeEmbedTitle(json);
@@ -117,7 +124,7 @@ public class EntityFactory { //TODO: Write Tests, Documentation
                     fields.add(field);
             }
         }
-        return new WebhookEmbed(timestamp, color, description, thumbnail, image, footer, title, author, fields);
+        return new ReadonlyEmbed(timestamp, color, description, thumbnail, image, footer, title, author, fields, provider);
     }
 
     public static ReadonlyMessage makeMessage(JSONObject json) {
@@ -133,7 +140,7 @@ public class EntityFactory { //TODO: Write Tests, Documentation
         final JSONArray embedArray = json.getJSONArray("embeds");
         final JSONArray attachmentArray = json.getJSONArray("attachments");
         final List<ReadonlyUser> mentionedUsers = convertToList(usersArray, EntityFactory::makeUser);
-        final List<WebhookEmbed> embeds = convertToList(embedArray, EntityFactory::makeEmbed);
+        final List<ReadonlyEmbed> embeds = convertToList(embedArray, EntityFactory::makeEmbed);
         final List<ReadonlyAttachment> attachments = convertToList(attachmentArray, EntityFactory::makeAttachment);
         final List<Long> mentionedRoles = new ArrayList<>();
         for (int i = 0; i < rolesArray.length(); i++) {

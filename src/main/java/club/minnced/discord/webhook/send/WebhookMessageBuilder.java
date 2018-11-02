@@ -79,7 +79,7 @@ public class WebhookMessageBuilder {//TODO: Docs
     }
 
     @NotNull
-    public WebhookMessageBuilder addEmbeds(@NotNull Collection<WebhookEmbed> embeds) {
+    public WebhookMessageBuilder addEmbeds(@NotNull Collection<? extends WebhookEmbed> embeds) {
         Objects.requireNonNull(embeds, "Embeds");
         for (WebhookEmbed embed : embeds) {
             Objects.requireNonNull(embed, "Embed");

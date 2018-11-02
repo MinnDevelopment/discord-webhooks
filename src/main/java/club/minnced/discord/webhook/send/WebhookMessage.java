@@ -144,6 +144,8 @@ public class WebhookMessage { //TODO: Docs
             payload.put("avatar_url", avatarUrl);
         if (username != null)
             payload.put("username", username);
+        if (nonce != null)
+            payload.put("nonce", nonce);
         payload.put("tts", isTTS);
         if (isFile()) {
             final MultipartBody.Builder builder = new MultipartBody.Builder().setType(MultipartBody.FORM);
