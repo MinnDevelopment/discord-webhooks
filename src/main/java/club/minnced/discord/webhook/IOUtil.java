@@ -27,7 +27,9 @@ import org.json.JSONTokener;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 import java.util.zip.GZIPInputStream;
 
 /**
@@ -42,6 +44,8 @@ public class IOUtil { //TODO: test json
     public static final MediaType OCTET = MediaType.parse("application/octet-stream; charset=utf-8");
     /** Empty byte-array, used for {@link #readAllBytes(java.io.InputStream)} */
     public static final byte[] EMPTY_BYTES = new byte[0];
+
+    private static final CompletableFuture[] EMPTY_FUTURES = new CompletableFuture[0];
 
     /**
      * Reads all bytes from an {@link java.io.InputStream}
@@ -108,6 +112,36 @@ public class IOUtil { //TODO: test json
     @NotNull
     public static JSONObject toJSON(@NotNull InputStream input) {
         return new JSONObject(new JSONTokener(input));
+    }
+
+    /**
+     * Converts a list of futures in a future of a list.
+     *
+     * @param list
+     *         The list of futures to flatten
+     * @param <T>
+     *         Component type of the list
+     *
+     * @return A future that will be completed with the resulting list
+     */
+    @NotNull
+    public static <T> CompletableFuture<List<T>> flipFuture(@NotNull List<CompletableFuture<T>> list) {
+        List<T> result = new ArrayList<>(list.size());
+        List<CompletableFuture<Void>> updatedStages = new ArrayList<>(list.size());
+
+        list.stream()
+            .map(it -> it.thenAccept(result::add))
+            .forEach(updatedStages::add);
+
+        CompletableFuture<Void> tracker = CompletableFuture.allOf(updatedStages.toArray(EMPTY_FUTURES));
+        CompletableFuture<List<T>> future = new CompletableFuture<>();
+
+        tracker.thenRun(() -> future.complete(result)).exceptionally((e) -> {
+            future.completeExceptionally(e);
+            return null;
+        });
+
+        return future;
     }
 
     /**
