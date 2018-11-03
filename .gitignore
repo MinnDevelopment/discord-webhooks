@@ -3,3 +3,4 @@
 out/
 build/
 gradle.properties
+webhook_url.txt
