@@ -1,3 +1,10 @@
+[version]: https://api.bintray.com/packages/minndevelopment/maven/discord-webhooks/images/download.svg
+[download]: https://bintray.com/minndevelopment/maven/discord-webhooks/_latestVersion
+[license]: https://img.shields.io/badge/License-Apache%202.0-lightgrey.svg
+[license-file]: https://github.com/MinnDevelopment/discord-webhooks/blob/master/LICENSE
+
+[ ![version] ][download]
+[ ![license] ][license-file]
 
 # Discord-Webhooks
 

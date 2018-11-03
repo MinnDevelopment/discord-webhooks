@@ -51,9 +51,9 @@ public class WebhookClient implements AutoCloseable {
     /**
      * Format for webhook execution endpoint
      */
-    public static final String WEBHOOK_URL = "https://discordapp.com/api/v7/webhooks/%s/%s?wait=%s";
+    public static final String WEBHOOK_URL = "https://discordapp.com/api/v" + LibraryInfo.DISCORD_API_VERSION + "/webhooks/%s/%s?wait=%s";
     /** User-Agent used for REST requests */
-    public static final String USER_AGENT = "Webhook(https://github.com/MinnDevelopment/discord-webhooks | 0.1.1)";
+    public static final String USER_AGENT = "Webhook(https://github.com/MinnDevelopment/discord-webhooks | " + LibraryInfo.VERSION + ")";
     private static final Logger LOG = LoggerFactory.getLogger(WebhookClient.class);
 
     protected final String url;

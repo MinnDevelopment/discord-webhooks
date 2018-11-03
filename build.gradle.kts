@@ -1,6 +1,8 @@
 import com.jfrog.bintray.gradle.BintrayExtension
 import com.jfrog.bintray.gradle.tasks.BintrayUploadTask
 import org.apache.maven.model.Build
+import org.apache.tools.ant.filters.ReplaceTokens
+import org.gradle.api.internal.changedetection.state.FileTree
 import org.gradle.jvm.tasks.Jar
 
 /*
@@ -26,8 +28,19 @@ plugins {
     id("com.github.johnrengelman.shadow") version "2.0.4"
 }
 
+val major = "0"
+val minor = "1"
+val patch = "2"
+
 group = "club.minnced"
-version = "0.1.1"
+version = "$major.$minor.$patch"
+
+val tokens = mapOf(
+        "MAJOR" to major,
+        "MINOR" to minor,
+        "PATCH" to patch,
+        "VERSION" to version
+)
 
 repositories {
     jcenter()
@@ -89,14 +102,24 @@ fun getProjectProperty(name: String) = project.properties[name] as? String
 val javadoc: Javadoc by tasks
 val jar: Jar by tasks
 
-val sourcesJar = tasks.create("sourcesJar", Jar::class.java) {
+val sources = tasks.create("sources", Copy::class.java) {
     from("src/main/java")
-    classifier = "sources"
+    into("$buildDir/sources")
+    filter<ReplaceTokens>("tokens" to tokens)
 }
+
+javadoc.dependsOn(sources)
+javadoc.source = fileTree(sources.destinationDir)
 
 val javadocJar = tasks.create("javadocJar", Jar::class.java) {
     from(javadoc.destinationDir)
     classifier = "javadoc"
+}
+
+val sourcesJar = tasks.create("sourcesJar", Jar::class.java) {
+    dependsOn(sources)
+    from(sources.destinationDir)
+    classifier = "sources"
 }
 
 val publicationName = "BintrayRelease"
@@ -124,6 +147,8 @@ bintrayUpload.apply {
 
 val compileJava: JavaCompile by tasks
 compileJava.options.isIncremental = true
+compileJava.source = fileTree(sources.destinationDir)
+compileJava.dependsOn(sources)
 
 configure<JavaPluginConvention> {
     sourceCompatibility = JavaVersion.VERSION_1_8
