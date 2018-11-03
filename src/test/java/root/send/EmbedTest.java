@@ -24,6 +24,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
+import java.time.Instant;
 import java.time.OffsetDateTime;
 
 public class EmbedTest {
@@ -55,6 +56,7 @@ public class EmbedTest {
         builder.setThumbnailUrl(null);
         builder.setTitle(new WebhookEmbed.EmbedTitle("Title", null));
         builder.setTimestamp(OffsetDateTime.now());
+        builder.setTimestamp(Instant.now());
         builder.build();
     }
 

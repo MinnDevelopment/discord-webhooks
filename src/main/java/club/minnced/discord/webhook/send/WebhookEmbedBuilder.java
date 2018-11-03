@@ -19,7 +19,9 @@ package club.minnced.discord.webhook.send;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.time.Instant;
 import java.time.OffsetDateTime;
+import java.time.ZoneId;
 import java.time.temporal.TemporalAccessor;
 import java.util.ArrayList;
 import java.util.List;
@@ -100,7 +102,12 @@ public class WebhookEmbedBuilder {
      */
     @NotNull
     public WebhookEmbedBuilder setTimestamp(@Nullable TemporalAccessor timestamp) {
-        this.timestamp = timestamp == null ? null : OffsetDateTime.from(timestamp);
+        if (timestamp instanceof Instant) {
+            this.timestamp = OffsetDateTime.ofInstant((Instant) timestamp, ZoneId.of("UTC"));
+        }
+        else {
+            this.timestamp = timestamp == null ? null : OffsetDateTime.from(timestamp);
+        }
         return this;
     }
 
