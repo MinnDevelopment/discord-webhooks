@@ -29,8 +29,17 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.*;
 
-public class WebhookMessage { //TODO: Docs
+/**
+ * Send-only message for a {@link club.minnced.discord.webhook.WebhookClient}
+ * <br>A {@link club.minnced.discord.webhook.receive.ReadonlyMessage} can be sent
+ * by first converting it to a WebhookMessage with {@link #from(club.minnced.discord.webhook.receive.ReadonlyMessage)}.
+ */
+public class WebhookMessage {
+    /**
+     * Maximum amount of files a single message can hold (10)
+     */
     public static final int MAX_FILES = 10;
+    /** Maximum amount of embeds a single message can hold (10) */
     public static final int MAX_EMBEDS = 10;
 
     protected final String username, avatarUrl, content, nonce;
@@ -50,6 +59,19 @@ public class WebhookMessage { //TODO: Docs
         this.attachments = files;
     }
 
+    /**
+     * Converts a {@link club.minnced.discord.webhook.receive.ReadonlyMessage} to a
+     * WebhookMessage.
+     * <br>This does not convert attachments.
+     *
+     * @param  message
+     *         The message to convert
+     *
+     * @throws java.lang.NullPointerException
+     *         If provided with null
+     *
+     * @return A WebhookMessage copy
+     */
     @NotNull
     public static WebhookMessage from(@NotNull ReadonlyMessage message) {
         Objects.requireNonNull(message, "Message");
@@ -62,8 +84,23 @@ public class WebhookMessage { //TODO: Docs
         return builder.build();
     }
 
-    // forcing first embed as we expect at least one entry (Effective Java 3rd. Edition - Item 53)
-    @NotNull
+    /**
+     * Creates a WebhookMessage from
+     * the provided embeds. A message can hold up to {@value #MAX_EMBEDS} embeds.
+     *
+     * @param first
+     *         The first embed
+     * @param embeds
+     *         Optional additional embeds for the message
+     *
+     * @return A WebhookMessage for the embeds
+     *
+     * @throws java.lang.NullPointerException
+     *         If provided with null
+     * @throws java.lang.IllegalArgumentException
+     *         If more than {@value WebhookMessage#MAX_EMBEDS} are provided
+     */
+    @NotNull // forcing first embed as we expect at least one entry (Effective Java 3rd. Edition - Item 53)
     public static WebhookMessage embeds(@NotNull WebhookEmbed first, @NotNull WebhookEmbed... embeds) {
         Objects.requireNonNull(embeds, "Embeds");
         if (embeds.length >= WebhookMessage.MAX_EMBEDS)
@@ -77,15 +114,47 @@ public class WebhookMessage { //TODO: Docs
         return new WebhookMessage(null, null, null, null, list, false, null);
     }
 
+    /**
+     * Creates a WebhookMessage from
+     * the provided embeds. A message can hold up to {@value #MAX_EMBEDS} embeds.
+     *
+     * @param  embeds
+     *         Embeds for the message
+     *
+     * @throws java.lang.NullPointerException
+     *         If provided with null
+     * @throws java.lang.IllegalArgumentException
+     *         If more than {@value WebhookMessage#MAX_EMBEDS} are provided
+     *
+     * @return A WebhookMessage for the embeds
+     */
     @NotNull
     public static WebhookMessage embeds(@NotNull Collection<WebhookEmbed> embeds) {
         Objects.requireNonNull(embeds, "Embeds");
         if (embeds.size() > WebhookMessage.MAX_EMBEDS)
             throw new IllegalArgumentException("Cannot add more than 10 embeds to a message");
+        if (embeds.isEmpty())
+            throw new IllegalArgumentException("Cannot build an empty message");
         embeds.forEach(Objects::requireNonNull);
         return new WebhookMessage(null, null, null, null, new ArrayList<>(embeds), false, null);
     }
 
+    /**
+     * Creates a WebhookMessage from the provided attachments.
+     * <br>A message can hold up to {@value #MAX_FILES} attachments
+     * and a total of 8MiB of data.
+     *
+     * @param  attachments
+     *         The attachments to add, keys are the alternative names
+     *         for each attachment
+     *
+     * @throws java.lang.NullPointerException
+     *         If provided with null
+     * @throws java.lang.IllegalArgumentException
+     *         If no attachments are provided or more than {@value #MAX_FILES}
+     *
+     * @return A WebhookMessage for the attachments
+     */
     @NotNull
     public static WebhookMessage files(@NotNull Map<String, ?> attachments) {
         Objects.requireNonNull(attachments, "Attachments");
@@ -107,8 +176,31 @@ public class WebhookMessage { //TODO: Docs
         return new WebhookMessage(null, null, null, null, null, false, files);
     }
 
-    // forcing first pair as we expect at least one entry (Effective Java 3rd. Edition - Item 53)
-    @NotNull
+    /**
+     * Creates a WebhookMessage from the provided attachments.
+     * <br>A message can hold up to {@value #MAX_FILES} attachments
+     * and a total of 8MiB of data.
+     *
+     * <p>The files are provided in pairs of Name->Data similar
+     * to the first 2 arguments.
+     * <br>The allowed data types are {@code byte[] | InputStream | File}
+     *
+     * @param name1
+     *         The alternative name of the first attachment
+     * @param data1
+     *         The first attachment, must be of type {@code byte[] | InputStream | File}
+     * @param attachments
+     *         Optional additional attachments to add, pairs of String->Data
+     *
+     * @return A WebhookMessage for the attachments
+     *
+     * @throws java.lang.NullPointerException
+     *         If provided with null
+     * @throws java.lang.IllegalArgumentException
+     *         If no attachments are provided or more than {@value #MAX_FILES}
+     *         or the additional arguments are not an even count or an invalid format
+     */
+    @NotNull // forcing first pair as we expect at least one entry (Effective Java 3rd. Edition - Item 53)
     public static WebhookMessage files(@NotNull String name1, @NotNull Object data1, @NotNull Object... attachments) {
         Objects.requireNonNull(name1, "Name");
         Objects.requireNonNull(data1, "Data");
@@ -130,10 +222,21 @@ public class WebhookMessage { //TODO: Docs
         return new WebhookMessage(null, null, null, null, null, false, files);
     }
 
+    /**
+     * Whether this message contains files
+     *
+     * @return True, if this message contains files
+     */
     public boolean isFile() {
         return attachments != null;
     }
 
+    /**
+     * Provides a {@link okhttp3.RequestBody} of this message.
+     * <br>This is used internally for executing webhooks through HTTP requests.
+     *
+     * @return The request body
+     */
     @NotNull
     public RequestBody getBody() {
         final JSONObject payload = new JSONObject();
