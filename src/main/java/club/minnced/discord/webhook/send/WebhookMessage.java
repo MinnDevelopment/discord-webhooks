@@ -30,6 +30,8 @@ import java.io.InputStream;
 import java.util.*;
 
 public class WebhookMessage { //TODO: Docs
+    public static final int MAX_FILES = 10;
+    public static final int MAX_EMBEDS = 10;
 
     protected final String username, avatarUrl, content, nonce;
     protected final List<WebhookEmbed> embeds;
@@ -64,6 +66,8 @@ public class WebhookMessage { //TODO: Docs
     @NotNull
     public static WebhookMessage embeds(@NotNull WebhookEmbed first, @NotNull WebhookEmbed... embeds) {
         Objects.requireNonNull(embeds, "Embeds");
+        if (embeds.length >= WebhookMessage.MAX_EMBEDS)
+            throw new IllegalArgumentException("Cannot add more than 10 embeds to a message");
         for (WebhookEmbed e : embeds) {
             Objects.requireNonNull(e);
         }
@@ -76,6 +80,8 @@ public class WebhookMessage { //TODO: Docs
     @NotNull
     public static WebhookMessage embeds(@NotNull Collection<WebhookEmbed> embeds) {
         Objects.requireNonNull(embeds, "Embeds");
+        if (embeds.size() > WebhookMessage.MAX_EMBEDS)
+            throw new IllegalArgumentException("Cannot add more than 10 embeds to a message");
         embeds.forEach(Objects::requireNonNull);
         return new WebhookMessage(null, null, null, null, new ArrayList<>(embeds), false, null);
     }
@@ -87,8 +93,8 @@ public class WebhookMessage { //TODO: Docs
         int fileAmount = attachments.size();
         if (fileAmount == 0)
             throw new IllegalArgumentException("Cannot build an empty message");
-        if (fileAmount > WebhookMessageBuilder.MAX_FILES)
-            throw new IllegalArgumentException("Cannot add more than " + WebhookMessageBuilder.MAX_FILES + " files to a message");
+        if (fileAmount > WebhookMessage.MAX_FILES)
+            throw new IllegalArgumentException("Cannot add more than " + WebhookMessage.MAX_FILES + " files to a message");
         Set<? extends Map.Entry<String, ?>> entries = attachments.entrySet();
         MessageAttachment[] files = new MessageAttachment[fileAmount];
         int i = 0;
@@ -110,8 +116,8 @@ public class WebhookMessage { //TODO: Docs
         if (attachments.length % 2 != 0)
             throw new IllegalArgumentException("Must provide even number of varargs arguments");
         int fileAmount = 1 + attachments.length / 2;
-        if (fileAmount > WebhookMessageBuilder.MAX_FILES)
-            throw new IllegalArgumentException("Cannot add more than " + WebhookMessageBuilder.MAX_FILES + " files to a message");
+        if (fileAmount > WebhookMessage.MAX_FILES)
+            throw new IllegalArgumentException("Cannot add more than " + WebhookMessage.MAX_FILES + " files to a message");
         MessageAttachment[] files = new MessageAttachment[fileAmount];
         files[0] = convertAttachment(name1, data1);
         for (int i = 0, j = 1; i < attachments.length; j++, i += 2) {

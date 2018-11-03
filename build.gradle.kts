@@ -37,6 +37,9 @@ dependencies {
     testCompile("ch.qos.logback:logback-classic:1.2.3")
 }
 
+val compileJava: JavaCompile by tasks
+compileJava.options.isIncremental = true
+
 configure<JavaPluginConvention> {
     sourceCompatibility = JavaVersion.VERSION_1_8
 }

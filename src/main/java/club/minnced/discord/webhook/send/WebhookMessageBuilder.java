@@ -25,11 +25,9 @@ import java.io.InputStream;
 import java.util.*;
 
 public class WebhookMessageBuilder {//TODO: Docs
-    public static final int MAX_FILES = 10; //TODO: Use this more
-
     protected final StringBuilder content = new StringBuilder();
     protected final List<WebhookEmbed> embeds = new LinkedList<>();
-    protected final MessageAttachment[] files = new MessageAttachment[MAX_FILES];
+    protected final MessageAttachment[] files = new MessageAttachment[WebhookMessage.MAX_FILES];
     protected String username, avatarUrl, nonce;
     protected boolean isTTS;
     private int fileIndex = 0;
@@ -55,7 +53,7 @@ public class WebhookMessageBuilder {//TODO: Docs
 
     @NotNull
     public WebhookMessageBuilder resetFiles() {
-        for (int i = 0; i < MAX_FILES; i++) {
+        for (int i = 0; i < WebhookMessage.MAX_FILES; i++) {
             files[i] = null;
         }
         fileIndex = 0;
@@ -71,6 +69,8 @@ public class WebhookMessageBuilder {//TODO: Docs
     @NotNull
     public WebhookMessageBuilder addEmbeds(@NotNull WebhookEmbed... embeds) {
         Objects.requireNonNull(embeds, "Embeds");
+        if (this.embeds.size() + embeds.length > WebhookMessage.MAX_EMBEDS)
+            throw new IllegalStateException("Cannot add more than 10 embeds to a message");
         for (WebhookEmbed embed : embeds) {
             Objects.requireNonNull(embed, "Embed");
             this.embeds.add(embed);
@@ -81,6 +81,8 @@ public class WebhookMessageBuilder {//TODO: Docs
     @NotNull
     public WebhookMessageBuilder addEmbeds(@NotNull Collection<? extends WebhookEmbed> embeds) {
         Objects.requireNonNull(embeds, "Embeds");
+        if (this.embeds.size() + embeds.size() > WebhookMessage.MAX_EMBEDS)
+            throw new IllegalStateException("Cannot add more than 10 embeds to a message");
         for (WebhookEmbed embed : embeds) {
             Objects.requireNonNull(embed, "Embed");
             this.embeds.add(embed);
@@ -137,8 +139,8 @@ public class WebhookMessageBuilder {//TODO: Docs
         Objects.requireNonNull(file, "File");
         Objects.requireNonNull(name, "Name");
         if (!file.exists() || !file.canRead()) throw new IllegalArgumentException("File must exist and be readable");
-        if (fileIndex >= MAX_FILES)
-            throw new IllegalStateException("Cannot add more than " + MAX_FILES + " attachments to a message");
+        if (fileIndex >= WebhookMessage.MAX_FILES)
+            throw new IllegalStateException("Cannot add more than " + WebhookMessage.MAX_FILES + " attachments to a message");
 
         try {
             MessageAttachment attachment = new MessageAttachment(name, file);
@@ -154,8 +156,8 @@ public class WebhookMessageBuilder {//TODO: Docs
     public WebhookMessageBuilder addFile(@NotNull String name, @NotNull byte[] data) {
         Objects.requireNonNull(data, "Data");
         Objects.requireNonNull(name, "Name");
-        if (fileIndex >= MAX_FILES)
-            throw new IllegalStateException("Cannot add more than " + MAX_FILES + " attachments to a message");
+        if (fileIndex >= WebhookMessage.MAX_FILES)
+            throw new IllegalStateException("Cannot add more than " + WebhookMessage.MAX_FILES + " attachments to a message");
 
         MessageAttachment attachment = new MessageAttachment(name, data);
         files[fileIndex++] = attachment;
@@ -166,8 +168,8 @@ public class WebhookMessageBuilder {//TODO: Docs
     public WebhookMessageBuilder addFile(@NotNull String name, @NotNull InputStream data) {
         Objects.requireNonNull(data, "InputStream");
         Objects.requireNonNull(name, "Name");
-        if (fileIndex >= MAX_FILES)
-            throw new IllegalStateException("Cannot add more than " + MAX_FILES + " attachments to a message");
+        if (fileIndex >= WebhookMessage.MAX_FILES)
+            throw new IllegalStateException("Cannot add more than " + WebhookMessage.MAX_FILES + " attachments to a message");
 
         try {
             MessageAttachment attachment = new MessageAttachment(name, data);

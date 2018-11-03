@@ -23,6 +23,7 @@ import java.time.OffsetDateTime;
 import java.time.temporal.TemporalAccessor;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 public class WebhookEmbedBuilder { //TODO: Docs
     private final List<WebhookEmbed.EmbedField> fields;
@@ -105,8 +106,17 @@ public class WebhookEmbedBuilder { //TODO: Docs
         return this;
     }
 
+    @NotNull
+    public WebhookEmbedBuilder addField(@NotNull WebhookEmbed.EmbedField field) {
+        if (fields.size() == WebhookEmbed.MAX_FIELDS)
+            throw new IllegalStateException("Cannot add more than 25 fields");
+        fields.add(Objects.requireNonNull(field));
+        return this;
+    }
+
     public boolean isEmpty() {
-        return isEmpty(description)
+        return fields.isEmpty()
+               && isEmpty(description)
                && isEmpty(imageUrl)
                && isFieldsEmpty()
                && isAuthorEmpty()
