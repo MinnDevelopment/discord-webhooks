@@ -32,6 +32,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class MessageTest {
@@ -62,11 +63,20 @@ public class MessageTest {
 
     @Test
     public void buildMessageWithEmbed() {
-        builder.addEmbeds(
+        List<WebhookEmbed> embedList = Arrays.asList(
                 new WebhookEmbedBuilder()
                         .setDescription("Hello World")
+                        .build(),
+                new WebhookEmbedBuilder()
+                        .setDescription("World")
                         .build()
-        ).build().getBody();
+        );
+        builder.addEmbeds(embedList.get(0));
+        builder.addEmbeds(embedList.subList(1, 2));
+        WebhookMessage message = builder.build();
+        for (int i = 0; i < 2; i++) {
+            Assert.assertEquals(embedList.get(i), message.getEmbeds().get(i));
+        }
     }
 
     @Test
@@ -75,8 +85,11 @@ public class MessageTest {
         builder.addFile(tmp);
         builder.addFile("dog.png", new FileInputStream(tmp));
         builder.addFile("bird.png", IOUtil.readAllBytes(new FileInputStream(tmp)));
-        builder.build().getBody();
         tmp.delete();
+        WebhookMessage message = builder.build();
+        Assert.assertEquals(tmp.getName(), message.getAttachments()[0].getName());
+        Assert.assertEquals("dog.png", message.getAttachments()[1].getName());
+        Assert.assertEquals("bird.png", message.getAttachments()[2].getName());
     }
 
     @Test

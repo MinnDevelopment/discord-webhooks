@@ -24,7 +24,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.*;
 
-public class WebhookMessageBuilder {//TODO: Docs
+/**
+ * Constructs a {@link club.minnced.discord.webhook.send.WebhookMessage}
+ */
+public class WebhookMessageBuilder {
     protected final StringBuilder content = new StringBuilder();
     protected final List<WebhookEmbed> embeds = new LinkedList<>();
     protected final MessageAttachment[] files = new MessageAttachment[WebhookMessage.MAX_FILES];
@@ -32,18 +35,33 @@ public class WebhookMessageBuilder {//TODO: Docs
     protected boolean isTTS;
     private int fileIndex = 0;
 
+    /**
+     * Whether this builder is currently empty
+     *
+     * @return True, if this builder is empty
+     */
     public boolean isEmpty() {
-        return content.length() == 0 && embeds.isEmpty() && fileIndex == 0;
+        return content.length() == 0 && embeds.isEmpty() && getFileAmount() == 0;
     }
 
+    /**
+     * The amount of files currently added
+     *
+     * @return The amount of currently added files
+     */
     public int getFileAmount() {
         return fileIndex;
     }
 
+    /**
+     * Clears this builder to its default state
+     *
+     * @return This builder for chaining convenience
+     */
     @NotNull
     public WebhookMessageBuilder reset() {
         content.setLength(0);
-        embeds.clear();
+        resetEmbeds();
         resetFiles();
         username = null;
         avatarUrl = null;
@@ -51,6 +69,11 @@ public class WebhookMessageBuilder {//TODO: Docs
         return this;
     }
 
+    /**
+     * Clears all files currently added to this builder
+     *
+     * @return This builder for chaining convenience
+     */
     @NotNull
     public WebhookMessageBuilder resetFiles() {
         for (int i = 0; i < WebhookMessage.MAX_FILES; i++) {
@@ -60,12 +83,30 @@ public class WebhookMessageBuilder {//TODO: Docs
         return this;
     }
 
+    /**
+     * Clears all embeds currently added this builder
+     *
+     * @return This builder for chaining convenience
+     */
     @NotNull
     public WebhookMessageBuilder resetEmbeds() {
         this.embeds.clear();
         return this;
     }
 
+    /**
+     * Adds the provided embeds to the builder
+     *
+     * @param embeds
+     *         The embeds to add
+     *
+     * @return This builder for chaining convenience
+     *
+     * @throws java.lang.NullPointerException
+     *         If provided with null
+     * @throws java.lang.IllegalStateException
+     *         If more than {@value WebhookMessage#MAX_EMBEDS} are added
+     */
     @NotNull
     public WebhookMessageBuilder addEmbeds(@NotNull WebhookEmbed... embeds) {
         Objects.requireNonNull(embeds, "Embeds");
@@ -78,6 +119,19 @@ public class WebhookMessageBuilder {//TODO: Docs
         return this;
     }
 
+    /**
+     * Adds the provided embeds to the builder
+     *
+     * @param embeds
+     *         The embeds to add
+     *
+     * @return This builder for chaining convenience
+     *
+     * @throws java.lang.NullPointerException
+     *         If provided with null
+     * @throws java.lang.IllegalStateException
+     *         If more than {@value WebhookMessage#MAX_EMBEDS} are added
+     */
     @NotNull
     public WebhookMessageBuilder addEmbeds(@NotNull Collection<? extends WebhookEmbed> embeds) {
         Objects.requireNonNull(embeds, "Embeds");
@@ -90,6 +144,17 @@ public class WebhookMessageBuilder {//TODO: Docs
         return this;
     }
 
+    /**
+     * Configures the content for this builder
+     *
+     * @param content
+     *         The (nullable) content to use
+     *
+     * @return This builder for chaining convenience
+     *
+     * @throws java.lang.IllegalArgumentException
+     *         If the content is larger than 2000 characters
+     */
     @NotNull
     public WebhookMessageBuilder setContent(@Nullable String content) {
         if (content != null && content.length() > 2000)
@@ -101,12 +166,37 @@ public class WebhookMessageBuilder {//TODO: Docs
         return this;
     }
 
+    /**
+     * The nonce for the resulting message.
+     * <br>This is useful for bots trying to react to a message sent by
+     * the webhook. The nonce will be available on the message
+     * received over the gateway of the bot.
+     *
+     * @param nonce
+     *         The (nullable) nonce
+     *
+     * @return This builder for chaining convenience
+     */
     @NotNull
     public WebhookMessageBuilder setNonce(@Nullable String nonce) {
         this.nonce = nonce;
         return this;
     }
 
+    /**
+     * Appends the provided content to the already
+     * present content in this message.
+     *
+     * @param content
+     *         The content to append
+     *
+     * @return This builder for chaining convenience
+     *
+     * @throws java.lang.NullPointerException
+     *         If provided with null
+     * @throws java.lang.IllegalArgumentException
+     *         If the content exceeds 2000 characters
+     */
     @NotNull
     public WebhookMessageBuilder append(@NotNull String content) {
         Objects.requireNonNull(content, "Content");
@@ -116,24 +206,86 @@ public class WebhookMessageBuilder {//TODO: Docs
         return this;
     }
 
+    /**
+     * The username to use for this message.
+     * <br>Each message by a webhook can have a different user appearance.
+     * If this is not set it will default the user appearance in the settings of
+     * the webhook.
+     *
+     * @param  username
+     *         The (nullable) username to use
+     *
+     * @return This builder for chaining convenience
+     */
     @NotNull
     public WebhookMessageBuilder setUsername(@Nullable String username) {
         this.username = username == null || username.trim().isEmpty() ? null : username.trim();
         return this;
     }
 
+    /**
+     * The avatar url to use for this message.
+     * <br>Each message by a webhook can have a different user appearance.
+     * If this is not set it will default the user appearance in the settings of
+     * the webhook.
+     *
+     * @param  avatarUrl
+     *         The (nullable) avatar url to use
+     *
+     * @return This builder for chaining convenience
+     */
     @NotNull
     public WebhookMessageBuilder setAvatarUrl(@Nullable String avatarUrl) {
         this.avatarUrl = avatarUrl == null || avatarUrl.trim().isEmpty() ? null : avatarUrl.trim();
         return this;
     }
 
+    /**
+     * Whether this message should use Text-to-Speech (TTS)
+     *
+     * @param  tts
+     *         True, if this message should use tts
+     *
+     * @return This builder for chaining convenience
+     */
+    @NotNull
+    public WebhookMessageBuilder setTTS(boolean tts) {
+        isTTS = tts;
+        return this;
+    }
+
+    /**
+     * Adds the provided file as an attachment to this message.
+     * <br>A single message can have up to {@value WebhookMessage#MAX_FILES} attachments.
+     *
+     * @param file
+     *         The file to attach
+     *
+     * @return This builder for chaining convenience
+     *
+     * @throws java.lang.NullPointerException
+     *         If provided with null
+     */
     @NotNull
     public WebhookMessageBuilder addFile(@NotNull File file) {
         Objects.requireNonNull(file, "File");
         return addFile(file.getName(), file);
     }
 
+    /**
+     * Adds the provided file as an attachment to this message.
+     * <br>A single message can have up to {@value WebhookMessage#MAX_FILES} attachments.
+     *
+     * @param  name
+     *         The alternative name that should be used instead
+     * @param  file
+     *         The file to attach
+     *
+     * @throws java.lang.NullPointerException
+     *         If provided with null
+     *
+     * @return This builder for chaining convenience
+     */
     @NotNull
     public WebhookMessageBuilder addFile(@NotNull String name, @NotNull File file) {
         Objects.requireNonNull(file, "File");
@@ -152,6 +304,20 @@ public class WebhookMessageBuilder {//TODO: Docs
         }
     }
 
+    /**
+     * Adds the provided data as a file attachment to this message.
+     * <br>A single message can have up to {@value WebhookMessage#MAX_FILES} attachments.
+     *
+     * @param  name
+     *         The alternative name that should be used
+     * @param  data
+     *         The data to attach as a file
+     *
+     * @throws java.lang.NullPointerException
+     *         If provided with null
+     *
+     * @return This builder for chaining convenience
+     */
     @NotNull
     public WebhookMessageBuilder addFile(@NotNull String name, @NotNull byte[] data) {
         Objects.requireNonNull(data, "Data");
@@ -164,6 +330,20 @@ public class WebhookMessageBuilder {//TODO: Docs
         return this;
     }
 
+    /**
+     * Adds the provided data as a file attachment to this message.
+     * <br>A single message can have up to {@value WebhookMessage#MAX_FILES} attachments.
+     *
+     * @param  name
+     *         The alternative name that should be used
+     * @param  data
+     *         The data to attach as a file
+     *
+     * @throws java.lang.NullPointerException
+     *         If provided with null
+     *
+     * @return This builder for chaining convenience
+     */
     @NotNull
     public WebhookMessageBuilder addFile(@NotNull String name, @NotNull InputStream data) {
         Objects.requireNonNull(data, "InputStream");
@@ -181,12 +361,12 @@ public class WebhookMessageBuilder {//TODO: Docs
         }
     }
 
-    @NotNull
-    public WebhookMessageBuilder setTTS(boolean tts) {
-        isTTS = tts;
-        return this;
-    }
-
+    /**
+     * Constructs the {@link club.minnced.discord.webhook.send.WebhookMessage}
+     * from the current configurations.
+     *
+     * @return The resulting {@link club.minnced.discord.webhook.send.WebhookMessage}
+     */
     @NotNull
     public WebhookMessage build() {
         if (isEmpty())

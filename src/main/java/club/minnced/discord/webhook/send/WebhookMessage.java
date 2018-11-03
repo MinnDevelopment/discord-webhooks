@@ -21,6 +21,7 @@ import club.minnced.discord.webhook.receive.ReadonlyMessage;
 import okhttp3.MultipartBody;
 import okhttp3.RequestBody;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -57,6 +58,75 @@ public class WebhookMessage {
         this.embeds = embeds;
         this.isTTS = isTTS;
         this.attachments = files;
+    }
+
+    /**
+     * The username for this message
+     *
+     * @return Possibly-null username
+     */
+    @Nullable
+    public String getUsername() {
+        return username;
+    }
+
+    /**
+     * The avatar url for this message
+     *
+     * @return Possibly-null avatar url
+     */
+    @Nullable
+    public String getAvatarUrl() {
+        return avatarUrl;
+    }
+
+    /**
+     * The content for this message
+     *
+     * @return Possibly-null content
+     */
+    @Nullable
+    public String getContent() {
+        return content;
+    }
+
+    /**
+     * The nonce for this message
+     *
+     * @return Possibly-null nonce
+     */
+    @Nullable
+    public String getNonce() {
+        return nonce;
+    }
+
+    /**
+     * The embeds for this message
+     *
+     * @return The embeds
+     */
+    @NotNull
+    public List<WebhookEmbed> getEmbeds() {
+        return embeds == null ? Collections.emptyList() : embeds;
+    }
+
+    /**
+     * The attachments for this message
+     *
+     * @return The attachments
+     */
+    @Nullable
+    public MessageAttachment[] getAttachments() {
+        return attachments;
+    }
+
+    /**
+     * Whether this message should use Text-to-Speech (TTS)
+     *
+     * @return True, if this message will use tts
+     */
+    public boolean isTTS() {
+        return isTTS;
     }
 
     /**
