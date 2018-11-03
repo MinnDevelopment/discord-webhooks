@@ -23,7 +23,9 @@ import club.minnced.discord.webhook.send.WebhookMessage;
 import club.minnced.discord.webhook.send.WebhookMessageBuilder;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -33,6 +35,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class MessageTest {
+    @Rule
+    public ExpectedException expectedException = ExpectedException.none();
     private WebhookMessageBuilder builder;
 
     @Before
@@ -98,5 +102,11 @@ public class MessageTest {
         files.put("bird.png", IOUtil.readAllBytes(new FileInputStream(tmp)));
         WebhookMessage.files(files).getBody();
         tmp.delete();
+    }
+
+    @Test
+    public void buildEmptyMessage() {
+        expectedException.expect(IllegalStateException.class);
+        builder.build();
     }
 }
