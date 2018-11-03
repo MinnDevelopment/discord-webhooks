@@ -21,6 +21,7 @@ import club.minnced.discord.webhook.send.WebhookEmbed;
 import club.minnced.discord.webhook.send.WebhookEmbedBuilder;
 import club.minnced.discord.webhook.send.WebhookMessage;
 import club.minnced.discord.webhook.send.WebhookMessageBuilder;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -37,6 +38,15 @@ public class MessageTest {
     @Before
     public void setupBuilder() {
         builder = new WebhookMessageBuilder();
+    }
+
+    @Test
+    public void resetBuilder() {
+        builder.setContent("test")
+               .setUsername("hello")
+               .setTTS(true);
+        builder.reset();
+        Assert.assertTrue(builder.isEmpty());
     }
 
     @Test

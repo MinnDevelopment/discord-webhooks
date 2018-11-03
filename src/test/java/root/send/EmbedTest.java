@@ -18,6 +18,7 @@ package root.send;
 
 import club.minnced.discord.webhook.send.WebhookEmbed;
 import club.minnced.discord.webhook.send.WebhookEmbedBuilder;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -33,6 +34,15 @@ public class EmbedTest {
     @Before
     public void setup() {
         builder = new WebhookEmbedBuilder();
+    }
+
+    @Test
+    public void resetBuilder() {
+        builder.setAuthor(new WebhookEmbed.EmbedAuthor("minn", null, null))
+               .setDescription("Hello World!")
+               .addField(new WebhookEmbed.EmbedField(false, "name", "value"));
+        builder.reset();
+        Assert.assertTrue(builder.isEmpty());
     }
 
     @Test

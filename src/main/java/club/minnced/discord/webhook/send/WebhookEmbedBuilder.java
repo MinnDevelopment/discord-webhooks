@@ -72,6 +72,21 @@ public class WebhookEmbedBuilder {
     }
 
     /**
+     * Resets the builder to its default state
+     */
+    public void reset() {
+        fields.clear();
+        timestamp = null;
+        color = null;
+        description = null;
+        thumbnailUrl = null;
+        imageUrl = null;
+        footer = null;
+        title = null;
+        author = null;
+    }
+
+    /**
      * The timestamp for the resulting embed.
      * <br>Usually used in combination with {@link java.time.OffsetDateTime}.
      *
