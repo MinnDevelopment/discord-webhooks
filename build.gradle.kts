@@ -1,4 +1,5 @@
 import com.jfrog.bintray.gradle.BintrayExtension
+import com.jfrog.bintray.gradle.tasks.BintrayPublishTask
 import com.jfrog.bintray.gradle.tasks.BintrayUploadTask
 import org.apache.maven.model.Build
 import org.apache.tools.ant.filters.ReplaceTokens
@@ -144,6 +145,9 @@ bintrayUpload.apply {
     onlyIf { getProjectProperty("bintrayUsername") != null }
     onlyIf { getProjectProperty("bintrayApiKey") != null }
 }
+
+val bintrayPublish: BintrayPublishTask by tasks
+bintrayPublish.dependsOn(bintrayUpload)
 
 val compileJava: JavaCompile by tasks
 compileJava.options.isIncremental = true
