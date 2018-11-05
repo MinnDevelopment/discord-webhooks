@@ -43,18 +43,17 @@ public class WebhookMessage {
     /** Maximum amount of embeds a single message can hold (10) */
     public static final int MAX_EMBEDS = 10;
 
-    protected final String username, avatarUrl, content, nonce;
+    protected final String username, avatarUrl, content;
     protected final List<WebhookEmbed> embeds;
     protected final boolean isTTS;
     protected final MessageAttachment[] attachments;
 
-    protected WebhookMessage(final String username, final String avatarUrl, final String content, final String nonce,
+    protected WebhookMessage(final String username, final String avatarUrl, final String content,
                              final List<WebhookEmbed> embeds, final boolean isTTS,
                              final MessageAttachment[] files) {
         this.username = username;
         this.avatarUrl = avatarUrl;
         this.content = content;
-        this.nonce = nonce;
         this.embeds = embeds;
         this.isTTS = isTTS;
         this.attachments = files;
@@ -88,16 +87,6 @@ public class WebhookMessage {
     @Nullable
     public String getContent() {
         return content;
-    }
-
-    /**
-     * The nonce for this message
-     *
-     * @return Possibly-null nonce
-     */
-    @Nullable
-    public String getNonce() {
-        return nonce;
     }
 
     /**
@@ -181,7 +170,7 @@ public class WebhookMessage {
         List<WebhookEmbed> list = new ArrayList<>(1 + embeds.length);
         list.add(first);
         Collections.addAll(list, embeds);
-        return new WebhookMessage(null, null, null, null, list, false, null);
+        return new WebhookMessage(null, null, null, list, false, null);
     }
 
     /**
@@ -206,7 +195,7 @@ public class WebhookMessage {
         if (embeds.isEmpty())
             throw new IllegalArgumentException("Cannot build an empty message");
         embeds.forEach(Objects::requireNonNull);
-        return new WebhookMessage(null, null, null, null, new ArrayList<>(embeds), false, null);
+        return new WebhookMessage(null, null, null, new ArrayList<>(embeds), false, null);
     }
 
     /**
@@ -243,7 +232,7 @@ public class WebhookMessage {
             Object data = attachment.getValue();
             files[i++] = convertAttachment(name, data);
         }
-        return new WebhookMessage(null, null, null, null, null, false, files);
+        return new WebhookMessage(null, null, null, null, false, files);
     }
 
     /**
@@ -289,7 +278,7 @@ public class WebhookMessage {
                 throw new IllegalArgumentException("Provided arguments must be pairs for (String, Data). Expected String and found " + (name == null ? null : name.getClass().getName()));
             files[j] = convertAttachment((String) name, data);
         }
-        return new WebhookMessage(null, null, null, null, null, false, files);
+        return new WebhookMessage(null, null, null, null, false, files);
     }
 
     /**
@@ -323,8 +312,6 @@ public class WebhookMessage {
             payload.put("avatar_url", avatarUrl);
         if (username != null)
             payload.put("username", username);
-        if (nonce != null)
-            payload.put("nonce", nonce);
         payload.put("tts", isTTS);
         if (isFile()) {
             final MultipartBody.Builder builder = new MultipartBody.Builder().setType(MultipartBody.FORM);

@@ -23,7 +23,6 @@ import club.minnced.discord.webhook.send.WebhookMessage;
 import club.minnced.discord.webhook.send.WebhookMessageBuilder;
 import okhttp3.RequestBody;
 import okio.Buffer;
-import okio.BufferedSink;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.junit.Assert;
@@ -34,9 +33,6 @@ import org.junit.rules.ExpectedException;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
-import java.time.Instant;
-import java.time.format.DateTimeFormatter;
-import java.time.temporal.ChronoUnit;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -78,14 +74,12 @@ public class MessageTest {
         //checking remaining setters + reset on those
         builder.setUsername("NotAWebhook");
         builder.setAvatarUrl("avatarUrl");
-        builder.setNonce("mySuperSecretNonce");
         builder.setTTS(true);
         Assert.assertTrue("Some extra field set isEmpty to false", builder.isEmpty());
         builder.setContent("dummy"); //needed for building
         WebhookMessage msg = builder.build();
         Assert.assertEquals("Username mismatches", "NotAWebhook", msg.getUsername());
         Assert.assertEquals("AvatarUrl mismatches", "avatarUrl", msg.getAvatarUrl());
-        Assert.assertEquals("Nonce mismatches", "mySuperSecretNonce", msg.getNonce());
         Assert.assertTrue("TTS mismatches", msg.isTTS());
 
         builder.reset();
@@ -93,7 +87,6 @@ public class MessageTest {
         msg = builder.build();
         Assert.assertNull("Username not reset by reset()", msg.getUsername());
         Assert.assertNull("AvatarUrl not reset by reset()", msg.getAvatarUrl());
-        Assert.assertNull("Nonce not reset by reset()", msg.getNonce());
         Assert.assertFalse("TTS not reset by reset()", msg.isTTS());
     }
 
@@ -176,7 +169,6 @@ public class MessageTest {
                 .put("avatar_url", "linkToImage")
                 .put("tts", true)
                 .put("embeds", new JSONArray().put(new JSONObject().put("description", "embed")))
-                .put("nonce", "whoCares")   //todo: is nonce even supported?
                 .toMap();
 
         WebhookMessage msg = builder
@@ -184,7 +176,6 @@ public class MessageTest {
                 .setUsername("MrWebhook")
                 .setAvatarUrl("linkToImage")
                 .setTTS(true)
-                .setNonce("whoCares")
                 .addEmbeds(new WebhookEmbedBuilder().setDescription("embed").build())
                 .build();
         Assert.assertFalse("Message should not be of type file", msg.isFile());

@@ -65,7 +65,6 @@ public class IOMock {
                 .setUsername("MrWebhook")
                 .setAvatarUrl("linkToImage")
                 .setTTS(true)
-                .setNonce("whoCares")
                 .addEmbeds(new WebhookEmbedBuilder().setDescription("embed").build())
                 .build().getBody();
 
