@@ -54,6 +54,7 @@ dependencies {
     implementation("org.jetbrains:annotations:16.0.1")
 
     testCompile("junit:junit:4.12")
+    testCompile("org.mockito:mockito-core:2.+")
     testCompile("ch.qos.logback:logback-classic:1.2.3")
 }
 

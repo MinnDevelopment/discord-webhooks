@@ -245,10 +245,12 @@ public class WebhookEmbedBuilder {
     public boolean isEmpty() {
         return isEmpty(description)
                && isEmpty(imageUrl)
+               && isEmpty(thumbnailUrl)
                && isFieldsEmpty()
                && isAuthorEmpty()
                && isTitleEmpty()
-               && isFooterEmpty();
+               && isFooterEmpty()
+               && timestamp == null;
     }
 
     private boolean isEmpty(String s) {

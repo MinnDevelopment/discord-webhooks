@@ -65,6 +65,7 @@ public class WebhookMessageBuilder {
         resetFiles();
         username = null;
         avatarUrl = null;
+        nonce = null;
         isTTS = false;
         return this;
     }
