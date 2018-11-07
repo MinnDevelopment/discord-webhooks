@@ -157,6 +157,7 @@ compileJava.dependsOn(sources)
 
 configure<JavaPluginConvention> {
     sourceCompatibility = JavaVersion.VERSION_1_8
+    targetCompatibility = JavaVersion.VERSION_1_8
 }
 
 val test: Task by tasks
