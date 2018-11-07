@@ -171,7 +171,24 @@ public class EmbedTest {
         provided.remove("timestamp");
         Assert.assertEquals("Json output is incorrect", expected, provided);
 
-        //todo: check for individual field/value absence?
+        //check if optional fields are (properly) omitted
+        builder.reset();
+        builder.setDescription("desc");
+        expected = new JSONObject().put("description", "desc").toMap();
+        provided = new JSONObject(builder.build().toJSONString()).toMap();
+        Assert.assertEquals("Json output is adding extra (non-set) fields", expected, provided);
+
+        builder.reset();
+        builder.setTitle(new WebhookEmbed.EmbedTitle("title", null));
+        builder.setAuthor(new WebhookEmbed.EmbedAuthor("author", null, null));
+        builder.setFooter(new WebhookEmbed.EmbedFooter("footer", null));
+        expected = new JSONObject()
+                .put("title", "title")
+                .put("author", new JSONObject().put("name", "author"))
+                .put("footer", new JSONObject().put("text", "footer"))
+                .toMap();
+        provided = new JSONObject(builder.build().toJSONString()).toMap();
+        Assert.assertEquals("Json output is adding extra (non-set) fields", expected, provided);
     }
 
     private void populateBuilder() {
