@@ -107,23 +107,23 @@ public class EmbedTest {
 
         try {
             new WebhookEmbed.EmbedAuthor(null, null, null);
-        } catch(IllegalArgumentException ex) { numFailed.incrementAndGet(); }
+        } catch(NullPointerException ex) { numFailed.incrementAndGet(); }
 
         try {
             new WebhookEmbed.EmbedTitle(null, null);
-        } catch(IllegalArgumentException ex) { numFailed.incrementAndGet(); }
+        } catch(NullPointerException ex) { numFailed.incrementAndGet(); }
 
         try {
             new WebhookEmbed.EmbedFooter(null, null);
-        } catch(IllegalArgumentException ex) { numFailed.incrementAndGet(); }
+        } catch(NullPointerException ex) { numFailed.incrementAndGet(); }
 
         try {
             new WebhookEmbed.EmbedField(true, "key", null);
-        } catch(IllegalArgumentException ex) { numFailed.incrementAndGet(); }
+        } catch(NullPointerException ex) { numFailed.incrementAndGet(); }
 
         try {
             new WebhookEmbed.EmbedField(true, null, "val");
-        } catch(IllegalArgumentException ex) { numFailed.incrementAndGet(); }
+        } catch(NullPointerException ex) { numFailed.incrementAndGet(); }
 
         Assert.assertEquals("Not all constructors with non-null field annotation threw errors", 5, numFailed.get());
     }
