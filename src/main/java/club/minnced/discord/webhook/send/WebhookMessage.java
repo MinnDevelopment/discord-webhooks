@@ -240,7 +240,7 @@ public class WebhookMessage {
      * <br>A message can hold up to {@value #MAX_FILES} attachments
      * and a total of 8MiB of data.
      *
-     * <p>The files are provided in pairs of Name->Data similar
+     * <p>The files are provided in pairs of {@literal Name->Data} similar
      * to the first 2 arguments.
      * <br>The allowed data types are {@code byte[] | InputStream | File}
      *
@@ -249,7 +249,7 @@ public class WebhookMessage {
      * @param data1
      *         The first attachment, must be of type {@code byte[] | InputStream | File}
      * @param attachments
-     *         Optional additional attachments to add, pairs of String->Data
+     *         Optional additional attachments to add, pairs of {@literal String->Data}
      *
      * @return A WebhookMessage for the attachments
      *

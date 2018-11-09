@@ -112,8 +112,10 @@ val sources = tasks.create("sources", Copy::class.java) {
 
 javadoc.dependsOn(sources)
 javadoc.source = fileTree(sources.destinationDir)
+(javadoc.options as CoreJavadocOptions).addBooleanOption("html5", true)
 
 val javadocJar = tasks.create("javadocJar", Jar::class.java) {
+    dependsOn(javadoc)
     from(javadoc.destinationDir)
     classifier = "javadoc"
 }
