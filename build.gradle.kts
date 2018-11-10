@@ -1,10 +1,8 @@
-import com.jfrog.bintray.gradle.BintrayExtension
-import com.jfrog.bintray.gradle.tasks.BintrayPublishTask
-import com.jfrog.bintray.gradle.tasks.BintrayUploadTask
-import org.apache.maven.model.Build
-import org.apache.tools.ant.filters.ReplaceTokens
-import org.gradle.api.internal.changedetection.state.FileTree
-import org.gradle.jvm.tasks.Jar
+import com.jfrog.bintray.gradle.*
+import com.jfrog.bintray.gradle.tasks.*
+import org.apache.maven.model.*
+import org.apache.tools.ant.filters.*
+import org.gradle.jvm.tasks.*
 
 /*
  * Copyright 2018-2019 Florian Spieß
@@ -58,25 +56,6 @@ dependencies {
     testCompile("ch.qos.logback:logback-classic:1.2.3")
 }
 
-bintray {
-    user = getProjectProperty("bintrayUsername")
-    key = getProjectProperty("bintrayApiKey")
-    setPublications("BintrayRelease")
-
-    pkg(delegateClosureOf<BintrayExtension.PackageConfig> {
-        repo = "maven"
-        name = project.name
-        vcsUrl = "https://github.com/MinnDevelopment/discord-webhooks.git"
-        githubRepo = "MinnDevelopment/discord-webhooks"
-        setLicenses("Apache-2.0")
-        version(delegateClosureOf<BintrayExtension.VersionConfig> {
-            name = project.version as String
-            vcsTag = project.version as String
-            gpg.sign = true
-        })
-    })
-}
-
 fun org.gradle.api.publish.maven.MavenPom.addDependencies() = withXml {
     asNode().appendNode("dependencies").let { depNode ->
         configurations.api.dependencies.forEach {
@@ -112,7 +91,8 @@ val sources = tasks.create("sources", Copy::class.java) {
 
 javadoc.dependsOn(sources)
 javadoc.source = fileTree(sources.destinationDir)
-(javadoc.options as CoreJavadocOptions).addBooleanOption("html5", true)
+if (!System.getProperty("java.version").startsWith("1.8"))
+    (javadoc.options as CoreJavadocOptions).addBooleanOption("html5", true)
 
 val javadocJar = tasks.create("javadocJar", Jar::class.java) {
     dependsOn(javadoc)
@@ -126,18 +106,17 @@ val sourcesJar = tasks.create("sourcesJar", Jar::class.java) {
     classifier = "sources"
 }
 
-val publicationName = "BintrayRelease"
 publishing {
-    publications.invoke {
-        publicationName(MavenPublication::class) {
+    publications {
+        register("BintrayRelease", MavenPublication::class) {
+            from(components["java"])
+
             artifactId = project.name
             groupId = project.group as String
             version = project.version as String
 
-            artifact(jar)
             artifact(sourcesJar)
             artifact(javadocJar)
-            pom.addDependencies()
         }
     }
 }
@@ -170,3 +149,23 @@ build.apply {
     dependsOn(jar)
     dependsOn(test)
 }
+
+bintray {
+    user = getProjectProperty("bintrayUsername")
+    key = getProjectProperty("bintrayApiKey")
+    setPublications("BintrayRelease")
+
+    pkg(delegateClosureOf<BintrayExtension.PackageConfig> {
+        repo = "maven"
+        name = project.name
+        vcsUrl = "https://github.com/MinnDevelopment/discord-webhooks.git"
+        githubRepo = "MinnDevelopment/discord-webhooks"
+        setLicenses("Apache-2.0")
+        version(delegateClosureOf<BintrayExtension.VersionConfig> {
+            name = project.version as String
+            vcsTag = project.version as String
+            gpg.sign = true
+        })
+    })
+}
+
