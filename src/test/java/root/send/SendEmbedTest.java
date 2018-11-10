@@ -33,7 +33,7 @@ import java.time.temporal.ChronoUnit;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
-public class EmbedTest {
+public class SendEmbedTest {
     @Rule
     public ExpectedException expectedException = ExpectedException.none();
     private WebhookEmbedBuilder builder;
