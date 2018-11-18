@@ -29,6 +29,7 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
+import root.IOTestUtil;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -183,7 +184,7 @@ public class MessageTest {
         RequestBody body = msg.getBody();
         Assert.assertEquals("Request type mismatch", IOUtil.JSON, body.contentType());
 
-        String bodyContent = root.IOUtil.readRequestBody(body);
+        String bodyContent = IOTestUtil.readRequestBody(body);
 
         Map<String, Object> provided = new JSONObject(bodyContent).toMap();
 
@@ -200,7 +201,7 @@ public class MessageTest {
                 .setContent("...")
                 .build();
 
-        bodyContent = root.IOUtil.readRequestBody(msg.getBody());
+        bodyContent = IOTestUtil.readRequestBody(msg.getBody());
         provided = new JSONObject(bodyContent).toMap();
 
         Assert.assertEquals("Json output has additional fields", expected, provided);
@@ -216,9 +217,9 @@ public class MessageTest {
         Assert.assertTrue("Message should be of type file", msg.isFile());
 
         RequestBody body = msg.getBody();
-        Assert.assertTrue("Request type mismatch", root.IOUtil.isMultiPart(body));
+        Assert.assertTrue("Request type mismatch", IOTestUtil.isMultiPart(body));
 
-        Map<String, Object> multiPart = root.IOUtil.parseMultipart(body);
+        Map<String, Object> multiPart = IOTestUtil.parseMultipart(body);
 
         Assert.assertTrue("Multipart doesn't contain payload json", multiPart.containsKey("payload_json"));
         Assert.assertTrue("Multipart json is not of correct type", multiPart.get("payload_json") instanceof String);
@@ -228,10 +229,10 @@ public class MessageTest {
         );
 
         Assert.assertTrue("Multipart doesn't contain file", multiPart.containsKey("file0"));
-        Assert.assertTrue("Multipart file is not of correct type", multiPart.get("file0") instanceof root.IOUtil.MultiPartFile);
+        Assert.assertTrue("Multipart file is not of correct type", multiPart.get("file0") instanceof IOTestUtil.MultiPartFile);
         Assert.assertEquals("Multipart file mismatches",
                 fileContent,
-                new String(((root.IOUtil.MultiPartFile) multiPart.get("file0")).content, StandardCharsets.UTF_8)
+                new String(((IOTestUtil.MultiPartFile) multiPart.get("file0")).content, StandardCharsets.UTF_8)
         );
     }
 

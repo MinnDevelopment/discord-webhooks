@@ -16,8 +16,7 @@
 
 package root;
 
-import okhttp3.MediaType;
-import okhttp3.RequestBody;
+import okhttp3.*;
 import okio.Buffer;
 
 import java.io.ByteArrayOutputStream;
@@ -28,8 +27,9 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.zip.GZIPOutputStream;
 
-public class IOUtil {
+public class IOTestUtil {
 
     public static boolean isMultiPart(RequestBody body) {
         return getBoundary(body) != null;
@@ -109,6 +109,10 @@ public class IOUtil {
         return parts;
     }
 
+    public static Call forgeCall(String json, boolean useGzip) {
+        return new FakeCall(json, useGzip);
+    }
+
     private static Pattern MULTIPART_TYPE_PATTERN = Pattern.compile("^multipart/form-data; boundary=(.+)$");
 
     private static String getBoundary(RequestBody body) {
@@ -128,6 +132,67 @@ public class IOUtil {
         private MultiPartFile(String filename, byte[] content) {
             this.filename = filename;
             this.content = content;
+        }
+    }
+
+    private static class FakeCall implements Call {
+        private final String jsonResponse;
+        private final boolean isGzip;
+
+        public FakeCall(String jsonResponse, boolean isGzip) {
+            this.jsonResponse = jsonResponse;
+            this.isGzip = isGzip;
+        }
+
+        @Override
+        public Request request() {
+            return null;
+        }
+
+        @Override
+        public Response execute() throws IOException {
+            Response.Builder builder = new Response.Builder()
+                    .request(new Request.Builder().url("dummy").build())
+                    .code(200)
+                    .message("OK");
+
+            if(isGzip) {
+                builder.header("content-encoding", "gzip");
+                ByteArrayOutputStream bout = new ByteArrayOutputStream();
+                GZIPOutputStream gzipout = new GZIPOutputStream(bout);
+                gzipout.write(jsonResponse.getBytes(StandardCharsets.UTF_8));
+                gzipout.close();
+                builder.body(ResponseBody.create(club.minnced.discord.webhook.IOUtil.JSON, bout.toByteArray()));
+            } else {
+                builder.body(ResponseBody.create(club.minnced.discord.webhook.IOUtil.JSON, jsonResponse));
+            }
+
+            return builder.build();
+        }
+
+        @Override
+        public void enqueue(Callback responseCallback) {
+
+        }
+
+        @Override
+        public void cancel() {
+
+        }
+
+        @Override
+        public boolean isExecuted() {
+            return false;
+        }
+
+        @Override
+        public boolean isCanceled() {
+            return false;
+        }
+
+        @Override
+        public Call clone() {
+            return null;
         }
     }
 }
