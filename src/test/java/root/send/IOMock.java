@@ -22,6 +22,7 @@ import club.minnced.discord.webhook.send.WebhookEmbedBuilder;
 import club.minnced.discord.webhook.send.WebhookMessage;
 import club.minnced.discord.webhook.send.WebhookMessageBuilder;
 import okhttp3.*;
+import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -35,20 +36,27 @@ import static org.mockito.Mockito.*;
 public class IOMock {
 
     @Captor
-    ArgumentCaptor<Request> requestCaptor;
+    private ArgumentCaptor<Request> requestCaptor;
 
     @Mock
-    OkHttpClient httpClient;
+    private OkHttpClient httpClient;
+
+    private WebhookClient client;
 
     @Before
     public void init() {
         MockitoAnnotations.initMocks(this);
+        when(httpClient.newCall(any())).thenReturn(null);   //will make WebhookClient code throw NPE internally, which we don't care about
+        client = new WebhookClientBuilder(1234, "token").setWait(false).setHttpClient(httpClient).build();
+    }
+
+    @After
+    public void cleanup() {
+        client.close();
     }
 
     @Test
     public void testUrl() {
-        WebhookClient client = prepare();
-
         client.send("Hello World");
 
         verify(httpClient, timeout(1000).only()).newCall(requestCaptor.capture());
@@ -71,17 +79,10 @@ public class IOMock {
         WebhookMessage mock = mock(WebhookMessage.class);
         when(mock.getBody()).thenReturn(body);
 
-        WebhookClient client = prepare();
         client.send(mock);
 
         verify(httpClient, timeout(1000).only()).newCall(requestCaptor.capture());
         Request req = requestCaptor.getValue();
         Assert.assertSame(body, req.body());
-    }
-
-    private WebhookClient prepare() {
-        when(httpClient.newCall(any())).thenReturn(null);   //will make WebhookClient code throw NPE internally, which we don't care about
-
-        return new WebhookClientBuilder(1234, "token").setWait(false).setHttpClient(httpClient).build();
     }
 }

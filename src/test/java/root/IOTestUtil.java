@@ -109,8 +109,8 @@ public class IOTestUtil {
         return parts;
     }
 
-    public static Call forgeCall(String json, boolean useGzip) {
-        return new FakeCall(json, useGzip);
+    public static Call forgeCall(Request req, String json, boolean useGzip) {
+        return new FakeCall(req, json, useGzip);
     }
 
     private static Pattern MULTIPART_TYPE_PATTERN = Pattern.compile("^multipart/form-data; boundary=(.+)$");
@@ -136,10 +136,12 @@ public class IOTestUtil {
     }
 
     private static class FakeCall implements Call {
+        private final Request req;
         private final String jsonResponse;
         private final boolean isGzip;
 
-        public FakeCall(String jsonResponse, boolean isGzip) {
+        public FakeCall(Request req, String jsonResponse, boolean isGzip) {
+            this.req = req;
             this.jsonResponse = jsonResponse;
             this.isGzip = isGzip;
         }
@@ -152,9 +154,12 @@ public class IOTestUtil {
         @Override
         public Response execute() throws IOException {
             Response.Builder builder = new Response.Builder()
-                    .request(new Request.Builder().url("dummy").build())
+                    .request(req)
+                    .protocol(Protocol.HTTP_1_1)
                     .code(200)
-                    .message("OK");
+                    .message("OK")
+                    .header("X-RateLimit-Remaining", "199")
+                    .header("X-RateLimit-Limit", "200");
 
             if(isGzip) {
                 builder.header("content-encoding", "gzip");
