@@ -70,13 +70,20 @@ public class ReceiveMock {
     }
 
     @Test
-    public void testNonGzip() throws InterruptedException, ExecutionException, TimeoutException {
-        JSONObject json = ReceiveMessageTest.getMockMessageJson();
-        ReadonlyMessage mockMessage = setupFakeResponse(json.toString(), false);
+    public void testPassedEntity() throws InterruptedException, ExecutionException, TimeoutException {
+        ReadonlyMessage mockMessage = setupFakeResponse(ReceiveMessageTest.getMockMessageJson().toString(), false);
         ReadonlyMessage readMessage = client.send("dummy").get(5, TimeUnit.SECONDS);
 
         assertNotNull("Returned message is null", readMessage);
         assertSame("Returned message not same as result of EntityFactory.makeMessage", mockMessage, readMessage);
+    }
+
+    @Test
+    public void testNonGzip() throws InterruptedException, ExecutionException, TimeoutException {
+        JSONObject json = ReceiveMessageTest.getMockMessageJson();
+        setupFakeResponse(json.toString(), false);
+        client.send("dummy").get(5, TimeUnit.SECONDS);
+
         PowerMockito.verifyStatic(EntityFactory.class, only());
         EntityFactory.makeMessage(any());
         JSONObject value = jsonCaptor.getValue();
@@ -87,11 +94,9 @@ public class ReceiveMock {
     @Test
     public void testGzip() throws InterruptedException, ExecutionException, TimeoutException {
         JSONObject json = ReceiveMessageTest.getMockMessageJson();
-        ReadonlyMessage mockMessage = setupFakeResponse(json.toString(), true);
-        ReadonlyMessage readMessage = client.send("dummy").get(5, TimeUnit.SECONDS);
+        setupFakeResponse(json.toString(), true);
+        client.send("dummy").get(5, TimeUnit.SECONDS);
 
-        assertNotNull("Returned message is null", readMessage);
-        assertSame("Returned message not same as result of EntityFactory.makeMessage", mockMessage, readMessage);
         PowerMockito.verifyStatic(EntityFactory.class, only());
         EntityFactory.makeMessage(any());
         JSONObject value = jsonCaptor.getValue();

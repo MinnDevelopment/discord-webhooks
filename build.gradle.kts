@@ -54,7 +54,7 @@ dependencies {
     implementation("org.jetbrains:annotations:16.0.1")
 
     testCompile("junit:junit:4.12")
-    testCompile("org.mockito:mockito-core:2.+")
+    testCompile("org.mockito:mockito-core:2.23.0")
     testCompile("org.powermock:powermock-module-junit4:$powermockVersion")
     testCompile("org.powermock:powermock-api-mockito2:$powermockVersion")
     testCompile("ch.qos.logback:logback-classic:1.2.3")
