@@ -38,7 +38,6 @@ public class ReadonlyMessage implements JSONString {
 
     private final ReadonlyUser author;
 
-    private final String nonce;
     private final String content;
     private final List<ReadonlyEmbed> embeds;
     private final List<ReadonlyAttachment> attachments;
@@ -48,7 +47,7 @@ public class ReadonlyMessage implements JSONString {
 
     public ReadonlyMessage(
             long id, long channelId, boolean mentionsEveryone, boolean tts,
-            @NotNull ReadonlyUser author, @Nullable String nonce, @NotNull String content,
+            @NotNull ReadonlyUser author, @NotNull String content,
             @NotNull List<ReadonlyEmbed> embeds, @NotNull List<ReadonlyAttachment> attachments,
             @NotNull List<ReadonlyUser> mentionedUsers, @NotNull List<Long> mentionedRoles) {
         this.id = id;
@@ -56,7 +55,6 @@ public class ReadonlyMessage implements JSONString {
         this.mentionsEveryone = mentionsEveryone;
         this.tts = tts;
         this.author = author;
-        this.nonce = nonce;
         this.content = content;
         this.embeds = embeds;
         this.attachments = attachments;
@@ -98,17 +96,6 @@ public class ReadonlyMessage implements JSONString {
      */
     public boolean isTTS() {
         return tts;
-    }
-
-    /**
-     * The nonce of this message, used for testing RTT with a bot account.
-     * <br>Webhooks have no use for this.
-     *
-     * @return Possibly-null nonce of the message
-     */
-    @Nullable
-    public String getNonce() {
-        return nonce;
     }
 
     /**
@@ -205,7 +192,6 @@ public class ReadonlyMessage implements JSONString {
             .put("mentions", mentionedUsers)
             .put("mention_roles", mentionedRoles)
             .put("attachments", attachments)
-            .put("nonce", nonce)
             .put("author", author)
             .put("tts", tts)
             .put("id", Long.toUnsignedString(id))

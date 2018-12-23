@@ -1,10 +1,8 @@
-import com.jfrog.bintray.gradle.BintrayExtension
-import com.jfrog.bintray.gradle.tasks.BintrayPublishTask
-import com.jfrog.bintray.gradle.tasks.BintrayUploadTask
-import org.apache.maven.model.Build
-import org.apache.tools.ant.filters.ReplaceTokens
-import org.gradle.api.internal.changedetection.state.FileTree
-import org.gradle.jvm.tasks.Jar
+import com.jfrog.bintray.gradle.*
+import com.jfrog.bintray.gradle.tasks.*
+import org.apache.maven.model.*
+import org.apache.tools.ant.filters.*
+import org.gradle.jvm.tasks.*
 
 /*
  * Copyright 2018-2019 Florian Spieß
@@ -31,7 +29,7 @@ plugins {
 
 val major = "0"
 val minor = "1"
-val patch = "3"
+val patch = "4"
 
 group = "club.minnced"
 version = "$major.$minor.$patch"
@@ -47,6 +45,8 @@ repositories {
     jcenter()
 }
 
+val powermockVersion = "2.0.0-RC.4"
+
 dependencies {
     api("org.slf4j:slf4j-api:1.7.25")
     api("com.squareup.okhttp3:okhttp:3.11.0")
@@ -54,26 +54,10 @@ dependencies {
     implementation("org.jetbrains:annotations:16.0.1")
 
     testCompile("junit:junit:4.12")
+    testCompile("org.mockito:mockito-core:2.23.0")
+    testCompile("org.powermock:powermock-module-junit4:$powermockVersion")
+    testCompile("org.powermock:powermock-api-mockito2:$powermockVersion")
     testCompile("ch.qos.logback:logback-classic:1.2.3")
-}
-
-bintray {
-    user = getProjectProperty("bintrayUsername")
-    key = getProjectProperty("bintrayApiKey")
-    setPublications("BintrayRelease")
-
-    pkg(delegateClosureOf<BintrayExtension.PackageConfig> {
-        repo = "maven"
-        name = project.name
-        vcsUrl = "https://github.com/MinnDevelopment/discord-webhooks.git"
-        githubRepo = "MinnDevelopment/discord-webhooks"
-        setLicenses("Apache-2.0")
-        version(delegateClosureOf<BintrayExtension.VersionConfig> {
-            name = project.version as String
-            vcsTag = project.version as String
-            gpg.sign = true
-        })
-    })
 }
 
 fun org.gradle.api.publish.maven.MavenPom.addDependencies() = withXml {
@@ -111,8 +95,11 @@ val sources = tasks.create("sources", Copy::class.java) {
 
 javadoc.dependsOn(sources)
 javadoc.source = fileTree(sources.destinationDir)
+if (!System.getProperty("java.version").startsWith("1.8"))
+    (javadoc.options as CoreJavadocOptions).addBooleanOption("html5", true)
 
 val javadocJar = tasks.create("javadocJar", Jar::class.java) {
+    dependsOn(javadoc)
     from(javadoc.destinationDir)
     classifier = "javadoc"
 }
@@ -123,18 +110,17 @@ val sourcesJar = tasks.create("sourcesJar", Jar::class.java) {
     classifier = "sources"
 }
 
-val publicationName = "BintrayRelease"
 publishing {
-    publications.invoke {
-        publicationName(MavenPublication::class) {
+    publications {
+        register("BintrayRelease", MavenPublication::class) {
+            from(components["java"])
+
             artifactId = project.name
             groupId = project.group as String
             version = project.version as String
 
-            artifact(jar)
             artifact(sourcesJar)
             artifact(javadocJar)
-            pom.addDependencies()
         }
     }
 }
@@ -156,6 +142,7 @@ compileJava.dependsOn(sources)
 
 configure<JavaPluginConvention> {
     sourceCompatibility = JavaVersion.VERSION_1_8
+    targetCompatibility = JavaVersion.VERSION_1_8
 }
 
 val test: Task by tasks
@@ -166,3 +153,23 @@ build.apply {
     dependsOn(jar)
     dependsOn(test)
 }
+
+bintray {
+    user = getProjectProperty("bintrayUsername")
+    key = getProjectProperty("bintrayApiKey")
+    setPublications("BintrayRelease")
+
+    pkg(delegateClosureOf<BintrayExtension.PackageConfig> {
+        repo = "maven"
+        name = project.name
+        vcsUrl = "https://github.com/MinnDevelopment/discord-webhooks.git"
+        githubRepo = "MinnDevelopment/discord-webhooks"
+        setLicenses("Apache-2.0")
+        version(delegateClosureOf<BintrayExtension.VersionConfig> {
+            name = project.version as String
+            vcsTag = project.version as String
+            gpg.sign = true
+        })
+    })
+}
+

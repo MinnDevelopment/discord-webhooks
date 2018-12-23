@@ -21,15 +21,20 @@ import club.minnced.discord.webhook.send.WebhookEmbed;
 import club.minnced.discord.webhook.send.WebhookEmbedBuilder;
 import club.minnced.discord.webhook.send.WebhookMessage;
 import club.minnced.discord.webhook.send.WebhookMessageBuilder;
+import okhttp3.RequestBody;
+import org.json.JSONArray;
+import org.json.JSONObject;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
+import root.IOTestUtil;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -46,16 +51,49 @@ public class MessageTest {
     }
 
     @Test
-    public void resetBuilder() {
-        builder.setContent("test")
-               .setUsername("hello")
-               .setTTS(true);
+    public void setAndReset() {
+        //checking isEmpty and reset of those fields
+        Assert.assertTrue("Builder should be empty at start", builder.isEmpty());
+
+        builder.setContent("CONTENT!");
+        Assert.assertFalse("Setting content doesn't change isEmpty to false", builder.isEmpty());
         builder.reset();
-        Assert.assertTrue(builder.isEmpty());
+        Assert.assertTrue("Reset doesn't reset content", builder.isEmpty());
+
+        builder.addEmbeds(new WebhookEmbedBuilder().setDescription("test").build());
+        Assert.assertFalse("Adding embed doesn't change isEmpty to false", builder.isEmpty());
+        builder.reset();
+        Assert.assertTrue("Reset doesn't reset embed(s)", builder.isEmpty());
+
+        Assert.assertEquals("File count of empty builder mismatches", 0, builder.getFileAmount());
+        builder.addFile("notARealFile", new byte[0]);
+        Assert.assertEquals("File count of builder mismatches", 1, builder.getFileAmount());
+        Assert.assertFalse("Adding file doesn't change isEmpty to false", builder.isEmpty());
+        builder.reset();
+        Assert.assertEquals("File count of empty builder mismatches", 0, builder.getFileAmount());
+        Assert.assertTrue("Reset doesn't reset file(s)", builder.isEmpty());
+
+        //checking remaining setters + reset on those
+        builder.setUsername("NotAWebhook");
+        builder.setAvatarUrl("avatarUrl");
+        builder.setTTS(true);
+        Assert.assertTrue("Some extra field set isEmpty to false", builder.isEmpty());
+        builder.setContent("dummy"); //needed for building
+        WebhookMessage msg = builder.build();
+        Assert.assertEquals("Username mismatches", "NotAWebhook", msg.getUsername());
+        Assert.assertEquals("AvatarUrl mismatches", "avatarUrl", msg.getAvatarUrl());
+        Assert.assertTrue("TTS mismatches", msg.isTTS());
+
+        builder.reset();
+        builder.setContent("dummy"); //needed for building
+        msg = builder.build();
+        Assert.assertNull("Username not reset by reset()", msg.getUsername());
+        Assert.assertNull("AvatarUrl not reset by reset()", msg.getAvatarUrl());
+        Assert.assertFalse("TTS not reset by reset()", msg.isTTS());
     }
 
     @Test
-    public void buildMessage() {
+    public void messageBuilds() {
         builder.setContent("Hello World");
         builder.setUsername("Minn");
         builder.build().getBody();
@@ -87,6 +125,8 @@ public class MessageTest {
         builder.addFile("bird.png", IOUtil.readAllBytes(new FileInputStream(tmp)));
         tmp.delete();
         WebhookMessage message = builder.build();
+        Assert.assertNotNull(message.getAttachments());
+        Assert.assertEquals(3, message.getAttachments().length);
         Assert.assertEquals(tmp.getName(), message.getAttachments()[0].getName());
         Assert.assertEquals("dog.png", message.getAttachments()[1].getName());
         Assert.assertEquals("bird.png", message.getAttachments()[2].getName());
@@ -122,4 +162,78 @@ public class MessageTest {
         expectedException.expect(IllegalStateException.class);
         builder.build();
     }
+
+    @Test
+    public void checkJSONNonFile() throws IOException {
+        Map<String, Object> expected = new JSONObject()
+                .put("content", "CONTENT!")
+                .put("username", "MrWebhook")
+                .put("avatar_url", "linkToImage")
+                .put("tts", true)
+                .put("embeds", new JSONArray().put(new JSONObject().put("description", "embed")))
+                .toMap();
+
+        WebhookMessage msg = builder
+                .setContent("CONTENT!")
+                .setUsername("MrWebhook")
+                .setAvatarUrl("linkToImage")
+                .setTTS(true)
+                .addEmbeds(new WebhookEmbedBuilder().setDescription("embed").build())
+                .build();
+        Assert.assertFalse("Message should not be of type file", msg.isFile());
+        RequestBody body = msg.getBody();
+        Assert.assertEquals("Request type mismatch", IOUtil.JSON, body.contentType());
+
+        String bodyContent = IOTestUtil.readRequestBody(body);
+
+        Map<String, Object> provided = new JSONObject(bodyContent).toMap();
+
+        Assert.assertEquals("Json output is incorrect", expected, provided);
+
+        //check if optional fields are omitted if not used (tts is always sent)
+        expected = new JSONObject()
+                .put("content", "...")
+                .put("tts", false)
+                .toMap();
+
+        msg = builder
+                .reset()
+                .setContent("...")
+                .build();
+
+        bodyContent = IOTestUtil.readRequestBody(msg.getBody());
+        provided = new JSONObject(bodyContent).toMap();
+
+        Assert.assertEquals("Json output has additional fields", expected, provided);
+    }
+
+    @Test
+    public void checkMultipart() throws IOException {
+        String fileContent = "Hello World!\nNext line...\r\nAnother line";
+        WebhookMessage msg = builder
+                .setContent("CONTENT!")
+                .addFile("myFile.txt", fileContent.getBytes(StandardCharsets.UTF_8))
+                .build();
+        Assert.assertTrue("Message should be of type file", msg.isFile());
+
+        RequestBody body = msg.getBody();
+        Assert.assertTrue("Request type mismatch", IOTestUtil.isMultiPart(body));
+
+        Map<String, Object> multiPart = IOTestUtil.parseMultipart(body);
+
+        Assert.assertTrue("Multipart doesn't contain payload json", multiPart.containsKey("payload_json"));
+        Assert.assertTrue("Multipart json is not of correct type", multiPart.get("payload_json") instanceof String);
+        Assert.assertEquals("Multipart json mismatches",
+                new JSONObject().put("content", "CONTENT!").put("tts", false).toMap(),
+                new JSONObject((String) multiPart.get("payload_json")).toMap()
+        );
+
+        Assert.assertTrue("Multipart doesn't contain file", multiPart.containsKey("file0"));
+        Assert.assertTrue("Multipart file is not of correct type", multiPart.get("file0") instanceof IOTestUtil.MultiPartFile);
+        Assert.assertEquals("Multipart file mismatches",
+                fileContent,
+                new String(((IOTestUtil.MultiPartFile) multiPart.get("file0")).content, StandardCharsets.UTF_8)
+        );
+    }
+
 }

@@ -25,7 +25,7 @@ import org.json.JSONString;
 /**
  * Readonly POJO of a discord user
  */
-public class ReadonlyUser implements JSONString { //TODO: Member details?
+public class ReadonlyUser implements JSONString {
     private final long id;
     private final short discriminator;
     private final boolean bot;
@@ -74,6 +74,7 @@ public class ReadonlyUser implements JSONString { //TODO: Member details?
      * @return The name of this user
      */
     @NotNull
+    @JSONPropertyName("username")
     public String getName() {
         return name;
     }

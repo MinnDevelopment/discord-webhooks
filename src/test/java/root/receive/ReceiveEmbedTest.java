@@ -27,7 +27,7 @@ import java.time.OffsetDateTime;
 import java.time.ZoneId;
 import java.util.Iterator;
 
-public class EmbedTest {
+public class ReceiveEmbedTest {
     public static final JSONObject MOCK_IMAGE_JSON =
             new JSONObject()
                     .put("url", "https://avatars1.githubusercontent.com/u/18090140?s=460&v=4")

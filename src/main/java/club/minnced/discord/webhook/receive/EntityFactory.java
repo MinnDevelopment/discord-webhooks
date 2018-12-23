@@ -247,7 +247,6 @@ public class EntityFactory {
         final long channelId = Long.parseUnsignedLong(json.getString("channel_id"));
         final ReadonlyUser author = makeUser(json.getJSONObject("author"));
         final String content = json.getString("content");
-        final String nonce = json.optString("nonce", null);
         final boolean tts = json.getBoolean("tts");
         final boolean mentionEveryone = json.getBoolean("mention_everyone");
         final JSONArray usersArray = json.getJSONArray("mentions");
@@ -263,7 +262,7 @@ public class EntityFactory {
         }
         return new ReadonlyMessage(
                 id, channelId, mentionEveryone, tts,
-                author, nonce, content,
+                author, content,
                 embeds, attachments,
                 mentionedUsers, mentionedRoles);
     }
