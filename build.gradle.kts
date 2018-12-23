@@ -49,12 +49,12 @@ val powermockVersion = "2.0.0-RC.4"
 
 dependencies {
     api("org.slf4j:slf4j-api:1.7.25")
-    api("com.squareup.okhttp3:okhttp:3.11.0")
+    api("com.squareup.okhttp3:okhttp:3.12.0")
     api("org.json:json:20180813")
     implementation("org.jetbrains:annotations:16.0.1")
 
     testCompile("junit:junit:4.12")
-    testCompile("org.mockito:mockito-core:2.23.0")
+    testCompile("org.mockito:mockito-core:2.23.4")
     testCompile("org.powermock:powermock-module-junit4:$powermockVersion")
     testCompile("org.powermock:powermock-api-mockito2:$powermockVersion")
     testCompile("ch.qos.logback:logback-classic:1.2.3")

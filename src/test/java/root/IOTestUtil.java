@@ -18,6 +18,7 @@ package root;
 
 import okhttp3.*;
 import okio.Buffer;
+import okio.Timeout;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -144,6 +145,11 @@ public class IOTestUtil {
             this.req = req;
             this.jsonResponse = jsonResponse;
             this.isGzip = isGzip;
+        }
+
+        @Override
+        public Timeout timeout() {
+            return Timeout.NONE;
         }
 
         @Override

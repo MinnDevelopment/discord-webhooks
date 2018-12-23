@@ -23,7 +23,6 @@
             </pattern>
         </encoder>
     </appender>
-    <appender name="WEBHOOK" class="root.MyAppender"/>
 
     <root level="info">
         <appender-ref ref="STDOUT"/>
