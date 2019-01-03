@@ -29,7 +29,7 @@ plugins {
 
 val major = "0"
 val minor = "1"
-val patch = "4"
+val patch = "5"
 
 group = "club.minnced"
 version = "$major.$minor.$patch"
@@ -158,6 +158,7 @@ bintray {
     user = getProjectProperty("bintrayUsername")
     key = getProjectProperty("bintrayApiKey")
     setPublications("BintrayRelease")
+    publish = true
 
     pkg(delegateClosureOf<BintrayExtension.PackageConfig> {
         repo = "maven"
