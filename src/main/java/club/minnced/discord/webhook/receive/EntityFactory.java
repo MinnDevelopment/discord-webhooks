@@ -121,7 +121,7 @@ public class EntityFactory {
         if (json == null)
             return null;
         final String text = json.getString("text");
-        final String icon = json.getString("icon_url");
+        final String icon = json.optString("icon_url", null);
         return new WebhookEmbed.EmbedFooter(text, icon);
     }
 
