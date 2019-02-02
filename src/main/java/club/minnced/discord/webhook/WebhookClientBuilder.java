@@ -27,6 +27,12 @@ import java.util.concurrent.ThreadFactory;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+/**
+ * Builder for a {@link club.minnced.discord.webhook.WebhookClient} instance.
+ *
+ * @see club.minnced.discord.webhook.WebhookClient#withId(long, String)
+ * @see club.minnced.discord.webhook.WebhookClient#withUrl(String)
+ */
 public class WebhookClientBuilder { //TODO: tests
     /**
      * Pattern used to validate webhook urls
@@ -170,19 +176,24 @@ public class WebhookClientBuilder { //TODO: tests
      */
     @NotNull
     public WebhookClient build() {
-        OkHttpClient client = this.client == null
-                              ? new OkHttpClient()
-                              : this.client;
-        ScheduledExecutorService pool = this.pool != null
-                                        ? this.pool
-                                        : Executors.newSingleThreadScheduledExecutor(
-                threadFactory == null
-                ? new DefaultWebhookThreadFactory()
-                : threadFactory);
+        OkHttpClient client = this.client == null ? new OkHttpClient() : this.client;
+        ScheduledExecutorService pool = this.pool != null ? this.pool : getDefaultPool(id, threadFactory);
         return new WebhookClient(id, token, parseMessage, client, pool);
     }
 
-    private final class DefaultWebhookThreadFactory implements ThreadFactory {
+    protected static ScheduledExecutorService getDefaultPool(long id, ThreadFactory factory) {
+        return Executors.newSingleThreadScheduledExecutor(factory == null ? new DefaultWebhookThreadFactory(id, false) : factory);
+    }
+
+    private static final class DefaultWebhookThreadFactory implements ThreadFactory {
+        private final long id;
+        private final boolean isDaemon;
+
+        public DefaultWebhookThreadFactory(long id, boolean isDaemon) {
+            this.id = id;
+            this.isDaemon = isDaemon;
+        }
+
         @Override
         public Thread newThread(Runnable r) {
             final Thread thread = new Thread(r, "Webhook-RateLimit Thread WebhookID: " + id);
