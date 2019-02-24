@@ -29,7 +29,7 @@ plugins {
 
 val major = "0"
 val minor = "1"
-val patch = "5"
+val patch = "6"
 
 group = "club.minnced"
 version = "$major.$minor.$patch"
@@ -45,7 +45,7 @@ repositories {
     jcenter()
 }
 
-val powermockVersion = "2.0.0-RC.4"
+val powermockVersion = "2.0.0"
 
 dependencies {
     api("org.slf4j:slf4j-api:1.7.25")
