@@ -180,6 +180,7 @@ public class WebhookMessageBuilder {
      */
     @NotNull
     public WebhookMessageBuilder appendToBeginningOfContent(@NotNull String content) {
+        Objects.requireNonNull(content, "Content");
         if (content.length() > 2000)
             throw new IllegalArgumentException("Content may not exceed 2000 characters!");
         else
