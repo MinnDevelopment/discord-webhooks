@@ -122,7 +122,7 @@ public class WebhookMessageBuilder {
     /**
      * Adds the provided embeds to the builder
      *
-     * @param embeds
+     * @param  embeds
      *         The embeds to add
      *
      * @return This builder for chaining convenience
@@ -147,7 +147,7 @@ public class WebhookMessageBuilder {
     /**
      * Configures the content for this builder
      *
-     * @param content
+     * @param  content
      *         The (nullable) content to use
      *
      * @return This builder for chaining convenience
@@ -159,10 +159,9 @@ public class WebhookMessageBuilder {
     public WebhookMessageBuilder setContent(@Nullable String content) {
         if (content != null && content.length() > 2000)
             throw new IllegalArgumentException("Content may not exceed 2000 characters!");
-        if (content != null)
-            this.content.replace(0, content.length(), content);
-        else
-            this.content.setLength(0);
+        this.content.setLength(0);
+        if (content != null && !content.isEmpty())
+            this.content.append(content);
         return this;
     }
 
@@ -170,7 +169,7 @@ public class WebhookMessageBuilder {
      * Appends the provided content to the already
      * present content in this message.
      *
-     * @param content
+     * @param  content
      *         The content to append
      *
      * @return This builder for chaining convenience
