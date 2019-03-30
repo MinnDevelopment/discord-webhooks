@@ -143,12 +143,12 @@ public class WebhookMessageBuilder {
         }
         return this;
     }
-
+    
     /**
      * Configures the content for this builder
      *
      * @param content
-     *         The (nullable) content to use
+     *         The content to set
      *
      * @return This builder for chaining convenience
      *
@@ -160,9 +160,30 @@ public class WebhookMessageBuilder {
         if (content != null && content.length() > 2000)
             throw new IllegalArgumentException("Content may not exceed 2000 characters!");
         if (content != null)
-            this.content.replace(0, content.length(), content);
+            this.content.setLength(0);
+            this.content.append(content);
         else
             this.content.setLength(0);
+        return this;
+    }
+
+    /**
+     * Append content to the beginning of the current content for this builder
+     *
+     * @param content
+     *         The content to append to the beginning
+     *
+     * @return This builder for chaining convenience
+     *
+     * @throws java.lang.IllegalArgumentException
+     *         If the content is larger than 2000 characters
+     */
+    @NotNull
+    public WebhookMessageBuilder appendToBeginningOfContent(@NotNull String content) {
+        if (content.length() > 2000)
+            throw new IllegalArgumentException("Content may not exceed 2000 characters!");
+        else
+            this.content.replace(0, content.length(), content);
         return this;
     }
 
