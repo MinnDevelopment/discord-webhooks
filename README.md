@@ -11,6 +11,90 @@
 Originally part of JDA, this library provides easy to use bindings for the
 Discord Webhook API.
 
+# Introduction
+
+Here we will give a small overview of the proper usage and applicability of the resources provided by this library.
+
+## Limitations
+
+Webhooks on discord are only capable of sending messages, nothing more. For anything else you either have to use OAuth2 or a bot account. This library does not provide any functionality for creating or modifying webhooks.
+
+## Getting Started
+
+The first thing to do is to create either a `WebhookClient` or a `WebhookCluster`. The `WebhookClient` provides functionality to send messages to one webhook based on either a webhook URL or the ID and token of a webhook. It implements automatic rate-limit handling and can be configured to use a shared thread-pool.
+
+### Creating a WebhookClient
+
+```java
+// Using the builder
+WebhookClientBuilder builder = new WebhookClientBuilder(url); // or id, token
+builder.setThreadFactory((job) -> {
+    Thread thread = new Thread(job);
+    thread.setName("Hello");
+    thread.setDaemon(true);
+    return thread;
+});
+builder.setWait(true);
+WebhookClient client = builder.build();
+```
+
+```java
+// Using the factory methods
+WebhookClient client = WebhookClient.fromUrl(url); // or fromId(id, token)
+```
+
+### Creating a WebhookCluster
+
+```java
+// Create and initialize the cluster
+WebhookCluster cluster = new WebhookCluster(5); // create an initial 5 slots (dynamic like lists)
+cluster.setDefaultHttpClient(new OkHttpClient());
+cluster.setDefaultDaemon(true);
+
+// Create a webhook client
+cluster.buildWebhook(id, token);
+
+// Add an existing webhook client
+cluster.addWebhook(client);
+```
+
+## Sending Messages
+
+Sending messages happens in a background thread (configured through the pool/factory) and thus is async by default. To access the message you have to enable the `wait` mechanic (enabled by default). With this you can use the callbacks provided by `CompletableFuture<ReadonlyMessage>`.
+
+```java
+// Send and forget
+client.send("Hello World");
+
+// Send and log (using embed)
+WebhookEmbed embed = new WebhookEmbedBuilder()
+        .setColor(0xFF00EE)
+        .setDescription("Hello World")
+        .build();
+
+client.send(embed);
+      .thenAccept((message) -> System.out.printf("Message with embed has been sent [%s]%n", message.getId()));
+
+// Change appearance of webhook message
+WebhookMessageBuilder builder = new WebhookMessageBuilder();
+builder.setUsername("Minn"); // use this username
+builder.setAvatar(avatarUrl); // use this avatar
+builder.setContent("Hello World");
+client.send(builder.build());
+```
+
+### Shutdown
+
+Since the clients use threads for sending messages you should close the client to end the threads. This can be ignored if a shared thread-pool is used between multiple clients but that pool has to be shutdown by the user accordingly.
+
+```java
+try (WebhookClient client = WebhookClient.withUrl(url)) {
+    client.send("Hello World");
+} // client.close() automated
+
+webhookCluster.close(); // closes each client and can be used again
+```
+
 # Download
 
 Note: Replace `%VERSION%` below with the desired version.
