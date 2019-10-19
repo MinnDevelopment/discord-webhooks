@@ -177,12 +177,12 @@ public class WebhookClientBuilder { //TODO: tests
     @NotNull
     public WebhookClient build() {
         OkHttpClient client = this.client == null ? new OkHttpClient() : this.client;
-        ScheduledExecutorService pool = this.pool != null ? this.pool : getDefaultPool(id, threadFactory);
+        ScheduledExecutorService pool = this.pool != null ? this.pool : getDefaultPool(id, threadFactory, isDaemon);
         return new WebhookClient(id, token, parseMessage, client, pool);
     }
 
-    protected static ScheduledExecutorService getDefaultPool(long id, ThreadFactory factory) {
-        return Executors.newSingleThreadScheduledExecutor(factory == null ? new DefaultWebhookThreadFactory(id, false) : factory);
+    protected static ScheduledExecutorService getDefaultPool(long id, ThreadFactory factory, boolean isDaemon) {
+        return Executors.newSingleThreadScheduledExecutor(factory == null ? new DefaultWebhookThreadFactory(id, isDaemon) : factory);
     }
 
     private static final class DefaultWebhookThreadFactory implements ThreadFactory {

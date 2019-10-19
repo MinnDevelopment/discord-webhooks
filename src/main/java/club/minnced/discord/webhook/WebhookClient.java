@@ -95,7 +95,7 @@ public class WebhookClient implements AutoCloseable {
      */
     public static WebhookClient withId(long id, @NotNull String token) {
         Objects.requireNonNull(token, "Token");
-        ScheduledExecutorService pool = WebhookClientBuilder.getDefaultPool(id, null);
+        ScheduledExecutorService pool = WebhookClientBuilder.getDefaultPool(id, null, false);
         return new WebhookClient(id, token, true, new OkHttpClient(), pool);
     }
 
