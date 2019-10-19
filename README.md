@@ -78,7 +78,7 @@ client.send(embed);
 // Change appearance of webhook message
 WebhookMessageBuilder builder = new WebhookMessageBuilder();
 builder.setUsername("Minn"); // use this username
-builder.setAvatar(avatarUrl); // use this avatar
+builder.setAvatarUrl(avatarUrl); // use this avatar
 builder.setContent("Hello World");
 client.send(builder.build());
 ```
