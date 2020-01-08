@@ -342,7 +342,7 @@ public class WebhookClient implements AutoCloseable {
         final InputStream stream = IOUtil.getBody(response);
         final String responseBody = stream == null ? "" : new String(IOUtil.readAllBytes(stream));
 
-        return new HttpException("Request returned failure " + response.code() + ": " + responseBody);
+        return new HttpException(response.code(), responseBody);
     }
 
     @NotNull
