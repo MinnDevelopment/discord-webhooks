@@ -16,10 +16,40 @@
 
 package club.minnced.discord.webhook.exception;
 
-import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
+
+/**
+ * Exception thrown in case of unexpected non-2xx HTTP response.
+ */
 public class HttpException extends RuntimeException {
-    public HttpException(@NotNull String message) {
-        super(message);
+
+    private final int code;
+    private final String body;
+
+    public HttpException(int code, @Nullable String body) {
+        super("Request returned failure " + code + ": " + body);
+        this.body = body;
+        this.code = code;
     }
+
+    /**
+     * The code of HTTP response
+     *
+     * @return The code
+     */
+    public int getCode() {
+        return code;
+    }
+
+    /**
+     * The body of HTTP response
+     *
+     * @return The body
+     */
+    @Nullable
+    public String getBody() {
+        return body;
+    }
+
 }
