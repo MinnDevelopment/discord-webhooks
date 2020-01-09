@@ -28,8 +28,8 @@ plugins {
 }
 
 val major = "0"
-val minor = "1"
-val patch = "8"
+val minor = "2"
+val patch = "0"
 
 group = "club.minnced"
 version = "$major.$minor.$patch"
@@ -45,7 +45,7 @@ repositories {
     jcenter()
 }
 
-val powermockVersion = "2.0.0"
+val powermockVersion = "2.0.4"
 
 dependencies {
     api("org.slf4j:slf4j-api:1.7.25")
@@ -54,10 +54,10 @@ dependencies {
     implementation("org.jetbrains:annotations:16.0.1")
 
     testCompile("junit:junit:4.12")
-    testCompile("org.mockito:mockito-core:2.25.1")
+    testCompile("org.mockito:mockito-core:3.2.4")
     testCompile("org.powermock:powermock-module-junit4:$powermockVersion")
     testCompile("org.powermock:powermock-api-mockito2:$powermockVersion")
-    testCompile("ch.qos.logback:logback-classic:1.2.3")
+    //testCompile("ch.qos.logback:logback-classic:1.2.3")
 }
 
 fun org.gradle.api.publish.maven.MavenPom.addDependencies() = withXml {
