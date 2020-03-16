@@ -17,6 +17,7 @@
 package club.minnced.discord.webhook;
 
 import club.minnced.discord.webhook.receive.ReadonlyMessage;
+import club.minnced.discord.webhook.send.AllowedMentions;
 import club.minnced.discord.webhook.send.WebhookEmbed;
 import club.minnced.discord.webhook.send.WebhookMessage;
 import club.minnced.discord.webhook.send.WebhookMessageBuilder;
@@ -52,6 +53,7 @@ public class WebhookCluster implements AutoCloseable { //TODO: tests
     protected OkHttpClient defaultHttpClient;
     protected ScheduledExecutorService defaultPool;
     protected ThreadFactory threadFactory;
+    protected AllowedMentions allowedMentions = AllowedMentions.all();
     protected boolean isDaemon;
 
     /**
@@ -146,6 +148,12 @@ public class WebhookCluster implements AutoCloseable { //TODO: tests
     @NotNull
     public WebhookCluster setDefaultThreadFactory(@Nullable ThreadFactory factory) {
         this.threadFactory = factory;
+        return this;
+    }
+
+    @NotNull
+    public WebhookCluster setAllowedMentions(@Nullable AllowedMentions allowedMentions) {
+        this.allowedMentions = allowedMentions == null ? AllowedMentions.all() : allowedMentions;
         return this;
     }
 

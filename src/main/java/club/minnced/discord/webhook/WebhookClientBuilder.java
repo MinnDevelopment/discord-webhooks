@@ -16,6 +16,7 @@
 
 package club.minnced.discord.webhook;
 
+import club.minnced.discord.webhook.send.AllowedMentions;
 import okhttp3.OkHttpClient;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -45,6 +46,7 @@ public class WebhookClientBuilder { //TODO: tests
     protected ScheduledExecutorService pool;
     protected OkHttpClient client;
     protected ThreadFactory threadFactory;
+    protected AllowedMentions allowedMentions = AllowedMentions.all();
     protected boolean isDaemon;
     protected boolean parseMessage = true;
 
@@ -137,6 +139,24 @@ public class WebhookClientBuilder { //TODO: tests
     }
 
     /**
+     * The default mention whitelist for every outgoing message.
+     * <br>See {@link AllowedMentions} for more details.
+     *
+     * @param  mentions
+     *         The mention whitelist
+     *
+     * @throws NullPointerException
+     *         If provided null
+     *
+     * @return This builder for chaining convenience
+     */
+    @NotNull
+    public WebhookClientBuilder setAllowedMentions(@Nullable AllowedMentions mentions) {
+        this.allowedMentions = mentions;
+        return this;
+    }
+
+    /**
      * Whether the default executor should use daemon threads.
      * <br>This has no effect if either {@link #setExecutorService(java.util.concurrent.ScheduledExecutorService)}
      * or {@link #setThreadFactory(java.util.concurrent.ThreadFactory)} are configured to non-null values.
@@ -178,7 +198,7 @@ public class WebhookClientBuilder { //TODO: tests
     public WebhookClient build() {
         OkHttpClient client = this.client == null ? new OkHttpClient() : this.client;
         ScheduledExecutorService pool = this.pool != null ? this.pool : getDefaultPool(id, threadFactory, isDaemon);
-        return new WebhookClient(id, token, parseMessage, client, pool);
+        return new WebhookClient(id, token, parseMessage, client, pool, allowedMentions);
     }
 
     protected static ScheduledExecutorService getDefaultPool(long id, ThreadFactory factory, boolean isDaemon) {

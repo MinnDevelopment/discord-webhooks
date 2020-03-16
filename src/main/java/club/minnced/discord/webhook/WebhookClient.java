@@ -19,6 +19,7 @@ package club.minnced.discord.webhook;
 import club.minnced.discord.webhook.exception.HttpException;
 import club.minnced.discord.webhook.receive.EntityFactory;
 import club.minnced.discord.webhook.receive.ReadonlyMessage;
+import club.minnced.discord.webhook.send.AllowedMentions;
 import club.minnced.discord.webhook.send.WebhookEmbed;
 import club.minnced.discord.webhook.send.WebhookMessage;
 import club.minnced.discord.webhook.send.WebhookMessageBuilder;
@@ -64,12 +65,13 @@ public class WebhookClient implements AutoCloseable {
     protected final Bucket bucket;
     protected final BlockingQueue<Request> queue;
     protected final boolean parseMessage;
+    protected final AllowedMentions allowedMentions;
     protected volatile boolean isQueued;
     protected boolean isShutdown;
 
     protected WebhookClient(
             final long id, final String token, final boolean parseMessage,
-            final OkHttpClient client, final ScheduledExecutorService pool) {
+            final OkHttpClient client, final ScheduledExecutorService pool, AllowedMentions mentions) {
         this.client = client;
         this.id = id;
         this.parseMessage = parseMessage;
@@ -77,6 +79,7 @@ public class WebhookClient implements AutoCloseable {
         this.pool = pool;
         this.bucket = new Bucket();
         this.queue = new LinkedBlockingQueue<>();
+        this.allowedMentions = mentions;
         this.isQueued = false;
     }
 
@@ -96,7 +99,7 @@ public class WebhookClient implements AutoCloseable {
     public static WebhookClient withId(long id, @NotNull String token) {
         Objects.requireNonNull(token, "Token");
         ScheduledExecutorService pool = WebhookClientBuilder.getDefaultPool(id, null, false);
-        return new WebhookClient(id, token, true, new OkHttpClient(), pool);
+        return new WebhookClient(id, token, true, new OkHttpClient(), pool, AllowedMentions.all());
     }
 
     /**
