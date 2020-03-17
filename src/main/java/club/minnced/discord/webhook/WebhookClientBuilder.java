@@ -149,7 +149,7 @@ public class WebhookClientBuilder { //TODO: tests
      */
     @NotNull
     public WebhookClientBuilder setAllowedMentions(@Nullable AllowedMentions mentions) {
-        this.allowedMentions = mentions;
+        this.allowedMentions = mentions == null ? AllowedMentions.all() : mentions;
         return this;
     }
 

@@ -225,6 +225,7 @@ public class WebhookCluster implements AutoCloseable { //TODO: tests
         builder.setExecutorService(defaultPool)
                .setHttpClient(defaultHttpClient)
                .setThreadFactory(threadFactory)
+               .setAllowedMentions(allowedMentions)
                .setDaemon(isDaemon);
         return builder;
     }
