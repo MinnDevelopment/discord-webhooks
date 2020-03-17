@@ -160,6 +160,8 @@ public class WebhookClient implements AutoCloseable {
      * <br>The returned future receives {@code null} if {@link club.minnced.discord.webhook.WebhookClientBuilder#setWait(boolean)}
      * was set to false.
      *
+     * <p><b>This will override the default {@link AllowedMentions} of this client!</b>
+     *
      * @param  message
      *         The message to send
      *
@@ -209,7 +211,10 @@ public class WebhookClient implements AutoCloseable {
      */
     @NotNull
     public CompletableFuture<ReadonlyMessage> send(@NotNull File file, @NotNull String fileName) {
-        return send(new WebhookMessageBuilder().addFile(fileName, file).build());
+        return send(new WebhookMessageBuilder()
+                .setAllowedMentions(allowedMentions)
+                .addFile(fileName, file)
+                .build());
     }
 
     /**
@@ -229,7 +234,10 @@ public class WebhookClient implements AutoCloseable {
      */
     @NotNull
     public CompletableFuture<ReadonlyMessage> send(@NotNull byte[] data, @NotNull String fileName) {
-        return send(new WebhookMessageBuilder().addFile(fileName, data).build());
+        return send(new WebhookMessageBuilder()
+                .setAllowedMentions(allowedMentions)
+                .addFile(fileName, data)
+                .build());
     }
 
     /**
@@ -249,7 +257,10 @@ public class WebhookClient implements AutoCloseable {
      */
     @NotNull
     public CompletableFuture<ReadonlyMessage> send(@NotNull InputStream data, @NotNull String fileName) {
-        return send(new WebhookMessageBuilder().addFile(fileName, data).build());
+        return send(new WebhookMessageBuilder()
+                .setAllowedMentions(allowedMentions)
+                .addFile(fileName, data)
+                .build());
     }
 
     /**
@@ -311,7 +322,14 @@ public class WebhookClient implements AutoCloseable {
             throw new IllegalArgumentException("Cannot send an empty message");
         if (content.length() > 2000)
             throw new IllegalArgumentException("Content may not exceed 2000 characters");
-        return execute(newBody(new JSONObject().put("content", content).toString()));
+        return execute(newBody(newJson().put("content", content).toString()));
+    }
+
+    private JSONObject newJson()
+    {
+        JSONObject json = new JSONObject();
+        json.put("allowed_mentions", allowedMentions);
+        return json;
     }
 
     /**

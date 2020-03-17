@@ -316,6 +316,7 @@ public class WebhookMessage {
             payload.put("username", username);
         payload.put("tts", isTTS);
         payload.put("allowed_mentions", allowedMentions);
+        String json = payload.toString();
         if (isFile()) {
             final MultipartBody.Builder builder = new MultipartBody.Builder().setType(MultipartBody.FORM);
 
@@ -325,9 +326,9 @@ public class WebhookMessage {
                     break;
                 builder.addFormDataPart("file" + i, attachment.getName(), new IOUtil.OctetBody(attachment.getData()));
             }
-            return builder.addFormDataPart("payload_json", payload.toString()).build();
+            return builder.addFormDataPart("payload_json", json).build();
         }
-        return RequestBody.create(IOUtil.JSON, payload.toString());
+        return RequestBody.create(IOUtil.JSON, json);
     }
 
     @NotNull
