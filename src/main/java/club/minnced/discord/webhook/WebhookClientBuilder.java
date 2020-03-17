@@ -145,9 +145,6 @@ public class WebhookClientBuilder { //TODO: tests
      * @param  mentions
      *         The mention whitelist
      *
-     * @throws NullPointerException
-     *         If provided null
-     *
      * @return This builder for chaining convenience
      */
     @NotNull

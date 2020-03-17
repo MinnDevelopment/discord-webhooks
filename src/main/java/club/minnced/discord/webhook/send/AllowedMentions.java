@@ -14,12 +14,40 @@ import java.util.Set;
  * Constructs a whitelist of allowed mentions for a message.
  * If any argument in this class is {@code null}, a {@link NullPointerException} will be thrown.
  *
+ * <h2>Example</h2>
+ * <pre>{@code
+ * AllowedMentions mentions = new AllowedMentions()
+ *   .withUsers("86699011792191488", "107562988810027008")
+ *   .withParseEveryone(false)
+ *   .withParseRoles(false);
+ *
+ * // This will only mention the user with the id 86699011792191488 (Minn#6688)
+ * // The @everyone will be ignored since the allowed mentions disabled it.
+ * client.send(
+ *   new WebhookMessageBuilder()
+ *     .setAllowedMentions(mentions)
+ *     .setContent("Hello <@86699011792191488>! And hello @everyone else!")
+ *     .build()
+ * );
+ * }</pre>
+ *
  * @see WebhookMessageBuilder#setAllowedMentions(AllowedMentions)
  * @see club.minnced.discord.webhook.WebhookClientBuilder#setAllowedMentions(AllowedMentions) WebhookClientBuilder#setAllowedMentions(AllowedMentions)
+ *
+ * @see #all()
+ * @see #none()
  */
 public class AllowedMentions implements JSONString {
     /**
      * Parse all mentions.
+     *
+     * <p>Equivalent:
+     * <pre>{@code
+     * return new AllowedMentions()
+     *     .withParseEveryone(true)
+     *     .withParseRoles(true)
+     *     .withParseUsers(true);
+     * }</pre>
      *
      * @return Every mention type will be parsed.
      */
@@ -32,6 +60,14 @@ public class AllowedMentions implements JSONString {
 
     /**
      * Disable all mentions.
+     *
+     * <p>Equivalent:
+     * <pre>{@code
+     * return new AllowedMentions()
+     *     .withParseEveryone(false)
+     *     .withParseRoles(false)
+     *     .withParseUsers(false);
+     * }</pre>
      *
      * @return No mentions will be parsed.
      */

@@ -151,6 +151,15 @@ public class WebhookCluster implements AutoCloseable { //TODO: tests
         return this;
     }
 
+    /**
+     * The mention whitelist to use by default for every webhook client.
+     * <br>See {@link AllowedMentions} for more details.
+     *
+     * @param  allowedMentions
+     *         The default mention whitelist
+     *
+     * @return WebhookCluster instance for chaining convenience
+     */
     @NotNull
     public WebhookCluster setAllowedMentions(@Nullable AllowedMentions allowedMentions) {
         this.allowedMentions = allowedMentions == null ? AllowedMentions.all() : allowedMentions;
