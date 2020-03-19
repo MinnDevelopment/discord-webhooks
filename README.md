@@ -72,7 +72,7 @@ WebhookEmbed embed = new WebhookEmbedBuilder()
         .setDescription("Hello World")
         .build();
 
-client.send(embed);
+client.send(embed)
       .thenAccept((message) -> System.out.printf("Message with embed has been sent [%s]%n", message.getId()));
 
 // Change appearance of webhook message
