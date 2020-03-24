@@ -1,11 +1,11 @@
 /*
- * Copyright 2018-2019 Florian Spieß
+ * Copyright 2018-2020 Florian Spieß
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ *    http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -17,6 +17,7 @@
 package club.minnced.discord.webhook;
 
 import club.minnced.discord.webhook.receive.ReadonlyMessage;
+import club.minnced.discord.webhook.send.AllowedMentions;
 import club.minnced.discord.webhook.send.WebhookEmbed;
 import club.minnced.discord.webhook.send.WebhookMessage;
 import club.minnced.discord.webhook.send.WebhookMessageBuilder;
@@ -26,13 +27,13 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.json.JSONObject;
 
-import java.io.File;
-import java.io.InputStream;
+import java.io.*;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ThreadFactory;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 /**
  * Collection of webhooks, useful for subscriber pattern.
@@ -52,6 +53,7 @@ public class WebhookCluster implements AutoCloseable { //TODO: tests
     protected OkHttpClient defaultHttpClient;
     protected ScheduledExecutorService defaultPool;
     protected ThreadFactory threadFactory;
+    protected AllowedMentions allowedMentions = AllowedMentions.all();
     protected boolean isDaemon;
 
     /**
@@ -150,6 +152,21 @@ public class WebhookCluster implements AutoCloseable { //TODO: tests
     }
 
     /**
+     * The mention whitelist to use by default for every webhook client.
+     * <br>See {@link AllowedMentions} for more details.
+     *
+     * @param  allowedMentions
+     *         The default mention whitelist
+     *
+     * @return WebhookCluster instance for chaining convenience
+     */
+    @NotNull
+    public WebhookCluster setAllowedMentions(@Nullable AllowedMentions allowedMentions) {
+        this.allowedMentions = allowedMentions == null ? AllowedMentions.all() : allowedMentions;
+        return this;
+    }
+
+    /**
      * Configures whether {@link club.minnced.discord.webhook.WebhookClient} instances should be daemon by default.
      *
      * @param  isDaemon
@@ -208,6 +225,7 @@ public class WebhookCluster implements AutoCloseable { //TODO: tests
         builder.setExecutorService(defaultPool)
                .setHttpClient(defaultHttpClient)
                .setThreadFactory(threadFactory)
+               .setAllowedMentions(allowedMentions)
                .setDaemon(isDaemon);
         return builder;
     }
@@ -360,6 +378,8 @@ public class WebhookCluster implements AutoCloseable { //TODO: tests
     /**
      * Sends a message to a filtered set of clients.
      *
+     * <p><b>This will override the default {@link AllowedMentions} of the client!</b>
+     *
      * @param  filter
      *         The filter to decide whether a client should be targeted
      * @param  message
@@ -385,6 +405,8 @@ public class WebhookCluster implements AutoCloseable { //TODO: tests
 
     /**
      * Sends a message to all registered clients.
+     *
+     * <p><b>This will override the default {@link AllowedMentions} of the client!</b>
      *
      * @param  message
      *         The message to send
@@ -422,7 +444,10 @@ public class WebhookCluster implements AutoCloseable { //TODO: tests
      */
     @NotNull
     public List<CompletableFuture<ReadonlyMessage>> broadcast(@NotNull WebhookEmbed first, @NotNull WebhookEmbed... embeds) {
-        return broadcast(WebhookMessage.embeds(first, embeds));
+        List<WebhookEmbed> list = new ArrayList<>(embeds.length + 2);
+        list.add(first);
+        Collections.addAll(list, embeds);
+        return broadcast(list);
     }
 
     /**
@@ -438,7 +463,9 @@ public class WebhookCluster implements AutoCloseable { //TODO: tests
      */
     @NotNull
     public List<CompletableFuture<ReadonlyMessage>> broadcast(@NotNull Collection<WebhookEmbed> embeds) {
-        return broadcast(WebhookMessage.embeds(embeds));
+        return webhooks.stream()
+                .map(w -> w.send(embeds))
+                .collect(Collectors.toList());
     }
 
     /**
@@ -457,12 +484,9 @@ public class WebhookCluster implements AutoCloseable { //TODO: tests
         Objects.requireNonNull(content, "Content");
         if (content.length() > 2000)
             throw new IllegalArgumentException("Content may not exceed 2000 characters!");
-        final RequestBody body = WebhookClient.newBody(new JSONObject().put("content", content).toString());
-        final List<CompletableFuture<ReadonlyMessage>> callbacks = new ArrayList<>(webhooks.size());
-        for (WebhookClient webhook : webhooks) {
-            callbacks.add(webhook.execute(body));
-        }
-        return callbacks;
+        return webhooks.stream()
+                .map(w -> w.send(content))
+                .collect(Collectors.toList());
     }
 
     /**
@@ -473,6 +497,8 @@ public class WebhookCluster implements AutoCloseable { //TODO: tests
      *
      * @throws java.lang.NullPointerException
      *         If provided with null
+     * @throws UncheckedIOException
+     *         If an I/O error occurs
      *
      * @return List of futures for each client execution
      */
@@ -492,6 +518,8 @@ public class WebhookCluster implements AutoCloseable { //TODO: tests
      *
      * @throws java.lang.NullPointerException
      *         If provided with null
+     * @throws UncheckedIOException
+     *         If an I/O error occurs
      *
      * @return List of futures for each client execution
      */
@@ -500,7 +528,11 @@ public class WebhookCluster implements AutoCloseable { //TODO: tests
         Objects.requireNonNull(file, "File");
         if (file.length() > 10)
             throw new IllegalArgumentException("Provided File exceeds the maximum size of 8MB!");
-        return broadcast(new WebhookMessageBuilder().addFile(fileName, file).build());
+        try {
+            return broadcast(fileName, new FileInputStream(file));
+        } catch (FileNotFoundException e) {
+            throw new UncheckedIOException(e);
+        }
     }
 
     /**
@@ -513,12 +545,18 @@ public class WebhookCluster implements AutoCloseable { //TODO: tests
      *
      * @throws java.lang.NullPointerException
      *         If provided with null
+     * @throws UncheckedIOException
+     *         If an I/O error occurs
      *
      * @return List of futures for each client execution
      */
     @NotNull
     public List<CompletableFuture<ReadonlyMessage>> broadcast(@NotNull String fileName, @NotNull InputStream data) {
-        return broadcast(new WebhookMessageBuilder().addFile(fileName, data).build());
+        try {
+            return broadcast(fileName, IOUtil.readAllBytes(data));
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
+        }
     }
 
     /**
@@ -539,7 +577,9 @@ public class WebhookCluster implements AutoCloseable { //TODO: tests
         Objects.requireNonNull(data, "Data");
         if (data.length > 10)
             throw new IllegalArgumentException("Provided data exceeds the maximum size of 8MB!");
-        return broadcast(new WebhookMessageBuilder().addFile(fileName, data).build());
+        return webhooks.stream()
+                .map(w -> w.send(data, fileName))
+                .collect(Collectors.toList());
     }
 
     /**

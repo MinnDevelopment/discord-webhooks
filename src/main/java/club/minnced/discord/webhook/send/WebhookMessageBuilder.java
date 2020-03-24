@@ -1,11 +1,11 @@
 /*
- * Copyright 2018-2019 Florian Spieß
+ * Copyright 2018-2020 Florian Spieß
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ *    http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -16,6 +16,7 @@
 
 package club.minnced.discord.webhook.send;
 
+import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -31,6 +32,7 @@ public class WebhookMessageBuilder {
     protected final StringBuilder content = new StringBuilder();
     protected final List<WebhookEmbed> embeds = new LinkedList<>();
     protected final MessageAttachment[] files = new MessageAttachment[WebhookMessage.MAX_FILES];
+    protected AllowedMentions allowedMentions = AllowedMentions.all();
     protected String username, avatarUrl;
     protected boolean isTTS;
     private int fileIndex = 0;
@@ -91,6 +93,25 @@ public class WebhookMessageBuilder {
     @NotNull
     public WebhookMessageBuilder resetEmbeds() {
         this.embeds.clear();
+        return this;
+    }
+
+    /**
+     * The mention whitelist.
+     * <br>See {@link AllowedMentions} for more details.
+     *
+     * @param  mentions
+     *         The mention whitelist
+     *
+     * @throws NullPointerException
+     *         If provided null
+     *
+     * @return This builder for chaining convenience
+     */
+    @NotNull
+    public WebhookMessageBuilder setAllowedMentions(@NotNull AllowedMentions mentions)
+    {
+        this.allowedMentions = Objects.requireNonNull(mentions);
         return this;
     }
 
@@ -353,6 +374,7 @@ public class WebhookMessageBuilder {
     public WebhookMessage build() {
         if (isEmpty())
             throw new IllegalStateException("Cannot build an empty message!");
-        return new WebhookMessage(username, avatarUrl, content.toString(), embeds, isTTS, fileIndex == 0 ? null : Arrays.copyOf(files, fileIndex));
+        return new WebhookMessage(username, avatarUrl, content.toString(), embeds, isTTS,
+                fileIndex == 0 ? null : Arrays.copyOf(files, fileIndex), allowedMentions);
     }
 }

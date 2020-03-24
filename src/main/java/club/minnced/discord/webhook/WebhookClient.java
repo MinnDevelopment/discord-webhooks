@@ -1,11 +1,11 @@
 /*
- * Copyright 2018-2019 Florian Spieß
+ * Copyright 2018-2020 Florian Spieß
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ *    http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -19,6 +19,7 @@ package club.minnced.discord.webhook;
 import club.minnced.discord.webhook.exception.HttpException;
 import club.minnced.discord.webhook.receive.EntityFactory;
 import club.minnced.discord.webhook.receive.ReadonlyMessage;
+import club.minnced.discord.webhook.send.AllowedMentions;
 import club.minnced.discord.webhook.send.WebhookEmbed;
 import club.minnced.discord.webhook.send.WebhookMessage;
 import club.minnced.discord.webhook.send.WebhookMessageBuilder;
@@ -64,12 +65,13 @@ public class WebhookClient implements AutoCloseable {
     protected final Bucket bucket;
     protected final BlockingQueue<Request> queue;
     protected final boolean parseMessage;
+    protected final AllowedMentions allowedMentions;
     protected volatile boolean isQueued;
     protected boolean isShutdown;
 
     protected WebhookClient(
             final long id, final String token, final boolean parseMessage,
-            final OkHttpClient client, final ScheduledExecutorService pool) {
+            final OkHttpClient client, final ScheduledExecutorService pool, AllowedMentions mentions) {
         this.client = client;
         this.id = id;
         this.parseMessage = parseMessage;
@@ -77,6 +79,7 @@ public class WebhookClient implements AutoCloseable {
         this.pool = pool;
         this.bucket = new Bucket();
         this.queue = new LinkedBlockingQueue<>();
+        this.allowedMentions = mentions;
         this.isQueued = false;
     }
 
@@ -96,7 +99,7 @@ public class WebhookClient implements AutoCloseable {
     public static WebhookClient withId(long id, @NotNull String token) {
         Objects.requireNonNull(token, "Token");
         ScheduledExecutorService pool = WebhookClientBuilder.getDefaultPool(id, null, false);
-        return new WebhookClient(id, token, true, new OkHttpClient(), pool);
+        return new WebhookClient(id, token, true, new OkHttpClient(), pool, AllowedMentions.all());
     }
 
     /**
@@ -157,6 +160,8 @@ public class WebhookClient implements AutoCloseable {
      * <br>The returned future receives {@code null} if {@link club.minnced.discord.webhook.WebhookClientBuilder#setWait(boolean)}
      * was set to false.
      *
+     * <p><b>This will override the default {@link AllowedMentions} of this client!</b>
+     *
      * @param  message
      *         The message to send
      *
@@ -206,7 +211,10 @@ public class WebhookClient implements AutoCloseable {
      */
     @NotNull
     public CompletableFuture<ReadonlyMessage> send(@NotNull File file, @NotNull String fileName) {
-        return send(new WebhookMessageBuilder().addFile(fileName, file).build());
+        return send(new WebhookMessageBuilder()
+                .setAllowedMentions(allowedMentions)
+                .addFile(fileName, file)
+                .build());
     }
 
     /**
@@ -226,7 +234,10 @@ public class WebhookClient implements AutoCloseable {
      */
     @NotNull
     public CompletableFuture<ReadonlyMessage> send(@NotNull byte[] data, @NotNull String fileName) {
-        return send(new WebhookMessageBuilder().addFile(fileName, data).build());
+        return send(new WebhookMessageBuilder()
+                .setAllowedMentions(allowedMentions)
+                .addFile(fileName, data)
+                .build());
     }
 
     /**
@@ -246,7 +257,10 @@ public class WebhookClient implements AutoCloseable {
      */
     @NotNull
     public CompletableFuture<ReadonlyMessage> send(@NotNull InputStream data, @NotNull String fileName) {
-        return send(new WebhookMessageBuilder().addFile(fileName, data).build());
+        return send(new WebhookMessageBuilder()
+                .setAllowedMentions(allowedMentions)
+                .addFile(fileName, data)
+                .build());
     }
 
     /**
@@ -308,7 +322,14 @@ public class WebhookClient implements AutoCloseable {
             throw new IllegalArgumentException("Cannot send an empty message");
         if (content.length() > 2000)
             throw new IllegalArgumentException("Content may not exceed 2000 characters");
-        return execute(newBody(new JSONObject().put("content", content).toString()));
+        return execute(newBody(newJson().put("content", content).toString()));
+    }
+
+    private JSONObject newJson()
+    {
+        JSONObject json = new JSONObject();
+        json.put("allowed_mentions", allowedMentions);
+        return json;
     }
 
     /**
