@@ -28,7 +28,7 @@ plugins {
 }
 
 val major = "0"
-val minor = "2"
+val minor = "3"
 val patch = "0"
 
 group = "club.minnced"
