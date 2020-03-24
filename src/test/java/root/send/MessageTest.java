@@ -165,12 +165,19 @@ public class MessageTest {
 
     @Test
     public void checkJSONNonFile() throws IOException {
+        JSONObject allowedMentions = new JSONObject()
+                .put("parse", new JSONArray()
+                        .put("users")
+                        .put("roles")
+                        .put("everyone"));
+
         Map<String, Object> expected = new JSONObject()
                 .put("content", "CONTENT!")
                 .put("username", "MrWebhook")
                 .put("avatar_url", "linkToImage")
                 .put("tts", true)
                 .put("embeds", new JSONArray().put(new JSONObject().put("description", "embed")))
+                .put("allowed_mentions", allowedMentions)
                 .toMap();
 
         WebhookMessage msg = builder
@@ -194,6 +201,7 @@ public class MessageTest {
         expected = new JSONObject()
                 .put("content", "...")
                 .put("tts", false)
+                .put("allowed_mentions", allowedMentions)
                 .toMap();
 
         msg = builder
@@ -209,6 +217,12 @@ public class MessageTest {
 
     @Test
     public void checkMultipart() throws IOException {
+        JSONObject allowedMentions = new JSONObject()
+                .put("parse", new JSONArray()
+                        .put("users")
+                        .put("roles")
+                        .put("everyone"));
+
         String fileContent = "Hello World!\nNext line...\r\nAnother line";
         WebhookMessage msg = builder
                 .setContent("CONTENT!")
@@ -224,7 +238,10 @@ public class MessageTest {
         Assert.assertTrue("Multipart doesn't contain payload json", multiPart.containsKey("payload_json"));
         Assert.assertTrue("Multipart json is not of correct type", multiPart.get("payload_json") instanceof String);
         Assert.assertEquals("Multipart json mismatches",
-                new JSONObject().put("content", "CONTENT!").put("tts", false).toMap(),
+                new JSONObject()
+                        .put("allowed_mentions", allowedMentions)
+                        .put("content", "CONTENT!")
+                        .put("tts", false).toMap(),
                 new JSONObject((String) multiPart.get("payload_json")).toMap()
         );
 

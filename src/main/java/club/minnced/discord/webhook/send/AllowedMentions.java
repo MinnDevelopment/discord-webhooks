@@ -230,7 +230,7 @@ public class AllowedMentions implements JSONString {
         if (!roles.isEmpty())
             json.put("roles", roles);
         else if (parseRoles)
-            json.accumulate("parse", roles);
+            json.accumulate("parse", "roles");
 
         if (parseEveryone)
             json.accumulate("parse", "everyone");
