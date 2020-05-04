@@ -62,7 +62,7 @@ public class IOMock {
         verify(httpClient, timeout(1000).only()).newCall(requestCaptor.capture());
         Request req = requestCaptor.getValue();
         Assert.assertEquals("POST", req.method());
-        Assert.assertEquals(String.format("https://discordapp.com/api/v7/webhooks/%d/%s?wait=false", 1234, "token"), req.url().toString());
+        Assert.assertEquals(String.format("https://discord.com/api/v7/webhooks/%d/%s?wait=false", 1234, "token"), req.url().toString());
     }
 
     @Test
