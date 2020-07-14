@@ -155,6 +155,13 @@ public class WebhookClient implements AutoCloseable {
     }
 
     /**
+     * @return True, if client is closed
+     */
+    public boolean isShutdown() {
+        return isShutdown;
+    }
+
+    /**
      * Sends the provided {@link club.minnced.discord.webhook.send.WebhookMessage}
      * to the webhook.
      * <br>The returned future receives {@code null} if {@link club.minnced.discord.webhook.WebhookClientBuilder#setWait(boolean)}
