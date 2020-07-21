@@ -155,6 +155,8 @@ public class WebhookClient implements AutoCloseable {
     }
 
     /**
+     * Whether this client has been shutdown.
+     *
      * @return True, if client is closed
      */
     public boolean isShutdown() {
