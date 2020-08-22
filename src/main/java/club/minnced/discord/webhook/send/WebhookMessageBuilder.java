@@ -27,6 +27,7 @@ import net.dv8tion.jda.api.entities.Role;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.internal.entities.DataMessage;
 import net.dv8tion.jda.internal.entities.ReceivedMessage;
+import org.javacord.api.entity.DiscordEntity;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -402,7 +403,6 @@ public class WebhookMessageBuilder {
         builder.setContent(message.getContentRaw());
         message.getEmbeds().forEach(embed -> builder.addEmbeds(WebhookEmbedBuilder.from(embed).build()));
 
-
         if (message instanceof DataMessage) {
             DataMessage data = (DataMessage) message;
             AllowedMentions allowedMentions = AllowedMentions.none();
@@ -417,10 +417,12 @@ public class WebhookMessageBuilder {
             builder.setAllowedMentions(allowedMentions);
         } else if (message instanceof ReceivedMessage) {
             AllowedMentions allowedMentions = AllowedMentions.none();
-            allowedMentions.withRoles(message.getMentionedRoles().stream()
+            allowedMentions.withRoles(
+                message.getMentionedRoles().stream()
                     .map(Role::getId)
                     .collect(Collectors.toList()));
-            allowedMentions.withUsers(message.getMentionedUsers().stream()
+            allowedMentions.withUsers(
+                message.getMentionedUsers().stream()
                     .map(User::getId)
                     .collect(Collectors.toList()));
             allowedMentions.withParseEveryone(message.mentionsEveryone());
@@ -435,7 +437,17 @@ public class WebhookMessageBuilder {
         builder.setTTS(message.isTts());
         builder.setContent(message.getContent());
         message.getEmbeds().forEach(embed -> builder.addEmbeds(WebhookEmbedBuilder.from(embed).build()));
-        // TODO: Does this support allowed mentions somehow?
+
+        AllowedMentions allowedMentions = AllowedMentions.none();
+        allowedMentions.withUsers(
+            message.getMentionedUsers().stream()
+                .map(DiscordEntity::getIdAsString)
+                .collect(Collectors.toList()));
+        allowedMentions.withRoles(
+            message.getMentionedRoles().stream()
+                .map(DiscordEntity::getIdAsString)
+                .collect(Collectors.toList()));
+        allowedMentions.withParseEveryone(message.mentionsEveryone());
         return builder;
     }
 
