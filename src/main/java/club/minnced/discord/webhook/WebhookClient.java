@@ -20,6 +20,7 @@ import club.minnced.discord.webhook.exception.HttpException;
 import club.minnced.discord.webhook.receive.EntityFactory;
 import club.minnced.discord.webhook.receive.ReadonlyMessage;
 import club.minnced.discord.webhook.send.*;
+import discord4j.core.spec.MessageCreateSpec;
 import net.dv8tion.jda.api.entities.Role;
 import okhttp3.OkHttpClient;
 import okhttp3.RequestBody;
@@ -41,6 +42,7 @@ import java.time.temporal.ChronoUnit;
 import java.util.Collection;
 import java.util.Objects;
 import java.util.concurrent.*;
+import java.util.function.Consumer;
 import java.util.regex.Matcher;
 
 /**
@@ -173,6 +175,11 @@ public class WebhookClient implements AutoCloseable {
     @NotNull
     public CompletableFuture<ReadonlyMessage> send(@NotNull org.javacord.api.entity.message.Message message) {
         return send(WebhookMessageBuilder.from(message).build());
+    }
+
+    @NotNull
+    public CompletableFuture<ReadonlyMessage> send(@NotNull Consumer<? super MessageCreateSpec> callback) {
+        return send(WebhookMessageBuilder.from(callback).build());
     }
 
     @NotNull

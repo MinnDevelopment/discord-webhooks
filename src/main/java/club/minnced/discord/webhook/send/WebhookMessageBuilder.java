@@ -16,6 +16,17 @@
 
 package club.minnced.discord.webhook.send;
 
+import discord4j.core.spec.MessageCreateSpec;
+import discord4j.discordjson.json.AllowedMentionsData;
+import discord4j.discordjson.json.EmbedData;
+import discord4j.discordjson.json.MessageCreateRequest;
+import discord4j.discordjson.possible.Possible;
+import discord4j.rest.util.MultipartRequest;
+import net.dv8tion.jda.api.entities.Message;
+import net.dv8tion.jda.api.entities.Role;
+import net.dv8tion.jda.api.entities.User;
+import net.dv8tion.jda.internal.entities.DataMessage;
+import net.dv8tion.jda.internal.entities.ReceivedMessage;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -24,6 +35,8 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.*;
+import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
 /**
  * Constructs a {@link club.minnced.discord.webhook.send.WebhookMessage}
@@ -389,6 +402,31 @@ public class WebhookMessageBuilder {
         builder.setTTS(message.isTTS());
         builder.setContent(message.getContentRaw());
         message.getEmbeds().forEach(embed -> builder.addEmbeds(WebhookEmbedBuilder.from(embed).build()));
+
+
+        if (message instanceof DataMessage) {
+            DataMessage data = (DataMessage) message;
+            AllowedMentions allowedMentions = AllowedMentions.none();
+            EnumSet<Message.MentionType> parse = data.getAllowedMentions();
+            allowedMentions.withUsers(data.getMentionedUsersWhitelist());
+            allowedMentions.withRoles(data.getMentionedRolesWhitelist());
+            if (parse != null) {
+                allowedMentions.withParseUsers(parse.contains(Message.MentionType.USER));
+                allowedMentions.withParseRoles(parse.contains(Message.MentionType.ROLE));
+                allowedMentions.withParseEveryone(parse.contains(Message.MentionType.EVERYONE) || parse.contains(Message.MentionType.HERE));
+            }
+            builder.setAllowedMentions(allowedMentions);
+        } else if (message instanceof ReceivedMessage) {
+            AllowedMentions allowedMentions = AllowedMentions.none();
+            allowedMentions.withRoles(message.getMentionedRoles().stream()
+                    .map(Role::getId)
+                    .collect(Collectors.toList()));
+            allowedMentions.withUsers(message.getMentionedUsers().stream()
+                    .map(User::getId)
+                    .collect(Collectors.toList()));
+            allowedMentions.withParseEveryone(message.mentionsEveryone());
+            builder.setAllowedMentions(allowedMentions);
+        }
         return builder;
     }
 
@@ -398,7 +436,49 @@ public class WebhookMessageBuilder {
         builder.setTTS(message.isTts());
         builder.setContent(message.getContent());
         message.getEmbeds().forEach(embed -> builder.addEmbeds(WebhookEmbedBuilder.from(embed).build()));
+        // TODO: Does this support allowed mentions somehow?
         return builder;
     }
 
+    @NotNull
+    public static WebhookMessageBuilder from(@NotNull Consumer<? super MessageCreateSpec> callback) {
+        WebhookMessageBuilder builder = new WebhookMessageBuilder();
+        MessageCreateSpec spec = new MessageCreateSpec();
+        callback.accept(spec);
+        MultipartRequest data = spec.asRequest();
+        data.getFiles().forEach(tuple -> builder.addFile(tuple.getT1(), tuple.getT2()));
+        MessageCreateRequest parts = data.getCreateRequest();
+        if (parts == null)
+            return builder;
+
+        Possible<String> content = parts.content();
+        Possible<EmbedData> embed = parts.embed();
+        Possible<Boolean> tts = parts.tts();
+        Possible<AllowedMentionsData> allowedMentions = parts.allowedMentions();
+
+        if (!content.isAbsent())
+            builder.setContent(content.get());
+        if (!embed.isAbsent())
+            builder.addEmbeds(WebhookEmbedBuilder.from(embed.get()).build());
+        if (!tts.isAbsent())
+            builder.setTTS(tts.get());
+
+        if (!allowedMentions.isAbsent()) {
+            AllowedMentionsData mentions = allowedMentions.get();
+            AllowedMentions whitelist = AllowedMentions.none();
+            if (!mentions.users().isAbsent())
+                whitelist.withUsers(mentions.users().get());
+            if (!mentions.roles().isAbsent())
+                whitelist.withRoles(mentions.roles().get());
+            if (!mentions.parse().isAbsent()) {
+                List<String> parse = mentions.parse().get();
+                whitelist.withParseRoles(parse.contains("roles"));
+                whitelist.withParseEveryone(parse.contains("everyone"));
+                whitelist.withParseUsers(parse.contains("users"));
+            }
+            builder.setAllowedMentions(whitelist);
+        }
+
+        return builder;
+    }
 }
