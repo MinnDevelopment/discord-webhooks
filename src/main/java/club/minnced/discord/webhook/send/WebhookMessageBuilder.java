@@ -377,4 +377,28 @@ public class WebhookMessageBuilder {
         return new WebhookMessage(username, avatarUrl, content.toString(), embeds, isTTS,
                 fileIndex == 0 ? null : Arrays.copyOf(files, fileIndex), allowedMentions);
     }
+
+
+    /////////////////////////////////
+    /// Third-party compatibility ///
+    /////////////////////////////////
+
+    @NotNull
+    public static WebhookMessageBuilder from(@NotNull net.dv8tion.jda.api.entities.Message message) {
+        WebhookMessageBuilder builder = new WebhookMessageBuilder();
+        builder.setTTS(message.isTTS());
+        builder.setContent(message.getContentRaw());
+        message.getEmbeds().forEach(embed -> builder.addEmbeds(WebhookEmbedBuilder.from(embed).build()));
+        return builder;
+    }
+
+    @NotNull
+    public static WebhookMessageBuilder from(@NotNull org.javacord.api.entity.message.Message message) {
+        WebhookMessageBuilder builder = new WebhookMessageBuilder();
+        builder.setTTS(message.isTts());
+        builder.setContent(message.getContent());
+        message.getEmbeds().forEach(embed -> builder.addEmbeds(WebhookEmbedBuilder.from(embed).build()));
+        return builder;
+    }
+
 }

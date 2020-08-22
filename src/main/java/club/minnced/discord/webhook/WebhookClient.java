@@ -19,10 +19,8 @@ package club.minnced.discord.webhook;
 import club.minnced.discord.webhook.exception.HttpException;
 import club.minnced.discord.webhook.receive.EntityFactory;
 import club.minnced.discord.webhook.receive.ReadonlyMessage;
-import club.minnced.discord.webhook.send.AllowedMentions;
-import club.minnced.discord.webhook.send.WebhookEmbed;
-import club.minnced.discord.webhook.send.WebhookMessage;
-import club.minnced.discord.webhook.send.WebhookMessageBuilder;
+import club.minnced.discord.webhook.send.*;
+import net.dv8tion.jda.api.entities.Role;
 import okhttp3.OkHttpClient;
 import okhttp3.RequestBody;
 import okhttp3.Response;
@@ -162,6 +160,31 @@ public class WebhookClient implements AutoCloseable {
     public boolean isShutdown() {
         return isShutdown;
     }
+
+     /////////////////////////////////
+     /// Third-party compatibility ///
+     /////////////////////////////////
+
+    @NotNull
+    public CompletableFuture<ReadonlyMessage> send(@NotNull net.dv8tion.jda.api.entities.Message message) {
+        return send(WebhookMessageBuilder.from(message).build());
+    }
+
+    @NotNull
+    public CompletableFuture<ReadonlyMessage> send(@NotNull org.javacord.api.entity.message.Message message) {
+        return send(WebhookMessageBuilder.from(message).build());
+    }
+
+    @NotNull
+    public CompletableFuture<ReadonlyMessage> send(@NotNull net.dv8tion.jda.api.entities.MessageEmbed embed) {
+        return send(WebhookEmbedBuilder.from(embed).build());
+    }
+
+    @NotNull
+    public CompletableFuture<ReadonlyMessage> send(@NotNull org.javacord.api.entity.message.embed.Embed embed) {
+        return send(WebhookEmbedBuilder.from(embed).build());
+    }
+
 
     /**
      * Sends the provided {@link club.minnced.discord.webhook.send.WebhookMessage}

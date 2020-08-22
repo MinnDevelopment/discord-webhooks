@@ -23,8 +23,8 @@ import org.gradle.jvm.tasks.*
 plugins {
     `java-library`
     `maven-publish`
-    id("com.jfrog.bintray") version "1.8.1"
-    id("com.github.johnrengelman.shadow") version "2.0.4"
+    id("com.jfrog.bintray") version "1.8.5"
+    id("com.github.johnrengelman.shadow") version "6.0.0"
 }
 
 val major = "0"
@@ -52,11 +52,15 @@ dependencies {
     api("com.squareup.okhttp3:okhttp:3.12.0")
     api("org.json:json:20180813")
     implementation("org.jetbrains:annotations:16.0.1")
+    
+    compileOnly("net.dv8tion:JDA:4.2.0_196")
+    compileOnly("com.discord4j:discord4j-core:3.1.0")
+    compileOnly("org.javacord:javacord:3.0.6")
 
-    testCompile("junit:junit:4.12")
-    testCompile("org.mockito:mockito-core:3.2.4")
-    testCompile("org.powermock:powermock-module-junit4:$powermockVersion")
-    testCompile("org.powermock:powermock-api-mockito2:$powermockVersion")
+    testImplementation("junit:junit:4.12")
+    testImplementation("org.mockito:mockito-core:3.2.4")
+    testImplementation("org.powermock:powermock-module-junit4:$powermockVersion")
+    testImplementation("org.powermock:powermock-api-mockito2:$powermockVersion")
     //testCompile("ch.qos.logback:logback-classic:1.2.3")
 }
 

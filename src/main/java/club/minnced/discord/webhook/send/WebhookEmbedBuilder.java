@@ -16,9 +16,16 @@
 
 package club.minnced.discord.webhook.send;
 
+import discord4j.core.object.Embed;
+import discord4j.rest.util.Color;
+import net.dv8tion.jda.api.entities.MessageEmbed;
+import net.dv8tion.jda.api.entities.Role;
+import org.javacord.api.entity.message.embed.EmbedImage;
+import org.javacord.api.entity.message.embed.EmbedThumbnail;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.net.URL;
 import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.time.ZoneId;
@@ -295,4 +302,66 @@ public class WebhookEmbedBuilder {
                 new ArrayList<>(fields)
         );
     }
+
+
+    /////////////////////////////////
+    /// Third-party compatibility ///
+    /////////////////////////////////
+
+    @NotNull
+    @SuppressWarnings("ConstantConditions")
+    public static WebhookEmbedBuilder from(@NotNull net.dv8tion.jda.api.entities.MessageEmbed embed) {
+        WebhookEmbedBuilder builder = new WebhookEmbedBuilder();
+        String url = embed.getUrl();
+        String title = embed.getTitle();
+        String description = embed.getDescription();
+        MessageEmbed.Thumbnail thumbnail = embed.getThumbnail();
+        MessageEmbed.AuthorInfo author = embed.getAuthor();
+        MessageEmbed.Footer footer = embed.getFooter();
+        MessageEmbed.ImageInfo image = embed.getImage();
+        List<MessageEmbed.Field> fields = embed.getFields();
+        int color = embed.getColorRaw();
+        OffsetDateTime timestamp = embed.getTimestamp();
+
+        if (title != null)
+            builder.setTitle(new WebhookEmbed.EmbedTitle(title, url));
+        if (description != null)
+            builder.setDescription(description);
+        if (thumbnail != null)
+            builder.setThumbnailUrl(builder.thumbnailUrl);
+        if (author != null)
+            builder.setAuthor(new WebhookEmbed.EmbedAuthor(author.getName(), author.getIconUrl(), author.getUrl()));
+        if (footer != null)
+            builder.setFooter(new WebhookEmbed.EmbedFooter(footer.getText(), footer.getIconUrl()));
+        if (image != null)
+            builder.setImageUrl(builder.imageUrl);
+        if (!fields.isEmpty())
+            fields.forEach(field -> builder.addField(new WebhookEmbed.EmbedField(field.isInline(), field.getName(), field.getValue())));
+        if (color != Role.DEFAULT_COLOR_RAW)
+            builder.setColor(color);
+        if (timestamp != null)
+            builder.setTimestamp(timestamp);
+
+        return builder;
+    }
+
+    @NotNull
+    public static WebhookEmbedBuilder from(@NotNull org.javacord.api.entity.message.embed.Embed embed) {
+        WebhookEmbedBuilder builder = new WebhookEmbedBuilder();
+
+        embed.getTitle().ifPresent(title ->
+                builder.setTitle(new WebhookEmbed.EmbedTitle(title, embed.getUrl().map(URL::toString).orElse(null))));
+        embed.getDescription().ifPresent(builder::setDescription);
+        embed.getTimestamp().ifPresent(builder::setTimestamp);
+        embed.getColor().map(java.awt.Color::getRGB).ifPresent(builder::setColor);
+        embed.getFooter().map(footer -> new WebhookEmbed.EmbedFooter(footer.getText().orElseThrow(NullPointerException::new), footer.getIconUrl().map(URL::toString).orElse(null))).ifPresent(builder::setFooter);
+        embed.getImage().map(EmbedImage::getUrl).map(URL::toString).ifPresent(builder::setImageUrl);
+        embed.getThumbnail().map(EmbedThumbnail::getUrl).map(URL::toString).ifPresent(builder::setThumbnailUrl);
+        embed.getFields().stream()
+                .map(field -> new WebhookEmbed.EmbedField(field.isInline(), field.getName(), field.getValue()))
+                .forEach(builder::addField);
+
+        return builder;
+    }
+
 }
