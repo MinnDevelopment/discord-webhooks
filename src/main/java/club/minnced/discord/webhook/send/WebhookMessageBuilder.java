@@ -470,6 +470,7 @@ public class WebhookMessageBuilder {
                 .map(DiscordEntity::getIdAsString)
                 .collect(Collectors.toList()));
         allowedMentions.withParseEveryone(message.mentionsEveryone());
+        builder.setAllowedMentions(allowedMentions);
         return builder;
     }
 
