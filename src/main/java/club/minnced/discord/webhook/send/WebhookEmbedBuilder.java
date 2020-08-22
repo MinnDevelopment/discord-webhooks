@@ -310,6 +310,17 @@ public class WebhookEmbedBuilder {
     /// Third-party compatibility ///
     /////////////////////////////////
 
+    /**
+     * Converts a JDA {@link MessageEmbed} into a compatible WebhookEmbedBuilder.
+     *
+     * @param  embed
+     *         The embed
+     *
+     * @throws NullPointerException
+     *         If null is provided
+     *
+     * @return WebhookEmbedBuilder with the converted data
+     */
     @NotNull
     @SuppressWarnings("ConstantConditions")
     public static WebhookEmbedBuilder from(@NotNull net.dv8tion.jda.api.entities.MessageEmbed embed) {
@@ -347,6 +358,17 @@ public class WebhookEmbedBuilder {
         return builder;
     }
 
+    /**
+     * Converts a Javacord {@link org.javacord.api.entity.message.embed.Embed Embed} into a compatible WebhookEmbedBuilder.
+     *
+     * @param  embed
+     *         The embed
+     *
+     * @throws NullPointerException
+     *         If null is provided
+     *
+     * @return WebhookEmbedBuilder with the converted data
+     */
     @NotNull
     public static WebhookEmbedBuilder from(@NotNull org.javacord.api.entity.message.embed.Embed embed) {
         WebhookEmbedBuilder builder = new WebhookEmbedBuilder();
@@ -365,6 +387,17 @@ public class WebhookEmbedBuilder {
         return builder;
     }
 
+    /**
+     * Converts a Discord4J {@link EmbedCreateSpec} into a compatible WebhookEmbedBuilder.
+     *
+     * @param  callback
+     *         The callback which applies the desired settings to the {@link EmbedCreateSpec}
+     *
+     * @throws NullPointerException
+     *         If null is provided
+     *
+     * @return WebhookEmbedBuilder with the converted data
+     */
     @NotNull
     public static WebhookEmbedBuilder from(@NotNull Consumer<? super EmbedCreateSpec> callback) {
         EmbedCreateSpec spec = new EmbedCreateSpec();
@@ -373,6 +406,17 @@ public class WebhookEmbedBuilder {
         return from(data);
     }
 
+    /**
+     * Converts a Discord4J {@link EmbedCreateSpec} into a compatible WebhookEmbedBuilder.
+     *
+     * @param  data
+     *         The embed data
+     *
+     * @throws NullPointerException
+     *         If null is provided
+     *
+     * @return WebhookEmbedBuilder with the converted data
+     */
     @NotNull
     public static WebhookEmbedBuilder from(@NotNull EmbedData data) {
         WebhookEmbedBuilder builder = new WebhookEmbedBuilder();

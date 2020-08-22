@@ -23,6 +23,7 @@ import discord4j.discordjson.json.MessageCreateRequest;
 import discord4j.discordjson.possible.Possible;
 import discord4j.rest.util.MultipartRequest;
 import net.dv8tion.jda.api.entities.Message;
+import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.entities.Role;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.internal.entities.DataMessage;
@@ -396,6 +397,17 @@ public class WebhookMessageBuilder {
     /// Third-party compatibility ///
     /////////////////////////////////
 
+    /**
+     * Converts a JDA {@link Message} into a compatible WebhookMessageBuilder.
+     *
+     * @param  message
+     *         The message
+     *
+     * @throws NullPointerException
+     *         If null is provided
+     *
+     * @return WebhookMessageBuilder with the converted data
+     */
     @NotNull
     public static WebhookMessageBuilder from(@NotNull net.dv8tion.jda.api.entities.Message message) {
         WebhookMessageBuilder builder = new WebhookMessageBuilder();
@@ -431,6 +443,17 @@ public class WebhookMessageBuilder {
         return builder;
     }
 
+    /**
+     * Converts a Javacord {@link org.javacord.api.entity.message.Message Message} into a compatible WebhookMessageBuilder.
+     *
+     * @param  message
+     *         The message
+     *
+     * @throws NullPointerException
+     *         If null is provided
+     *
+     * @return WebhookMessageBuilder with the converted data
+     */
     @NotNull
     public static WebhookMessageBuilder from(@NotNull org.javacord.api.entity.message.Message message) {
         WebhookMessageBuilder builder = new WebhookMessageBuilder();
@@ -451,6 +474,17 @@ public class WebhookMessageBuilder {
         return builder;
     }
 
+    /**
+     * Converts a Discord4J {@link MessageCreateSpec} into a compatible WebhookMessageBuilder.
+     *
+     * @param  callback
+     *         The callback used to specify the desired message settings
+     *
+     * @throws NullPointerException
+     *         If null is provided
+     *
+     * @return WebhookMessageBuilder with the converted data
+     */
     @NotNull
     public static WebhookMessageBuilder from(@NotNull Consumer<? super MessageCreateSpec> callback) {
         WebhookMessageBuilder builder = new WebhookMessageBuilder();

@@ -21,6 +21,7 @@ import club.minnced.discord.webhook.receive.EntityFactory;
 import club.minnced.discord.webhook.receive.ReadonlyMessage;
 import club.minnced.discord.webhook.send.*;
 import discord4j.core.spec.MessageCreateSpec;
+import net.dv8tion.jda.api.entities.Message;
 import okhttp3.OkHttpClient;
 import okhttp3.RequestBody;
 import okhttp3.Response;
@@ -166,26 +167,96 @@ public class WebhookClient implements AutoCloseable {
      /// Third-party compatibility ///
      /////////////////////////////////
 
+    /**
+     * Sends the provided {@link net.dv8tion.jda.api.entities.Message Message} to the webhook.
+     *
+     * @param  message
+     *         The message to send
+     *
+     * @throws NullPointerException
+     *         If null is provided
+     *
+     * @return {@link CompletableFuture}
+     *
+     * @see    #isWait()
+     * @see    WebhookMessageBuilder#from(Message)
+     */
     @NotNull
     public CompletableFuture<ReadonlyMessage> send(@NotNull net.dv8tion.jda.api.entities.Message message) {
         return send(WebhookMessageBuilder.from(message).build());
     }
 
+    /**
+     * Sends the provided {@link org.javacord.api.entity.message.Message Message} to the webhook.
+     *
+     * @param  message
+     *         The message to send
+     *
+     * @throws NullPointerException
+     *         If null is provided
+     *
+     * @return {@link CompletableFuture}
+     *
+     * @see    #isWait()
+     * @see    WebhookMessageBuilder#from(org.javacord.api.entity.message.Message)
+     */
     @NotNull
     public CompletableFuture<ReadonlyMessage> send(@NotNull org.javacord.api.entity.message.Message message) {
         return send(WebhookMessageBuilder.from(message).build());
     }
 
+    /**
+     * Sends the provided {@link MessageCreateSpec} to the webhook.
+     *
+     * @param  callback
+     *         The callback used to specify the desired message settings
+     *
+     * @throws NullPointerException
+     *         If null is provided
+     *
+     * @return {@link CompletableFuture}
+     *
+     * @see    #isWait()
+     * @see    WebhookMessageBuilder#from(Consumer)
+     */
     @NotNull
     public CompletableFuture<ReadonlyMessage> send(@NotNull Consumer<? super MessageCreateSpec> callback) {
         return send(WebhookMessageBuilder.from(callback).build());
     }
 
+    /**
+     * Sends the provided {@link net.dv8tion.jda.api.entities.MessageEmbed MessageEmbed} to the webhook.
+     *
+     * @param  embed
+     *         The embed to send
+     *
+     * @throws NullPointerException
+     *         If null is provided
+     *
+     * @return {@link CompletableFuture}
+     *
+     * @see    #isWait()
+     * @see    WebhookEmbedBuilder#from(net.dv8tion.jda.api.entities.MessageEmbed)
+     */
     @NotNull
     public CompletableFuture<ReadonlyMessage> send(@NotNull net.dv8tion.jda.api.entities.MessageEmbed embed) {
         return send(WebhookEmbedBuilder.from(embed).build());
     }
 
+    /**
+     * Sends the provided {@link org.javacord.api.entity.message.embed.Embed Embed} to the webhook.
+     *
+     * @param  embed
+     *         The embed to send
+     *
+     * @throws NullPointerException
+     *         If null is provided
+     *
+     * @return {@link CompletableFuture}
+     *
+     * @see    #isWait()
+     * @see    WebhookEmbedBuilder#from(org.javacord.api.entity.message.embed.Embed)
+     */
     @NotNull
     public CompletableFuture<ReadonlyMessage> send(@NotNull org.javacord.api.entity.message.embed.Embed embed) {
         return send(WebhookEmbedBuilder.from(embed).build());
