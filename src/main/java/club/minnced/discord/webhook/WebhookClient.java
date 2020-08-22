@@ -21,7 +21,6 @@ import club.minnced.discord.webhook.receive.EntityFactory;
 import club.minnced.discord.webhook.receive.ReadonlyMessage;
 import club.minnced.discord.webhook.send.*;
 import discord4j.core.spec.MessageCreateSpec;
-import net.dv8tion.jda.api.entities.Role;
 import okhttp3.OkHttpClient;
 import okhttp3.RequestBody;
 import okhttp3.Response;

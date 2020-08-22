@@ -16,11 +16,9 @@
 
 package club.minnced.discord.webhook.send;
 
-import discord4j.core.object.Embed;
 import discord4j.core.spec.EmbedCreateSpec;
 import discord4j.discordjson.json.*;
 import discord4j.discordjson.possible.Possible;
-import discord4j.rest.util.Color;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.entities.Role;
 import org.javacord.api.entity.message.embed.EmbedImage;
