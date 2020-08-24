@@ -1,8 +1,7 @@
-import com.jfrog.bintray.gradle.*
-import com.jfrog.bintray.gradle.tasks.*
-import org.apache.maven.model.*
-import org.apache.tools.ant.filters.*
-import org.gradle.jvm.tasks.*
+import com.jfrog.bintray.gradle.BintrayExtension
+import com.jfrog.bintray.gradle.tasks.BintrayPublishTask
+import com.jfrog.bintray.gradle.tasks.BintrayUploadTask
+import org.apache.tools.ant.filters.ReplaceTokens
 
 /*
  * Copyright 2018-2019 Florian Spieß
@@ -35,21 +34,21 @@ group = "club.minnced"
 version = "$major.$minor.$patch"
 
 val tokens = mapOf(
-        "MAJOR" to major,
-        "MINOR" to minor,
-        "PATCH" to patch,
-        "VERSION" to version
+    "MAJOR" to major,
+    "MINOR" to minor,
+    "PATCH" to patch,
+    "VERSION" to version
 )
 
 repositories {
     jcenter()
 }
 
-val powermockVersion = "2.0.4"
+val powermockVersion = "2.0.7"
 
 dependencies {
     api("org.slf4j:slf4j-api:1.7.25")
-    api("com.squareup.okhttp3:okhttp:3.12.0")
+    api("com.squareup.okhttp3:okhttp:3.14.9")
     api("org.json:json:20180813")
     implementation("org.jetbrains:annotations:16.0.1")
     
@@ -58,9 +57,12 @@ dependencies {
     compileOnly("org.javacord:javacord:3.0.6")
 
     testImplementation("junit:junit:4.12")
-    testImplementation("org.mockito:mockito-core:3.2.4")
+    testImplementation("org.mockito:mockito-core:3.5.5")
     testImplementation("org.powermock:powermock-module-junit4:$powermockVersion")
     testImplementation("org.powermock:powermock-api-mockito2:$powermockVersion")
+    testImplementation("net.dv8tion:JDA:4.2.0_196")
+    testImplementation("com.discord4j:discord4j-core:3.1.0")
+    testImplementation("org.javacord:javacord:3.0.6")
     //testCompile("ch.qos.logback:logback-classic:1.2.3")
 }
 

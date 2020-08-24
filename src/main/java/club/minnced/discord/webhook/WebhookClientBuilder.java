@@ -90,6 +90,29 @@ public class WebhookClientBuilder { //TODO: tests
         this.token = matcher.group(2);
     }
 
+    /////////////////////////////////
+    /// Third-party compatibility ///
+    /////////////////////////////////
+
+    @NotNull
+    public static WebhookClientBuilder from(@NotNull net.dv8tion.jda.api.entities.Webhook webhook) {
+        Objects.requireNonNull(webhook, "Webhook");
+        return new WebhookClientBuilder(webhook.getIdLong(), Objects.requireNonNull(webhook.getToken(), "Webhook Token"));
+    }
+
+    @NotNull
+    public static WebhookClientBuilder from(@NotNull discord4j.core.object.entity.Webhook webhook) {
+        Objects.requireNonNull(webhook, "Webhook");
+        return new WebhookClientBuilder(webhook.getId().asLong(), webhook.getToken());
+    }
+
+    @NotNull
+    public static WebhookClientBuilder from(@NotNull org.javacord.api.entity.webhook.Webhook webhook) {
+        Objects.requireNonNull(webhook, "Webhook");
+        return new WebhookClientBuilder(webhook.getId(), webhook.getToken().orElseThrow(NullPointerException::new));
+    }
+
+
     /**
      * The {@link java.util.concurrent.ScheduledExecutorService} that is used to execute
      * send requests in the resulting {@link club.minnced.discord.webhook.WebhookClient}.

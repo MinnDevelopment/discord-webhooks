@@ -31,6 +31,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import reactor.core.publisher.Mono;
 
 import java.io.File;
 import java.io.IOException;
@@ -163,9 +164,24 @@ public class WebhookClient implements AutoCloseable {
         return isShutdown;
     }
 
-     /////////////////////////////////
-     /// Third-party compatibility ///
-     /////////////////////////////////
+    /////////////////////////////////
+    /// Third-party compatibility ///
+    /////////////////////////////////
+
+    @NotNull
+    public static WebhookClient from(@NotNull net.dv8tion.jda.api.entities.Webhook webhook) {
+        return WebhookClientBuilder.from(webhook).build();
+    }
+
+    @NotNull
+    public static WebhookClient from(@NotNull discord4j.core.object.entity.Webhook webhook) {
+        return WebhookClientBuilder.from(webhook).build();
+    }
+
+    @NotNull
+    public static WebhookClient from(@NotNull org.javacord.api.entity.webhook.Webhook webhook) {
+        return WebhookClientBuilder.from(webhook).build();
+    }
 
     /**
      * Sends the provided {@link net.dv8tion.jda.api.entities.Message Message} to the webhook.
@@ -214,14 +230,15 @@ public class WebhookClient implements AutoCloseable {
      * @throws NullPointerException
      *         If null is provided
      *
-     * @return {@link CompletableFuture}
+     * @return {@link Mono}
      *
      * @see    #isWait()
      * @see    WebhookMessageBuilder#from(Consumer)
      */
     @NotNull
-    public CompletableFuture<ReadonlyMessage> send(@NotNull Consumer<? super MessageCreateSpec> callback) {
-        return send(WebhookMessageBuilder.from(callback).build());
+    public Mono<ReadonlyMessage> send(@NotNull Consumer<? super MessageCreateSpec> callback) {
+        WebhookMessage message = WebhookMessageBuilder.from(callback).build();
+        return Mono.fromFuture(() -> send(message));
     }
 
     /**
