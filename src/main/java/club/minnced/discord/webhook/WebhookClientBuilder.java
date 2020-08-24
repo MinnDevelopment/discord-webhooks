@@ -94,18 +94,55 @@ public class WebhookClientBuilder { //TODO: tests
     /// Third-party compatibility ///
     /////////////////////////////////
 
+    /**
+     * Creates a WebhookClientBuilder for the provided webhook.
+     *
+     * @param  webhook
+     *         The webhook
+     *
+     * @throws NullPointerException
+     *         If the webhook is null or does not provide a token
+     *
+     * @return The WebhookClientBuilder
+     */
     @NotNull
     public static WebhookClientBuilder from(@NotNull net.dv8tion.jda.api.entities.Webhook webhook) {
         Objects.requireNonNull(webhook, "Webhook");
         return new WebhookClientBuilder(webhook.getIdLong(), Objects.requireNonNull(webhook.getToken(), "Webhook Token"));
     }
 
+    /**
+     * Creates a WebhookClientBuilder for the provided webhook.
+     *
+     * @param  webhook
+     *         The webhook
+     *
+     * @throws NullPointerException
+     *         If the webhook is null or does not provide a token
+     *
+     * @return The WebhookClientBuilder
+     */
     @NotNull
     public static WebhookClientBuilder from(@NotNull discord4j.core.object.entity.Webhook webhook) {
         Objects.requireNonNull(webhook, "Webhook");
-        return new WebhookClientBuilder(webhook.getId().asLong(), webhook.getToken());
+        String token = webhook.getToken();
+        Objects.requireNonNull(token, "Webhook Token");
+        if (token.isEmpty())
+            throw new NullPointerException("Webhook Token");
+        return new WebhookClientBuilder(webhook.getId().asLong(), token);
     }
 
+    /**
+     * Creates a WebhookClientBuilder for the provided webhook.
+     *
+     * @param  webhook
+     *         The webhook
+     *
+     * @throws NullPointerException
+     *         If the webhook is null or does not provide a token
+     *
+     * @return The WebhookClientBuilder
+     */
     @NotNull
     public static WebhookClientBuilder from(@NotNull org.javacord.api.entity.webhook.Webhook webhook) {
         Objects.requireNonNull(webhook, "Webhook");

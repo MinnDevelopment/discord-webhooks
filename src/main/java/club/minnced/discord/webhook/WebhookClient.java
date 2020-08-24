@@ -33,6 +33,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import reactor.core.publisher.Mono;
 
+import javax.annotation.CheckReturnValue;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -168,16 +169,49 @@ public class WebhookClient implements AutoCloseable {
     /// Third-party compatibility ///
     /////////////////////////////////
 
+    /**
+     * Creates a WebhookClient for the provided webhook.
+     *
+     * @param  webhook
+     *         The webhook
+     *
+     * @throws NullPointerException
+     *         If the webhook is null or does not provide a token
+     *
+     * @return The WebhookClient
+     */
     @NotNull
     public static WebhookClient from(@NotNull net.dv8tion.jda.api.entities.Webhook webhook) {
         return WebhookClientBuilder.from(webhook).build();
     }
 
+    /**
+     * Creates a WebhookClient for the provided webhook.
+     *
+     * @param  webhook
+     *         The webhook
+     *
+     * @throws NullPointerException
+     *         If the webhook is null or does not provide a token
+     *
+     * @return The WebhookClient
+     */
     @NotNull
     public static WebhookClient from(@NotNull discord4j.core.object.entity.Webhook webhook) {
         return WebhookClientBuilder.from(webhook).build();
     }
 
+    /**
+     * Creates a WebhookClient for the provided webhook.
+     *
+     * @param  webhook
+     *         The webhook
+     *
+     * @throws NullPointerException
+     *         If the webhook is null or does not provide a token
+     *
+     * @return The WebhookClient
+     */
     @NotNull
     public static WebhookClient from(@NotNull org.javacord.api.entity.webhook.Webhook webhook) {
         return WebhookClientBuilder.from(webhook).build();
@@ -236,6 +270,7 @@ public class WebhookClient implements AutoCloseable {
      * @see    WebhookMessageBuilder#from(Consumer)
      */
     @NotNull
+    @CheckReturnValue
     public Mono<ReadonlyMessage> send(@NotNull Consumer<? super MessageCreateSpec> callback) {
         WebhookMessage message = WebhookMessageBuilder.from(callback).build();
         return Mono.fromFuture(() -> send(message));
