@@ -18,7 +18,6 @@ package club.minnced.discord.webhook.receive;
 
 import club.minnced.discord.webhook.send.WebhookMessage;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import org.json.JSONObject;
 import org.json.JSONString;
 

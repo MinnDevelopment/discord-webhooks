@@ -35,12 +35,13 @@ public class MessageAttachment {
 
     MessageAttachment(@NotNull String name, @NotNull InputStream stream) throws IOException {
         this.name = name;
-        this.data = IOUtil.readAllBytes(stream);
+        try (InputStream data = stream) {
+            this.data = IOUtil.readAllBytes(data);
+        }
     }
 
     MessageAttachment(@NotNull String name, @NotNull File file) throws IOException {
-        this.name = name;
-        this.data = IOUtil.readAllBytes(new FileInputStream(file));
+        this(name, new FileInputStream(file));
     }
 
     @NotNull

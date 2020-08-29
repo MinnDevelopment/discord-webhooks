@@ -16,9 +16,17 @@
 
 package club.minnced.discord.webhook.send;
 
+import discord4j.core.spec.EmbedCreateSpec;
+import discord4j.discordjson.json.*;
+import discord4j.discordjson.possible.Possible;
+import net.dv8tion.jda.api.entities.MessageEmbed;
+import net.dv8tion.jda.api.entities.Role;
+import org.javacord.api.entity.message.embed.EmbedImage;
+import org.javacord.api.entity.message.embed.EmbedThumbnail;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.net.URL;
 import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.time.ZoneId;
@@ -26,6 +34,7 @@ import java.time.temporal.TemporalAccessor;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.function.Consumer;
 
 /**
  * Builder for a {@link club.minnced.discord.webhook.send.WebhookEmbed} instance.
@@ -295,4 +304,164 @@ public class WebhookEmbedBuilder {
                 new ArrayList<>(fields)
         );
     }
+
+
+    /////////////////////////////////
+    /// Third-party compatibility ///
+    /////////////////////////////////
+
+    /**
+     * Converts a JDA {@link MessageEmbed} into a compatible WebhookEmbedBuilder.
+     *
+     * @param  embed
+     *         The embed
+     *
+     * @throws NullPointerException
+     *         If null is provided
+     *
+     * @return WebhookEmbedBuilder with the converted data
+     */
+    @NotNull
+    @SuppressWarnings("ConstantConditions")
+    public static WebhookEmbedBuilder from(@NotNull net.dv8tion.jda.api.entities.MessageEmbed embed) {
+        WebhookEmbedBuilder builder = new WebhookEmbedBuilder();
+        String url = embed.getUrl();
+        String title = embed.getTitle();
+        String description = embed.getDescription();
+        MessageEmbed.Thumbnail thumbnail = embed.getThumbnail();
+        MessageEmbed.AuthorInfo author = embed.getAuthor();
+        MessageEmbed.Footer footer = embed.getFooter();
+        MessageEmbed.ImageInfo image = embed.getImage();
+        List<MessageEmbed.Field> fields = embed.getFields();
+        int color = embed.getColorRaw();
+        OffsetDateTime timestamp = embed.getTimestamp();
+
+        if (title != null)
+            builder.setTitle(new WebhookEmbed.EmbedTitle(title, url));
+        if (description != null)
+            builder.setDescription(description);
+        if (thumbnail != null)
+            builder.setThumbnailUrl(builder.thumbnailUrl);
+        if (author != null)
+            builder.setAuthor(new WebhookEmbed.EmbedAuthor(author.getName(), author.getIconUrl(), author.getUrl()));
+        if (footer != null)
+            builder.setFooter(new WebhookEmbed.EmbedFooter(footer.getText(), footer.getIconUrl()));
+        if (image != null)
+            builder.setImageUrl(builder.imageUrl);
+        if (!fields.isEmpty())
+            fields.forEach(field -> builder.addField(new WebhookEmbed.EmbedField(field.isInline(), field.getName(), field.getValue())));
+        if (color != Role.DEFAULT_COLOR_RAW)
+            builder.setColor(color);
+        if (timestamp != null)
+            builder.setTimestamp(timestamp);
+
+        return builder;
+    }
+
+    /**
+     * Converts a Javacord {@link org.javacord.api.entity.message.embed.Embed Embed} into a compatible WebhookEmbedBuilder.
+     *
+     * @param  embed
+     *         The embed
+     *
+     * @throws NullPointerException
+     *         If null is provided
+     *
+     * @return WebhookEmbedBuilder with the converted data
+     */
+    @NotNull
+    public static WebhookEmbedBuilder from(@NotNull org.javacord.api.entity.message.embed.Embed embed) {
+        WebhookEmbedBuilder builder = new WebhookEmbedBuilder();
+
+        embed.getTitle().ifPresent(title ->
+                builder.setTitle(new WebhookEmbed.EmbedTitle(title, embed.getUrl().map(URL::toString).orElse(null))));
+        embed.getDescription().ifPresent(builder::setDescription);
+        embed.getTimestamp().ifPresent(builder::setTimestamp);
+        embed.getColor().map(java.awt.Color::getRGB).ifPresent(builder::setColor);
+        embed.getFooter().map(footer -> new WebhookEmbed.EmbedFooter(footer.getText().orElseThrow(NullPointerException::new), footer.getIconUrl().map(URL::toString).orElse(null))).ifPresent(builder::setFooter);
+        embed.getImage().map(EmbedImage::getUrl).map(URL::toString).ifPresent(builder::setImageUrl);
+        embed.getThumbnail().map(EmbedThumbnail::getUrl).map(URL::toString).ifPresent(builder::setThumbnailUrl);
+        embed.getFields().stream()
+                .map(field -> new WebhookEmbed.EmbedField(field.isInline(), field.getName(), field.getValue()))
+                .forEach(builder::addField);
+        return builder;
+    }
+
+    /**
+     * Converts a Discord4J {@link EmbedCreateSpec} into a compatible WebhookEmbedBuilder.
+     *
+     * @param  callback
+     *         The callback which applies the desired settings to the {@link EmbedCreateSpec}
+     *
+     * @throws NullPointerException
+     *         If null is provided
+     *
+     * @return WebhookEmbedBuilder with the converted data
+     */
+    @NotNull
+    public static WebhookEmbedBuilder from(@NotNull Consumer<? super EmbedCreateSpec> callback) {
+        EmbedCreateSpec spec = new EmbedCreateSpec();
+        callback.accept(spec);
+        EmbedData data = spec.asRequest();
+        return from(data);
+    }
+
+    /**
+     * Converts a Discord4J {@link EmbedCreateSpec} into a compatible WebhookEmbedBuilder.
+     *
+     * @param  data
+     *         The embed data
+     *
+     * @throws NullPointerException
+     *         If null is provided
+     *
+     * @return WebhookEmbedBuilder with the converted data
+     */
+    @NotNull
+    public static WebhookEmbedBuilder from(@NotNull EmbedData data) {
+        WebhookEmbedBuilder builder = new WebhookEmbedBuilder();
+
+        // there aren't any docs for this so I'm completely going off of assumptions here
+        Possible<String> title = data.title();
+        Possible<String> description = data.description();
+        Possible<String> url = data.url();
+        Possible<String> timestamp = data.timestamp();
+        Possible<Integer> color = data.color();
+        Possible<EmbedFooterData> footer = data.footer();
+        Possible<EmbedImageData> image = data.image();
+        Possible<EmbedThumbnailData> thumbnail = data.thumbnail();
+        Possible<EmbedAuthorData> author = data.author();
+        Possible<List<EmbedFieldData>> fields = data.fields();
+
+        if (!title.isAbsent())
+            builder.setTitle(new WebhookEmbed.EmbedTitle(title.get(), url.toOptional().orElse(null)));
+        if (!description.isAbsent())
+            builder.setDescription(description.get());
+        if (!timestamp.isAbsent())
+            builder.setTimestamp(OffsetDateTime.parse(timestamp.get()));
+        if (!color.isAbsent())
+            builder.setColor(color.get());
+        if (!footer.isAbsent())
+            builder.setFooter(new WebhookEmbed.EmbedFooter(footer.get().text(), footer.get().iconUrl().toOptional().orElse(null)));
+        if (!image.isAbsent())
+            builder.setImageUrl(image.get().url().get());
+        if (!thumbnail.isAbsent())
+            builder.setThumbnailUrl(thumbnail.get().url().get());
+        if (!author.isAbsent()) {
+            EmbedAuthorData authorData = author.get();
+            builder.setAuthor(new WebhookEmbed.EmbedAuthor(
+                    authorData.name().get(),
+                    authorData.iconUrl().toOptional().orElse(null),
+                    authorData.url().toOptional().orElse(null)));
+        }
+        if (!fields.isAbsent()) {
+            fields.get()
+                    .stream()
+                    .map(field -> new WebhookEmbed.EmbedField(field.inline().toOptional().orElse(false), field.name(), field.value()))
+                    .forEach(builder::addField);
+        }
+
+        return builder;
+    }
+
 }
