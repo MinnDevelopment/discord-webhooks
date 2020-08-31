@@ -106,7 +106,7 @@ public class WebhookClientBuilder { //TODO: tests
      * @return The WebhookClientBuilder
      */
     @NotNull
-    public static WebhookClientBuilder from(@NotNull net.dv8tion.jda.api.entities.Webhook webhook) {
+    public static WebhookClientBuilder fromJDA(@NotNull net.dv8tion.jda.api.entities.Webhook webhook) {
         Objects.requireNonNull(webhook, "Webhook");
         return new WebhookClientBuilder(webhook.getIdLong(), Objects.requireNonNull(webhook.getToken(), "Webhook Token"));
     }
@@ -123,7 +123,7 @@ public class WebhookClientBuilder { //TODO: tests
      * @return The WebhookClientBuilder
      */
     @NotNull
-    public static WebhookClientBuilder from(@NotNull discord4j.core.object.entity.Webhook webhook) {
+    public static WebhookClientBuilder fromD4J(@NotNull discord4j.core.object.entity.Webhook webhook) {
         Objects.requireNonNull(webhook, "Webhook");
         String token = webhook.getToken();
         Objects.requireNonNull(token, "Webhook Token");
@@ -144,7 +144,7 @@ public class WebhookClientBuilder { //TODO: tests
      * @return The WebhookClientBuilder
      */
     @NotNull
-    public static WebhookClientBuilder from(@NotNull org.javacord.api.entity.webhook.Webhook webhook) {
+    public static WebhookClientBuilder fromJavacord(@NotNull org.javacord.api.entity.webhook.Webhook webhook) {
         Objects.requireNonNull(webhook, "Webhook");
         return new WebhookClientBuilder(webhook.getId(), webhook.getToken().orElseThrow(NullPointerException::new));
     }

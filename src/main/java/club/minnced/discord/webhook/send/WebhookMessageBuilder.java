@@ -408,11 +408,11 @@ public class WebhookMessageBuilder {
      * @return WebhookMessageBuilder with the converted data
      */
     @NotNull
-    public static WebhookMessageBuilder from(@NotNull net.dv8tion.jda.api.entities.Message message) {
+    public static WebhookMessageBuilder fromJDA(@NotNull net.dv8tion.jda.api.entities.Message message) {
         WebhookMessageBuilder builder = new WebhookMessageBuilder();
         builder.setTTS(message.isTTS());
         builder.setContent(message.getContentRaw());
-        message.getEmbeds().forEach(embed -> builder.addEmbeds(WebhookEmbedBuilder.from(embed).build()));
+        message.getEmbeds().forEach(embed -> builder.addEmbeds(WebhookEmbedBuilder.fromJDA(embed).build()));
 
         if (message instanceof DataMessage) {
             DataMessage data = (DataMessage) message;
@@ -454,11 +454,11 @@ public class WebhookMessageBuilder {
      * @return WebhookMessageBuilder with the converted data
      */
     @NotNull
-    public static WebhookMessageBuilder from(@NotNull org.javacord.api.entity.message.Message message) {
+    public static WebhookMessageBuilder fromJavacord(@NotNull org.javacord.api.entity.message.Message message) {
         WebhookMessageBuilder builder = new WebhookMessageBuilder();
         builder.setTTS(message.isTts());
         builder.setContent(message.getContent());
-        message.getEmbeds().forEach(embed -> builder.addEmbeds(WebhookEmbedBuilder.from(embed).build()));
+        message.getEmbeds().forEach(embed -> builder.addEmbeds(WebhookEmbedBuilder.fromJavacord(embed).build()));
 
         AllowedMentions allowedMentions = AllowedMentions.none();
         allowedMentions.withUsers(
@@ -486,7 +486,7 @@ public class WebhookMessageBuilder {
      * @return WebhookMessageBuilder with the converted data
      */
     @NotNull
-    public static WebhookMessageBuilder from(@NotNull Consumer<? super MessageCreateSpec> callback) {
+    public static WebhookMessageBuilder fromD4J(@NotNull Consumer<? super MessageCreateSpec> callback) {
         WebhookMessageBuilder builder = new WebhookMessageBuilder();
         MessageCreateSpec spec = new MessageCreateSpec();
         callback.accept(spec);
@@ -504,7 +504,7 @@ public class WebhookMessageBuilder {
         if (!content.isAbsent())
             builder.setContent(content.get());
         if (!embed.isAbsent())
-            builder.addEmbeds(WebhookEmbedBuilder.from(embed.get()).build());
+            builder.addEmbeds(WebhookEmbedBuilder.fromD4J(embed.get()).build());
         if (!tts.isAbsent())
             builder.setTTS(tts.get());
 

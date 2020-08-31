@@ -323,7 +323,7 @@ public class WebhookEmbedBuilder {
      */
     @NotNull
     @SuppressWarnings("ConstantConditions")
-    public static WebhookEmbedBuilder from(@NotNull net.dv8tion.jda.api.entities.MessageEmbed embed) {
+    public static WebhookEmbedBuilder fromJDA(@NotNull net.dv8tion.jda.api.entities.MessageEmbed embed) {
         WebhookEmbedBuilder builder = new WebhookEmbedBuilder();
         String url = embed.getUrl();
         String title = embed.getTitle();
@@ -370,7 +370,7 @@ public class WebhookEmbedBuilder {
      * @return WebhookEmbedBuilder with the converted data
      */
     @NotNull
-    public static WebhookEmbedBuilder from(@NotNull org.javacord.api.entity.message.embed.Embed embed) {
+    public static WebhookEmbedBuilder fromJavacord(@NotNull org.javacord.api.entity.message.embed.Embed embed) {
         WebhookEmbedBuilder builder = new WebhookEmbedBuilder();
 
         embed.getTitle().ifPresent(title ->
@@ -399,11 +399,11 @@ public class WebhookEmbedBuilder {
      * @return WebhookEmbedBuilder with the converted data
      */
     @NotNull
-    public static WebhookEmbedBuilder from(@NotNull Consumer<? super EmbedCreateSpec> callback) {
+    public static WebhookEmbedBuilder fromD4J(@NotNull Consumer<? super EmbedCreateSpec> callback) {
         EmbedCreateSpec spec = new EmbedCreateSpec();
         callback.accept(spec);
         EmbedData data = spec.asRequest();
-        return from(data);
+        return fromD4J(data);
     }
 
     /**
@@ -418,7 +418,7 @@ public class WebhookEmbedBuilder {
      * @return WebhookEmbedBuilder with the converted data
      */
     @NotNull
-    public static WebhookEmbedBuilder from(@NotNull EmbedData data) {
+    public static WebhookEmbedBuilder fromD4J(@NotNull EmbedData data) {
         WebhookEmbedBuilder builder = new WebhookEmbedBuilder();
 
         // there aren't any docs for this so I'm completely going off of assumptions here

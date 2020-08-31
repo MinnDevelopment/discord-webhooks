@@ -181,8 +181,8 @@ public class WebhookClient implements AutoCloseable {
      * @return The WebhookClient
      */
     @NotNull
-    public static WebhookClient from(@NotNull net.dv8tion.jda.api.entities.Webhook webhook) {
-        return WebhookClientBuilder.from(webhook).build();
+    public static WebhookClient fromJDA(@NotNull net.dv8tion.jda.api.entities.Webhook webhook) {
+        return WebhookClientBuilder.fromJDA(webhook).build();
     }
 
     /**
@@ -197,8 +197,8 @@ public class WebhookClient implements AutoCloseable {
      * @return The WebhookClient
      */
     @NotNull
-    public static WebhookClient from(@NotNull discord4j.core.object.entity.Webhook webhook) {
-        return WebhookClientBuilder.from(webhook).build();
+    public static WebhookClient fromD4J(@NotNull discord4j.core.object.entity.Webhook webhook) {
+        return WebhookClientBuilder.fromD4J(webhook).build();
     }
 
     /**
@@ -213,8 +213,8 @@ public class WebhookClient implements AutoCloseable {
      * @return The WebhookClient
      */
     @NotNull
-    public static WebhookClient from(@NotNull org.javacord.api.entity.webhook.Webhook webhook) {
-        return WebhookClientBuilder.from(webhook).build();
+    public static WebhookClient fromJavacord(@NotNull org.javacord.api.entity.webhook.Webhook webhook) {
+        return WebhookClientBuilder.fromJavacord(webhook).build();
     }
 
     /**
@@ -229,11 +229,11 @@ public class WebhookClient implements AutoCloseable {
      * @return {@link CompletableFuture}
      *
      * @see    #isWait()
-     * @see    WebhookMessageBuilder#from(Message)
+     * @see    WebhookMessageBuilder#fromJDA(Message)
      */
     @NotNull
-    public CompletableFuture<ReadonlyMessage> send(@NotNull net.dv8tion.jda.api.entities.Message message) {
-        return send(WebhookMessageBuilder.from(message).build());
+    public CompletableFuture<ReadonlyMessage> sendJDA(@NotNull net.dv8tion.jda.api.entities.Message message) {
+        return send(WebhookMessageBuilder.fromJDA(message).build());
     }
 
     /**
@@ -248,11 +248,11 @@ public class WebhookClient implements AutoCloseable {
      * @return {@link CompletableFuture}
      *
      * @see    #isWait()
-     * @see    WebhookMessageBuilder#from(org.javacord.api.entity.message.Message)
+     * @see    WebhookMessageBuilder#fromJavacord(org.javacord.api.entity.message.Message)
      */
     @NotNull
-    public CompletableFuture<ReadonlyMessage> send(@NotNull org.javacord.api.entity.message.Message message) {
-        return send(WebhookMessageBuilder.from(message).build());
+    public CompletableFuture<ReadonlyMessage> sendJavacord(@NotNull org.javacord.api.entity.message.Message message) {
+        return send(WebhookMessageBuilder.fromJavacord(message).build());
     }
 
     /**
@@ -267,12 +267,12 @@ public class WebhookClient implements AutoCloseable {
      * @return {@link Mono}
      *
      * @see    #isWait()
-     * @see    WebhookMessageBuilder#from(Consumer)
+     * @see    WebhookMessageBuilder#fromD4J(Consumer)
      */
     @NotNull
     @CheckReturnValue
-    public Mono<ReadonlyMessage> send(@NotNull Consumer<? super MessageCreateSpec> callback) {
-        WebhookMessage message = WebhookMessageBuilder.from(callback).build();
+    public Mono<ReadonlyMessage> sendD4J(@NotNull Consumer<? super MessageCreateSpec> callback) {
+        WebhookMessage message = WebhookMessageBuilder.fromD4J(callback).build();
         return Mono.fromFuture(() -> send(message));
     }
 
@@ -288,11 +288,11 @@ public class WebhookClient implements AutoCloseable {
      * @return {@link CompletableFuture}
      *
      * @see    #isWait()
-     * @see    WebhookEmbedBuilder#from(net.dv8tion.jda.api.entities.MessageEmbed)
+     * @see    WebhookEmbedBuilder#fromJDA(net.dv8tion.jda.api.entities.MessageEmbed)
      */
     @NotNull
-    public CompletableFuture<ReadonlyMessage> send(@NotNull net.dv8tion.jda.api.entities.MessageEmbed embed) {
-        return send(WebhookEmbedBuilder.from(embed).build());
+    public CompletableFuture<ReadonlyMessage> sendJDA(@NotNull net.dv8tion.jda.api.entities.MessageEmbed embed) {
+        return send(WebhookEmbedBuilder.fromJDA(embed).build());
     }
 
     /**
@@ -307,11 +307,11 @@ public class WebhookClient implements AutoCloseable {
      * @return {@link CompletableFuture}
      *
      * @see    #isWait()
-     * @see    WebhookEmbedBuilder#from(org.javacord.api.entity.message.embed.Embed)
+     * @see    WebhookEmbedBuilder#fromJavacord(org.javacord.api.entity.message.embed.Embed)
      */
     @NotNull
-    public CompletableFuture<ReadonlyMessage> send(@NotNull org.javacord.api.entity.message.embed.Embed embed) {
-        return send(WebhookEmbedBuilder.from(embed).build());
+    public CompletableFuture<ReadonlyMessage> sendJavacord(@NotNull org.javacord.api.entity.message.embed.Embed embed) {
+        return send(WebhookEmbedBuilder.fromJavacord(embed).build());
     }
 
 
