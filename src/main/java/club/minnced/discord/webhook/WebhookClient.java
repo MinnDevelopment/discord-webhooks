@@ -19,9 +19,10 @@ package club.minnced.discord.webhook;
 import club.minnced.discord.webhook.exception.HttpException;
 import club.minnced.discord.webhook.receive.EntityFactory;
 import club.minnced.discord.webhook.receive.ReadonlyMessage;
-import club.minnced.discord.webhook.send.*;
-import discord4j.core.spec.MessageCreateSpec;
-import net.dv8tion.jda.api.entities.Message;
+import club.minnced.discord.webhook.send.AllowedMentions;
+import club.minnced.discord.webhook.send.WebhookEmbed;
+import club.minnced.discord.webhook.send.WebhookMessage;
+import club.minnced.discord.webhook.send.WebhookMessageBuilder;
 import okhttp3.OkHttpClient;
 import okhttp3.RequestBody;
 import okhttp3.Response;
@@ -31,9 +32,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import reactor.core.publisher.Mono;
 
-import javax.annotation.CheckReturnValue;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -44,7 +43,6 @@ import java.time.temporal.ChronoUnit;
 import java.util.Collection;
 import java.util.Objects;
 import java.util.concurrent.*;
-import java.util.function.Consumer;
 import java.util.regex.Matcher;
 
 /**
@@ -164,156 +162,6 @@ public class WebhookClient implements AutoCloseable {
     public boolean isShutdown() {
         return isShutdown;
     }
-
-    /////////////////////////////////
-    /// Third-party compatibility ///
-    /////////////////////////////////
-
-    /**
-     * Creates a WebhookClient for the provided webhook.
-     *
-     * @param  webhook
-     *         The webhook
-     *
-     * @throws NullPointerException
-     *         If the webhook is null or does not provide a token
-     *
-     * @return The WebhookClient
-     */
-    @NotNull
-    public static WebhookClient fromJDA(@NotNull net.dv8tion.jda.api.entities.Webhook webhook) {
-        return WebhookClientBuilder.fromJDA(webhook).build();
-    }
-
-    /**
-     * Creates a WebhookClient for the provided webhook.
-     *
-     * @param  webhook
-     *         The webhook
-     *
-     * @throws NullPointerException
-     *         If the webhook is null or does not provide a token
-     *
-     * @return The WebhookClient
-     */
-    @NotNull
-    public static WebhookClient fromD4J(@NotNull discord4j.core.object.entity.Webhook webhook) {
-        return WebhookClientBuilder.fromD4J(webhook).build();
-    }
-
-    /**
-     * Creates a WebhookClient for the provided webhook.
-     *
-     * @param  webhook
-     *         The webhook
-     *
-     * @throws NullPointerException
-     *         If the webhook is null or does not provide a token
-     *
-     * @return The WebhookClient
-     */
-    @NotNull
-    public static WebhookClient fromJavacord(@NotNull org.javacord.api.entity.webhook.Webhook webhook) {
-        return WebhookClientBuilder.fromJavacord(webhook).build();
-    }
-
-    /**
-     * Sends the provided {@link net.dv8tion.jda.api.entities.Message Message} to the webhook.
-     *
-     * @param  message
-     *         The message to send
-     *
-     * @throws NullPointerException
-     *         If null is provided
-     *
-     * @return {@link CompletableFuture}
-     *
-     * @see    #isWait()
-     * @see    WebhookMessageBuilder#fromJDA(Message)
-     */
-    @NotNull
-    public CompletableFuture<ReadonlyMessage> sendJDA(@NotNull net.dv8tion.jda.api.entities.Message message) {
-        return send(WebhookMessageBuilder.fromJDA(message).build());
-    }
-
-    /**
-     * Sends the provided {@link org.javacord.api.entity.message.Message Message} to the webhook.
-     *
-     * @param  message
-     *         The message to send
-     *
-     * @throws NullPointerException
-     *         If null is provided
-     *
-     * @return {@link CompletableFuture}
-     *
-     * @see    #isWait()
-     * @see    WebhookMessageBuilder#fromJavacord(org.javacord.api.entity.message.Message)
-     */
-    @NotNull
-    public CompletableFuture<ReadonlyMessage> sendJavacord(@NotNull org.javacord.api.entity.message.Message message) {
-        return send(WebhookMessageBuilder.fromJavacord(message).build());
-    }
-
-    /**
-     * Sends the provided {@link MessageCreateSpec} to the webhook.
-     *
-     * @param  callback
-     *         The callback used to specify the desired message settings
-     *
-     * @throws NullPointerException
-     *         If null is provided
-     *
-     * @return {@link Mono}
-     *
-     * @see    #isWait()
-     * @see    WebhookMessageBuilder#fromD4J(Consumer)
-     */
-    @NotNull
-    @CheckReturnValue
-    public Mono<ReadonlyMessage> sendD4J(@NotNull Consumer<? super MessageCreateSpec> callback) {
-        WebhookMessage message = WebhookMessageBuilder.fromD4J(callback).build();
-        return Mono.fromFuture(() -> send(message));
-    }
-
-    /**
-     * Sends the provided {@link net.dv8tion.jda.api.entities.MessageEmbed MessageEmbed} to the webhook.
-     *
-     * @param  embed
-     *         The embed to send
-     *
-     * @throws NullPointerException
-     *         If null is provided
-     *
-     * @return {@link CompletableFuture}
-     *
-     * @see    #isWait()
-     * @see    WebhookEmbedBuilder#fromJDA(net.dv8tion.jda.api.entities.MessageEmbed)
-     */
-    @NotNull
-    public CompletableFuture<ReadonlyMessage> sendJDA(@NotNull net.dv8tion.jda.api.entities.MessageEmbed embed) {
-        return send(WebhookEmbedBuilder.fromJDA(embed).build());
-    }
-
-    /**
-     * Sends the provided {@link org.javacord.api.entity.message.embed.Embed Embed} to the webhook.
-     *
-     * @param  embed
-     *         The embed to send
-     *
-     * @throws NullPointerException
-     *         If null is provided
-     *
-     * @return {@link CompletableFuture}
-     *
-     * @see    #isWait()
-     * @see    WebhookEmbedBuilder#fromJavacord(org.javacord.api.entity.message.embed.Embed)
-     */
-    @NotNull
-    public CompletableFuture<ReadonlyMessage> sendJavacord(@NotNull org.javacord.api.entity.message.embed.Embed embed) {
-        return send(WebhookEmbedBuilder.fromJavacord(embed).build());
-    }
-
 
     /**
      * Sends the provided {@link club.minnced.discord.webhook.send.WebhookMessage}
