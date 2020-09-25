@@ -27,8 +27,8 @@ plugins {
 }
 
 val major = "0"
-val minor = "4"
-val patch = "1"
+val minor = "5"
+val patch = "0"
 
 group = "club.minnced"
 version = "$major.$minor.$patch"
@@ -51,7 +51,7 @@ dependencies {
     api("com.squareup.okhttp3:okhttp:3.14.9")
     api("org.json:json:20180813")
     implementation("org.jetbrains:annotations:16.0.1")
-    
+
     compileOnly("net.dv8tion:JDA:4.2.0_196")
     compileOnly("com.discord4j:discord4j-core:3.1.0")
     compileOnly("org.javacord:javacord:3.0.6")
