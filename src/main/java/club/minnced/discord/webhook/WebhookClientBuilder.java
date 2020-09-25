@@ -16,6 +16,9 @@
 
 package club.minnced.discord.webhook;
 
+import club.minnced.discord.webhook.external.D4JWebhookClient;
+import club.minnced.discord.webhook.external.JDAWebhookClient;
+import club.minnced.discord.webhook.external.JavacordWebhookClient;
 import club.minnced.discord.webhook.send.AllowedMentions;
 import okhttp3.OkHttpClient;
 import org.jetbrains.annotations.NotNull;
@@ -256,6 +259,45 @@ public class WebhookClientBuilder { //TODO: tests
         OkHttpClient client = this.client == null ? new OkHttpClient() : this.client;
         ScheduledExecutorService pool = this.pool != null ? this.pool : getDefaultPool(id, threadFactory, isDaemon);
         return new WebhookClient(id, token, parseMessage, client, pool, allowedMentions);
+    }
+
+    /**
+     * Builds the {@link club.minnced.discord.webhook.external.JDAWebhookClient}
+     * with the current settings
+     *
+     * @return {@link club.minnced.discord.webhook.external.JDAWebhookClient} instance
+     */
+    @NotNull
+    public JDAWebhookClient buildJDA() {
+        OkHttpClient client = this.client == null ? new OkHttpClient() : this.client;
+        ScheduledExecutorService pool = this.pool != null ? this.pool : getDefaultPool(id, threadFactory, isDaemon);
+        return new JDAWebhookClient(id, token, parseMessage, client, pool, allowedMentions);
+    }
+
+    /**
+     * Builds the {@link club.minnced.discord.webhook.external.D4JWebhookClient}
+     * with the current settings
+     *
+     * @return {@link club.minnced.discord.webhook.external.D4JWebhookClient} instance
+     */
+    @NotNull
+    public D4JWebhookClient buildD4J() {
+        OkHttpClient client = this.client == null ? new OkHttpClient() : this.client;
+        ScheduledExecutorService pool = this.pool != null ? this.pool : getDefaultPool(id, threadFactory, isDaemon);
+        return new D4JWebhookClient(id, token, parseMessage, client, pool, allowedMentions);
+    }
+
+    /**
+     * Builds the {@link club.minnced.discord.webhook.external.JavacordWebhookClient}
+     * with the current settings
+     *
+     * @return {@link club.minnced.discord.webhook.external.JavacordWebhookClient} instance
+     */
+    @NotNull
+    public JavacordWebhookClient buildJavacord() {
+        OkHttpClient client = this.client == null ? new OkHttpClient() : this.client;
+        ScheduledExecutorService pool = this.pool != null ? this.pool : getDefaultPool(id, threadFactory, isDaemon);
+        return new JavacordWebhookClient(id, token, parseMessage, client, pool, allowedMentions);
     }
 
     protected static ScheduledExecutorService getDefaultPool(long id, ThreadFactory factory, boolean isDaemon) {
