@@ -341,13 +341,13 @@ public class WebhookEmbedBuilder {
         if (description != null)
             builder.setDescription(description);
         if (thumbnail != null)
-            builder.setThumbnailUrl(builder.thumbnailUrl);
+            builder.setThumbnailUrl(thumbnail.getUrl());
         if (author != null)
             builder.setAuthor(new WebhookEmbed.EmbedAuthor(author.getName(), author.getIconUrl(), author.getUrl()));
         if (footer != null)
             builder.setFooter(new WebhookEmbed.EmbedFooter(footer.getText(), footer.getIconUrl()));
         if (image != null)
-            builder.setImageUrl(builder.imageUrl);
+            builder.setImageUrl(image.getUrl());
         if (!fields.isEmpty())
             fields.forEach(field -> builder.addField(new WebhookEmbed.EmbedField(field.isInline(), field.getName(), field.getValue())));
         if (color != Role.DEFAULT_COLOR_RAW)
