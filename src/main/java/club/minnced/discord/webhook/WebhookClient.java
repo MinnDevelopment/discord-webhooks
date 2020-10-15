@@ -28,6 +28,7 @@ import okhttp3.RequestBody;
 import okhttp3.Response;
 import org.jetbrains.annotations.Async;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.slf4j.Logger;
@@ -334,6 +335,111 @@ public class WebhookClient implements AutoCloseable {
         return execute(newBody(newJson().put("content", content).toString()));
     }
 
+    /**
+     * Edits the target message and updates it with the provided {@link club.minnced.discord.webhook.send.WebhookMessage}
+     * to the webhook.
+     * <br>The returned future receives {@code null} if {@link club.minnced.discord.webhook.WebhookClientBuilder#setWait(boolean)}
+     * was set to false.
+     *
+     * <p><b>This will override the default {@link AllowedMentions} of this client!</b>
+     *
+     * @param  messageId
+     *         The target message id
+     * @param  message
+     *         The message to send
+     *
+     * @return {@link java.util.concurrent.CompletableFuture}
+     *
+     * @see    #isWait()
+     */
+    @NotNull
+    public CompletableFuture<ReadonlyMessage> edit(long messageId, @NotNull WebhookMessage message) {
+        Objects.requireNonNull(message, "WebhookMessage");
+        return execute(message.getBody(), Long.toUnsignedString(messageId), RequestType.EDIT);
+    }
+
+    /**
+     * Edits the target message and updates it with the provided {@link club.minnced.discord.webhook.send.WebhookEmbed} to the webhook.
+     * <br>The returned future receives {@code null} if {@link club.minnced.discord.webhook.WebhookClientBuilder#setWait(boolean)}
+     * was set to false.
+     *
+     * @param  messageId
+     *         The target message id
+     * @param  first
+     *         The first embed to send
+     * @param  embeds
+     *         Optional additional embeds to send, up to 10
+     *
+     * @return {@link java.util.concurrent.CompletableFuture}
+     *
+     * @see    #isWait()
+     * @see    #edit(long, club.minnced.discord.webhook.send.WebhookMessage)
+     */
+    @NotNull
+    public CompletableFuture<ReadonlyMessage> edit(long messageId, @NotNull WebhookEmbed first, @NotNull WebhookEmbed... embeds) {
+        return edit(messageId, WebhookMessage.embeds(first, embeds));
+    }
+
+    /**
+     * Edits the target message and updates it with the provided {@link club.minnced.discord.webhook.send.WebhookEmbed} to the webhook.
+     * <br>The returned future receives {@code null} if {@link club.minnced.discord.webhook.WebhookClientBuilder#setWait(boolean)}
+     * was set to false.
+     *
+     * @param  messageId
+     *         The target message id
+     * @param  embeds
+     *         The embeds to send
+     *
+     * @return {@link java.util.concurrent.CompletableFuture}
+     *
+     * @see    #isWait()
+     * @see    #edit(long, club.minnced.discord.webhook.send.WebhookMessage)
+     */
+    @NotNull
+    public CompletableFuture<ReadonlyMessage> edit(long messageId, @NotNull Collection<WebhookEmbed> embeds) {
+        return edit(messageId, WebhookMessage.embeds(embeds));
+    }
+
+    /**
+     * Edits the target message and updates it with the provided content as normal message to the webhook.
+     * <br>The returned future receives {@code null} if {@link club.minnced.discord.webhook.WebhookClientBuilder#setWait(boolean)}
+     * was set to false.
+     *
+     * @param  messageId
+     *         The target message id
+     * @param  content
+     *         The content to send
+     *
+     * @return {@link java.util.concurrent.CompletableFuture}
+     *
+     * @see    #isWait()
+     * @see    #edit(long, club.minnced.discord.webhook.send.WebhookMessage)
+     */
+    @NotNull
+    public CompletableFuture<ReadonlyMessage> edit(long messageId, @NotNull String content) {
+        Objects.requireNonNull(content, "Content");
+        content = content.trim();
+        if (content.isEmpty())
+            throw new IllegalArgumentException("Cannot send an empty message");
+        if (content.length() > 2000)
+            throw new IllegalArgumentException("Content may not exceed 2000 characters");
+        return edit(messageId, new WebhookMessageBuilder().setContent(content).build());
+    }
+
+    /**
+     * Deletes the message with the provided ID.
+     *
+     * @param  messageId
+     *         The target message id
+     *
+     * @return {@link java.util.concurrent.CompletableFuture}
+     */
+    @NotNull
+    public CompletableFuture<Void> delete(long messageId) {
+        return execute(null, Long.toUnsignedString(messageId), RequestType.DELETE).thenApply(v -> null);
+    }
+
+
     private JSONObject newJson()
     {
         JSONObject json = new JSONObject();
@@ -362,9 +468,14 @@ public class WebhookClient implements AutoCloseable {
     }
 
     @NotNull
-    protected CompletableFuture<ReadonlyMessage> execute(RequestBody body) {
+    protected CompletableFuture<ReadonlyMessage> execute(RequestBody body, @Nullable String messageId, @NotNull RequestType type) {
         checkShutdown();
-        return queueRequest(body);
+        return queueRequest(type.format(url, messageId), type.method, body);
+    }
+
+    @NotNull
+    protected CompletableFuture<ReadonlyMessage> execute(RequestBody body) {
+        return execute(body, null, RequestType.SEND);
     }
 
     @NotNull
@@ -376,11 +487,11 @@ public class WebhookClient implements AutoCloseable {
     }
 
     @NotNull
-    protected CompletableFuture<ReadonlyMessage> queueRequest(RequestBody body) {
+    protected CompletableFuture<ReadonlyMessage> queueRequest(String url, String method, RequestBody body) {
         final boolean wasQueued = isQueued;
         isQueued = true;
         CompletableFuture<ReadonlyMessage> callback = new CompletableFuture<>();
-        Request req = new Request(callback, body);
+        Request req = new Request(callback, body, method, url);
         enqueuePair(req);
         if (!wasQueued)
             backoffQueue();
@@ -388,10 +499,10 @@ public class WebhookClient implements AutoCloseable {
     }
 
     @NotNull
-    protected okhttp3.Request newRequest(RequestBody body) {
+    protected okhttp3.Request newRequest(Request request) {
         return new okhttp3.Request.Builder()
-                .url(url)
-                .method("POST", body)
+                .url(request.url)
+                .method(request.method, request.body)
                 .header("accept-encoding", "gzip")
                 .header("user-agent", USER_AGENT)
                 .build();
@@ -427,7 +538,7 @@ public class WebhookClient implements AutoCloseable {
             return true;
         }
 
-        final okhttp3.Request request = newRequest(req.body);
+        final okhttp3.Request request = newRequest(req);
         try (Response response = client.newCall(request).execute()) {
             bucket.update(response);
             if (response.code() == Bucket.RATE_LIMIT_CODE) {
@@ -441,7 +552,7 @@ public class WebhookClient implements AutoCloseable {
                 return true;
             }
             ReadonlyMessage message = null;
-            if (parseMessage) {
+            if (parseMessage && !"DELETE".equals(req.method)) {
                 InputStream body = IOUtil.getBody(response);
                 JSONObject json = IOUtil.toJSON(body);
                 message = EntityFactory.makeMessage(json);
@@ -457,6 +568,27 @@ public class WebhookClient implements AutoCloseable {
             queue.poll().future.completeExceptionally(e);
         }
         return true;
+    }
+
+    enum RequestType {
+        SEND("", "POST"), EDIT("messages/%d", "PATCH"), DELETE("messages/%d", "DELETE");
+
+        private final String format, method;
+
+        RequestType(String format, String method) {
+            this.format = format;
+            this.method = method;
+        }
+
+        public String getMethod() {
+            return method;
+        }
+
+        public String format(String url, String messageId) {
+            if (this == SEND)
+                return url;
+            return String.format("%s/" + format, messageId);
+        }
     }
 
     protected static final class Bucket {
@@ -526,10 +658,13 @@ public class WebhookClient implements AutoCloseable {
     private static final class Request {
         private final CompletableFuture<ReadonlyMessage> future;
         private final RequestBody body;
+        private final String method, url;
 
-        public Request(CompletableFuture<ReadonlyMessage> future, RequestBody body) {
+        public Request(CompletableFuture<ReadonlyMessage> future, RequestBody body, String method, String url) {
             this.future = future;
             this.body = body;
+            this.method = method;
+            this.url = url;
         }
     }
 }

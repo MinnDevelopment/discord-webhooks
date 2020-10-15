@@ -52,14 +52,61 @@ public class JDAWebhookClient extends WebhookClient {
     /**
      * Sends the provided {@link net.dv8tion.jda.api.entities.MessageEmbed MessageEmbed} to the webhook.
      *
-     * @param embed The embed to send
+     * @param  embed
+     *         The embed to send
+     *
+     * @throws NullPointerException
+     *         If null is provided
+     *
      * @return {@link CompletableFuture}
-     * @throws NullPointerException If null is provided
-     * @see #isWait()
-     * @see WebhookEmbedBuilder#fromJDA(net.dv8tion.jda.api.entities.MessageEmbed)
+     *
+     * @see    #isWait()
+     * @see    WebhookEmbedBuilder#fromJDA(net.dv8tion.jda.api.entities.MessageEmbed)
      */
     @NotNull
     public CompletableFuture<ReadonlyMessage> send(@NotNull net.dv8tion.jda.api.entities.MessageEmbed embed) {
         return send(WebhookEmbedBuilder.fromJDA(embed).build());
+    }
+
+    /**
+     * Edits the target message with the provided {@link net.dv8tion.jda.api.entities.Message Message} to the webhook.
+     *
+     * @param  messageId
+     *         The target message id
+     * @param  message
+     *         The message to send
+     *
+     * @throws NullPointerException
+     *         If null is provided
+     *
+     * @return {@link CompletableFuture}
+     *
+     * @see    #isWait()
+     * @see    WebhookMessageBuilder#fromJDA(Message)
+     */
+    @NotNull
+    public CompletableFuture<ReadonlyMessage> edit(long messageId, @NotNull net.dv8tion.jda.api.entities.Message message) {
+        return edit(messageId, WebhookMessageBuilder.fromJDA(message).build());
+    }
+
+    /**
+     * Edits the target message with the provided {@link net.dv8tion.jda.api.entities.MessageEmbed MessageEmbed} to the webhook.
+     *
+     * @param  messageId
+     *         The target message id
+     * @param  embed
+     *         The embed to send
+     *
+     * @throws NullPointerException
+     *         If null is provided
+     *
+     * @return {@link CompletableFuture}
+     *
+     * @see    #isWait()
+     * @see    WebhookEmbedBuilder#fromJDA(net.dv8tion.jda.api.entities.MessageEmbed)
+     */
+    @NotNull
+    public CompletableFuture<ReadonlyMessage> edit(long messageId, @NotNull net.dv8tion.jda.api.entities.MessageEmbed embed) {
+        return edit(messageId, WebhookEmbedBuilder.fromJDA(embed).build());
     }
 }

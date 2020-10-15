@@ -301,14 +301,15 @@ public class WebhookMessage {
     @NotNull
     public RequestBody getBody() {
         final JSONObject payload = new JSONObject();
-        if (content != null)
-            payload.put("content", content);
+        payload.put("content", content);
         if (embeds != null && !embeds.isEmpty()) {
             final JSONArray array = new JSONArray();
             for (WebhookEmbed embed : embeds) {
                 array.put(embed.reduced());
             }
             payload.put("embeds", array);
+        } else {
+            payload.put("embeds", new JSONArray());
         }
         if (avatarUrl != null)
             payload.put("avatar_url", avatarUrl);
