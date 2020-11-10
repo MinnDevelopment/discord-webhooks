@@ -571,7 +571,7 @@ public class WebhookClient implements AutoCloseable {
     }
 
     enum RequestType {
-        SEND("", "POST"), EDIT("messages/%d", "PATCH"), DELETE("messages/%d", "DELETE");
+        SEND("", "POST"), EDIT("messages/%s", "PATCH"), DELETE("messages/%s", "DELETE");
 
         private final String format, method;
 
