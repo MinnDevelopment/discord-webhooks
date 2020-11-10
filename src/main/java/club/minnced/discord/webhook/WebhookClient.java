@@ -587,7 +587,7 @@ public class WebhookClient implements AutoCloseable {
         public String format(String url, String messageId) {
             if (this == SEND)
                 return url;
-            return String.format("%s/" + format, messageId);
+            return String.format("%s/" + format, url, messageId);
         }
     }
 
