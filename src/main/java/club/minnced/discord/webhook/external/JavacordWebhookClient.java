@@ -70,4 +70,46 @@ public class JavacordWebhookClient extends WebhookClient {
     public CompletableFuture<ReadonlyMessage> send(@NotNull org.javacord.api.entity.message.embed.Embed embed) {
         return send(WebhookEmbedBuilder.fromJavacord(embed).build());
     }
+
+    /**
+     * Edits the target message with the provided {@link org.javacord.api.entity.message.Message Message} to the webhook.
+     *
+     * @param  messageId
+     *         The target message id
+     * @param  message
+     *         The message to send
+     *
+     * @throws NullPointerException
+     *         If null is provided
+     *
+     * @return {@link CompletableFuture}
+     *
+     * @see    #isWait()
+     * @see    WebhookMessageBuilder#fromJavacord(org.javacord.api.entity.message.Message)
+     */
+    @NotNull
+    public CompletableFuture<ReadonlyMessage> edit(long messageId, @NotNull org.javacord.api.entity.message.Message message) {
+        return edit(messageId, WebhookMessageBuilder.fromJavacord(message).build());
+    }
+
+    /**
+     * Edits the target message with the provided {@link org.javacord.api.entity.message.embed.Embed Embed} to the webhook.
+     *
+     * @param  messageId
+     *         The target message id
+     * @param  embed
+     *         The embed to send
+     *
+     * @throws NullPointerException
+     *         If null is provided
+     *
+     * @return {@link CompletableFuture}
+     *
+     * @see    #isWait()
+     * @see    WebhookEmbedBuilder#fromJavacord(org.javacord.api.entity.message.embed.Embed)
+     */
+    @NotNull
+    public CompletableFuture<ReadonlyMessage> edit(long messageId, @NotNull org.javacord.api.entity.message.embed.Embed embed) {
+        return edit(messageId, WebhookEmbedBuilder.fromJavacord(embed).build());
+    }
 }

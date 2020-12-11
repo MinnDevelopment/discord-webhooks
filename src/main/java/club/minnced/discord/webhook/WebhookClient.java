@@ -28,11 +28,13 @@ import okhttp3.RequestBody;
 import okhttp3.Response;
 import org.jetbrains.annotations.Async;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.annotation.Nonnegative;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -66,6 +68,7 @@ public class WebhookClient implements AutoCloseable {
     protected final BlockingQueue<Request> queue;
     protected final boolean parseMessage;
     protected final AllowedMentions allowedMentions;
+    protected long defaultTimeout;
     protected volatile boolean isQueued;
     protected boolean isShutdown;
 
@@ -161,6 +164,40 @@ public class WebhookClient implements AutoCloseable {
      */
     public boolean isShutdown() {
         return isShutdown;
+    }
+
+    /**
+     * Configure a default timeout to use for requests.
+     * <br>The {@link CompletableFuture} returned by the various send methods will be completed exceptionally with a {@link TimeoutException} when the timeout expires.
+     * By default, no timeout is used.
+     *
+     * <p>Note that this timeout is independent from the timeouts configured in {@link OkHttpClient} and will only prevent queued requests from being executed.
+     *
+     * @param  millis
+     *         The timeout in milliseconds, or 0 for no timeout
+     *
+     * @throws IllegalArgumentException
+     *         If the provided timeout is negative
+     *
+     * @return The current WebhookClient instance
+     */
+    @NotNull
+    @SuppressWarnings("ConstantConditions") // we still need a runtime check for negative numbers
+    public WebhookClient setTimeout(@Nonnegative long millis) {
+        if (millis < 0)
+            throw new IllegalArgumentException("Cannot set a negative timeout");
+        this.defaultTimeout = millis;
+        return this;
+    }
+
+    /**
+     * The current timeout configured by {@link #setTimeout(long)}.
+     * <br>If no timeout was configured, this returns 0.
+     *
+     * @return The timeout in milliseconds or 0 for no timeout
+     */
+    public long getTimeout() {
+        return defaultTimeout;
     }
 
     /**
@@ -334,6 +371,111 @@ public class WebhookClient implements AutoCloseable {
         return execute(newBody(newJson().put("content", content).toString()));
     }
 
+    /**
+     * Edits the target message and updates it with the provided {@link club.minnced.discord.webhook.send.WebhookMessage}
+     * to the webhook.
+     * <br>The returned future receives {@code null} if {@link club.minnced.discord.webhook.WebhookClientBuilder#setWait(boolean)}
+     * was set to false.
+     *
+     * <p><b>This will override the default {@link AllowedMentions} of this client!</b>
+     *
+     * @param  messageId
+     *         The target message id
+     * @param  message
+     *         The message to send
+     *
+     * @return {@link java.util.concurrent.CompletableFuture}
+     *
+     * @see    #isWait()
+     */
+    @NotNull
+    public CompletableFuture<ReadonlyMessage> edit(long messageId, @NotNull WebhookMessage message) {
+        Objects.requireNonNull(message, "WebhookMessage");
+        return execute(message.getBody(), Long.toUnsignedString(messageId), RequestType.EDIT);
+    }
+
+    /**
+     * Edits the target message and updates it with the provided {@link club.minnced.discord.webhook.send.WebhookEmbed} to the webhook.
+     * <br>The returned future receives {@code null} if {@link club.minnced.discord.webhook.WebhookClientBuilder#setWait(boolean)}
+     * was set to false.
+     *
+     * @param  messageId
+     *         The target message id
+     * @param  first
+     *         The first embed to send
+     * @param  embeds
+     *         Optional additional embeds to send, up to 10
+     *
+     * @return {@link java.util.concurrent.CompletableFuture}
+     *
+     * @see    #isWait()
+     * @see    #edit(long, club.minnced.discord.webhook.send.WebhookMessage)
+     */
+    @NotNull
+    public CompletableFuture<ReadonlyMessage> edit(long messageId, @NotNull WebhookEmbed first, @NotNull WebhookEmbed... embeds) {
+        return edit(messageId, WebhookMessage.embeds(first, embeds));
+    }
+
+    /**
+     * Edits the target message and updates it with the provided {@link club.minnced.discord.webhook.send.WebhookEmbed} to the webhook.
+     * <br>The returned future receives {@code null} if {@link club.minnced.discord.webhook.WebhookClientBuilder#setWait(boolean)}
+     * was set to false.
+     *
+     * @param  messageId
+     *         The target message id
+     * @param  embeds
+     *         The embeds to send
+     *
+     * @return {@link java.util.concurrent.CompletableFuture}
+     *
+     * @see    #isWait()
+     * @see    #edit(long, club.minnced.discord.webhook.send.WebhookMessage)
+     */
+    @NotNull
+    public CompletableFuture<ReadonlyMessage> edit(long messageId, @NotNull Collection<WebhookEmbed> embeds) {
+        return edit(messageId, WebhookMessage.embeds(embeds));
+    }
+
+    /**
+     * Edits the target message and updates it with the provided content as normal message to the webhook.
+     * <br>The returned future receives {@code null} if {@link club.minnced.discord.webhook.WebhookClientBuilder#setWait(boolean)}
+     * was set to false.
+     *
+     * @param  messageId
+     *         The target message id
+     * @param  content
+     *         The content to send
+     *
+     * @return {@link java.util.concurrent.CompletableFuture}
+     *
+     * @see    #isWait()
+     * @see    #edit(long, club.minnced.discord.webhook.send.WebhookMessage)
+     */
+    @NotNull
+    public CompletableFuture<ReadonlyMessage> edit(long messageId, @NotNull String content) {
+        Objects.requireNonNull(content, "Content");
+        content = content.trim();
+        if (content.isEmpty())
+            throw new IllegalArgumentException("Cannot send an empty message");
+        if (content.length() > 2000)
+            throw new IllegalArgumentException("Content may not exceed 2000 characters");
+        return edit(messageId, new WebhookMessageBuilder().setContent(content).build());
+    }
+
+    /**
+     * Deletes the message with the provided ID.
+     *
+     * @param  messageId
+     *         The target message id
+     *
+     * @return {@link java.util.concurrent.CompletableFuture}
+     */
+    @NotNull
+    public CompletableFuture<Void> delete(long messageId) {
+        return execute(null, Long.toUnsignedString(messageId), RequestType.DELETE).thenApply(v -> null);
+    }
+
+
     private JSONObject newJson()
     {
         JSONObject json = new JSONObject();
@@ -362,9 +504,14 @@ public class WebhookClient implements AutoCloseable {
     }
 
     @NotNull
-    protected CompletableFuture<ReadonlyMessage> execute(RequestBody body) {
+    protected CompletableFuture<ReadonlyMessage> execute(RequestBody body, @Nullable String messageId, @NotNull RequestType type) {
         checkShutdown();
-        return queueRequest(body);
+        return queueRequest(type.format(url, messageId), type.method, body);
+    }
+
+    @NotNull
+    protected CompletableFuture<ReadonlyMessage> execute(RequestBody body) {
+        return execute(body, null, RequestType.SEND);
     }
 
     @NotNull
@@ -376,11 +523,13 @@ public class WebhookClient implements AutoCloseable {
     }
 
     @NotNull
-    protected CompletableFuture<ReadonlyMessage> queueRequest(RequestBody body) {
+    protected CompletableFuture<ReadonlyMessage> queueRequest(String url, String method, RequestBody body) {
         final boolean wasQueued = isQueued;
         isQueued = true;
         CompletableFuture<ReadonlyMessage> callback = new CompletableFuture<>();
-        Request req = new Request(callback, body);
+        Request req = new Request(callback, body, method, url);
+        if (defaultTimeout > 0)
+            req.deadline = System.currentTimeMillis() + defaultTimeout;
         enqueuePair(req);
         if (!wasQueued)
             backoffQueue();
@@ -388,10 +537,10 @@ public class WebhookClient implements AutoCloseable {
     }
 
     @NotNull
-    protected okhttp3.Request newRequest(RequestBody body) {
+    protected okhttp3.Request newRequest(Request request) {
         return new okhttp3.Request.Builder()
-                .url(url)
-                .method("POST", body)
+                .url(request.url)
+                .method(request.method, request.body)
                 .header("accept-encoding", "gzip")
                 .header("user-agent", USER_AGENT)
                 .build();
@@ -422,12 +571,16 @@ public class WebhookClient implements AutoCloseable {
     }
 
     private boolean executePair(@Async.Execute Request req) {
-        if (req.future.isCancelled()) {
+        if (req.future.isDone()) {
+            queue.poll();
+            return true;
+        } else if (req.deadline > 0 && req.deadline < System.currentTimeMillis()) {
+            req.future.completeExceptionally(new TimeoutException());
             queue.poll();
             return true;
         }
 
-        final okhttp3.Request request = newRequest(req.body);
+        final okhttp3.Request request = newRequest(req);
         try (Response response = client.newCall(request).execute()) {
             bucket.update(response);
             if (response.code() == Bucket.RATE_LIMIT_CODE) {
@@ -441,7 +594,7 @@ public class WebhookClient implements AutoCloseable {
                 return true;
             }
             ReadonlyMessage message = null;
-            if (parseMessage) {
+            if (parseMessage && !"DELETE".equals(req.method)) {
                 InputStream body = IOUtil.getBody(response);
                 JSONObject json = IOUtil.toJSON(body);
                 message = EntityFactory.makeMessage(json);
@@ -457,6 +610,27 @@ public class WebhookClient implements AutoCloseable {
             queue.poll().future.completeExceptionally(e);
         }
         return true;
+    }
+
+    enum RequestType {
+        SEND("", "POST"), EDIT("messages/%s", "PATCH"), DELETE("messages/%s", "DELETE");
+
+        private final String format, method;
+
+        RequestType(String format, String method) {
+            this.format = format;
+            this.method = method;
+        }
+
+        public String getMethod() {
+            return method;
+        }
+
+        public String format(String url, String messageId) {
+            if (this == SEND)
+                return url;
+            return String.format("%s/" + format, url, messageId);
+        }
     }
 
     protected static final class Bucket {
@@ -526,10 +700,14 @@ public class WebhookClient implements AutoCloseable {
     private static final class Request {
         private final CompletableFuture<ReadonlyMessage> future;
         private final RequestBody body;
+        private final String method, url;
+        private long deadline;
 
-        public Request(CompletableFuture<ReadonlyMessage> future, RequestBody body) {
+        public Request(CompletableFuture<ReadonlyMessage> future, RequestBody body, String method, String url) {
             this.future = future;
             this.body = body;
+            this.method = method;
+            this.url = url;
         }
     }
 }

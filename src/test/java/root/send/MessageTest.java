@@ -197,22 +197,23 @@ public class MessageTest {
 
         Assert.assertEquals("Json output is incorrect", expected, provided);
 
-        //check if optional fields are omitted if not used (tts is always sent)
-        expected = new JSONObject()
-                .put("content", "...")
-                .put("tts", false)
-                .put("allowed_mentions", allowedMentions)
-                .toMap();
-
-        msg = builder
-                .reset()
-                .setContent("...")
-                .build();
-
-        bodyContent = IOTestUtil.readRequestBody(msg.getBody());
-        provided = new JSONObject(bodyContent).toMap();
-
-        Assert.assertEquals("Json output has additional fields", expected, provided);
+        // This is no longer expected behavior, we intentionally include optional fields due to the PATCH endpoint behavior
+//        //check if optional fields are omitted if not used (tts is always sent)
+//        expected = new JSONObject()
+//                .put("content", "...")
+//                .put("tts", false)
+//                .put("allowed_mentions", allowedMentions)
+//                .toMap();
+//
+//        msg = builder
+//                .reset()
+//                .setContent("...")
+//                .build();
+//
+//        bodyContent = IOTestUtil.readRequestBody(msg.getBody());
+//        provided = new JSONObject(bodyContent).toMap();
+//
+//        Assert.assertEquals("Json output has additional fields", expected, provided);
     }
 
     @Test
@@ -241,6 +242,7 @@ public class MessageTest {
                 new JSONObject()
                         .put("allowed_mentions", allowedMentions)
                         .put("content", "CONTENT!")
+                        .put("embeds", new JSONArray())
                         .put("tts", false).toMap(),
                 new JSONObject((String) multiPart.get("payload_json")).toMap()
         );
