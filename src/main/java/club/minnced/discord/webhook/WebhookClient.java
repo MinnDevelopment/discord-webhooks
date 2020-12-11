@@ -34,6 +34,7 @@ import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.annotation.Nonnegative;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -67,6 +68,7 @@ public class WebhookClient implements AutoCloseable {
     protected final BlockingQueue<Request> queue;
     protected final boolean parseMessage;
     protected final AllowedMentions allowedMentions;
+    protected long defaultTimeout;
     protected volatile boolean isQueued;
     protected boolean isShutdown;
 
@@ -162,6 +164,40 @@ public class WebhookClient implements AutoCloseable {
      */
     public boolean isShutdown() {
         return isShutdown;
+    }
+
+    /**
+     * Configure a default timeout to use for requests.
+     * <br>The {@link CompletableFuture} returned by the various send methods will be completed exceptionally with a {@link TimeoutException} when the timeout expires.
+     * By default, no timeout is used.
+     *
+     * <p>Note that this timeout is independent from the timeouts configured in {@link OkHttpClient} and will only prevent queued requests from being executed.
+     *
+     * @param  millis
+     *         The timeout in milliseconds, or 0 for no timeout
+     *
+     * @throws IllegalArgumentException
+     *         If the provided timeout is negative
+     *
+     * @return The current WebhookClient instance
+     */
+    @NotNull
+    @SuppressWarnings("ConstantConditions") // we still need a runtime check for negative numbers
+    public WebhookClient setTimeout(@Nonnegative long millis) {
+        if (millis < 0)
+            throw new IllegalArgumentException("Cannot set a negative timeout");
+        this.defaultTimeout = millis;
+        return this;
+    }
+
+    /**
+     * The current timeout configured by {@link #setTimeout(long)}.
+     * <br>If no timeout was configured, this returns 0.
+     *
+     * @return The timeout in milliseconds or 0 for no timeout
+     */
+    public long getTimeout() {
+        return defaultTimeout;
     }
 
     /**
@@ -492,6 +528,8 @@ public class WebhookClient implements AutoCloseable {
         isQueued = true;
         CompletableFuture<ReadonlyMessage> callback = new CompletableFuture<>();
         Request req = new Request(callback, body, method, url);
+        if (defaultTimeout > 0)
+            req.deadline = System.currentTimeMillis() + defaultTimeout;
         enqueuePair(req);
         if (!wasQueued)
             backoffQueue();
@@ -533,7 +571,11 @@ public class WebhookClient implements AutoCloseable {
     }
 
     private boolean executePair(@Async.Execute Request req) {
-        if (req.future.isCancelled()) {
+        if (req.future.isDone()) {
+            queue.poll();
+            return true;
+        } else if (req.deadline > 0 && req.deadline < System.currentTimeMillis()) {
+            req.future.completeExceptionally(new TimeoutException());
             queue.poll();
             return true;
         }
@@ -659,6 +701,7 @@ public class WebhookClient implements AutoCloseable {
         private final CompletableFuture<ReadonlyMessage> future;
         private final RequestBody body;
         private final String method, url;
+        private long deadline;
 
         public Request(CompletableFuture<ReadonlyMessage> future, RequestBody body, String method, String url) {
             this.future = future;
