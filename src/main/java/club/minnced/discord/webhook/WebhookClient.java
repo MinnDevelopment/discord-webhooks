@@ -55,7 +55,7 @@ public class WebhookClient implements AutoCloseable {
     /**
      * Format for webhook execution endpoint
      */
-    public static final String WEBHOOK_URL = "https://discord.com/api/v" + LibraryInfo.DISCORD_API_VERSION + "/webhooks/%s/%s?wait=%s";
+    public static final String WEBHOOK_URL = "https://discord.com/api/v" + LibraryInfo.DISCORD_API_VERSION + "/webhooks/%s/%s";
     /** User-Agent used for REST requests */
     public static final String USER_AGENT = "Webhook(https://github.com/MinnDevelopment/discord-webhooks, " + LibraryInfo.VERSION + ")";
     private static final Logger LOG = LoggerFactory.getLogger(WebhookClient.class);
@@ -78,7 +78,7 @@ public class WebhookClient implements AutoCloseable {
         this.client = client;
         this.id = id;
         this.parseMessage = parseMessage;
-        this.url = String.format(WEBHOOK_URL, Long.toUnsignedString(id), token, parseMessage);
+        this.url = String.format(WEBHOOK_URL, Long.toUnsignedString(id), token);
         this.pool = pool;
         this.bucket = new Bucket();
         this.queue = new LinkedBlockingQueue<>();
@@ -506,7 +506,12 @@ public class WebhookClient implements AutoCloseable {
     @NotNull
     protected CompletableFuture<ReadonlyMessage> execute(RequestBody body, @Nullable String messageId, @NotNull RequestType type) {
         checkShutdown();
-        return queueRequest(type.format(url, messageId), type.method, body);
+        String endpoint = url;
+        if (type != RequestType.SEND)
+            endpoint += "/messages/" + messageId;
+        if (parseMessage)
+            endpoint += "?wait=true";
+        return queueRequest(endpoint, type.method, body);
     }
 
     @NotNull
@@ -613,23 +618,16 @@ public class WebhookClient implements AutoCloseable {
     }
 
     enum RequestType {
-        SEND("", "POST"), EDIT("messages/%s", "PATCH"), DELETE("messages/%s", "DELETE");
+        SEND("POST"), EDIT("PATCH"), DELETE("DELETE");
 
-        private final String format, method;
+        private final String method;
 
-        RequestType(String format, String method) {
-            this.format = format;
+        RequestType(String method) {
             this.method = method;
         }
 
         public String getMethod() {
             return method;
-        }
-
-        public String format(String url, String messageId) {
-            if (this == SEND)
-                return url;
-            return String.format("%s/" + format, url, messageId);
         }
     }
 
@@ -680,7 +678,7 @@ public class WebhookClient implements AutoCloseable {
             final String date = response.header("Date");
 
             if (date != null && !is429) {
-                final long reset = Long.parseLong(response.header("X-RateLimit-Reset")); //epoch seconds
+                final long reset = (long) Math.ceil(Double.parseDouble(response.header("X-RateLimit-Reset-After"))); //epoch seconds
                 OffsetDateTime tDate = OffsetDateTime.parse(date, DateTimeFormatter.RFC_1123_DATE_TIME);
                 final long delay = tDate.toInstant().until(Instant.ofEpochSecond(reset), ChronoUnit.MILLIS);
                 resetTime = current + delay;
