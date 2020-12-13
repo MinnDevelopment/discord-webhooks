@@ -38,10 +38,6 @@ import javax.annotation.Nonnegative;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.time.Instant;
-import java.time.OffsetDateTime;
-import java.time.format.DateTimeFormatter;
-import java.time.temporal.ChronoUnit;
 import java.util.Collection;
 import java.util.Objects;
 import java.util.concurrent.*;
@@ -653,10 +649,10 @@ public class WebhookClient implements AutoCloseable {
             if (retryAfter == null) {
                 InputStream stream = IOUtil.getBody(response);
                 final JSONObject body = IOUtil.toJSON(stream);
-                delay = body.getLong("retry_after");
+                delay = (long) Math.ceil(body.getDouble("retry_after")) * 1000;
             }
             else {
-                delay = Long.parseLong(retryAfter);
+                delay = Long.parseLong(retryAfter) * 1000;
             }
             LOG.error("Encountered 429, retrying after {}", delay);
             resetTime = current + delay;
@@ -675,12 +671,10 @@ public class WebhookClient implements AutoCloseable {
             }
             remainingUses = Integer.parseInt(response.header("X-RateLimit-Remaining"));
             limit = Integer.parseInt(response.header("X-RateLimit-Limit"));
-            final String date = response.header("Date");
 
-            if (date != null && !is429) {
-                final long reset = (long) Math.ceil(Double.parseDouble(response.header("X-RateLimit-Reset-After"))); //epoch seconds
-                OffsetDateTime tDate = OffsetDateTime.parse(date, DateTimeFormatter.RFC_1123_DATE_TIME);
-                final long delay = tDate.toInstant().until(Instant.ofEpochSecond(reset), ChronoUnit.MILLIS);
+            if (!is429) {
+                final long reset = (long) Math.ceil(Double.parseDouble(response.header("X-RateLimit-Reset-After"))); // relative seconds
+                final long delay = reset * 1000;
                 resetTime = current + delay;
             }
         }
