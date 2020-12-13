@@ -40,7 +40,7 @@ WebhookClient client = builder.build();
 
 ```java
 // Using the factory methods
-WebhookClient client = WebhookClient.fromUrl(url); // or fromId(id, token)
+WebhookClient client = WebhookClient.withUrl(url); // or withId(id, token)
 ```
 
 ### Creating a WebhookCluster
