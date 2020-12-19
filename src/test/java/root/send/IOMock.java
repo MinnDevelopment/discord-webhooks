@@ -21,7 +21,9 @@ import club.minnced.discord.webhook.WebhookClientBuilder;
 import club.minnced.discord.webhook.send.WebhookEmbedBuilder;
 import club.minnced.discord.webhook.send.WebhookMessage;
 import club.minnced.discord.webhook.send.WebhookMessageBuilder;
-import okhttp3.*;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.RequestBody;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -62,7 +64,7 @@ public class IOMock {
         verify(httpClient, timeout(1000).only()).newCall(requestCaptor.capture());
         Request req = requestCaptor.getValue();
         Assert.assertEquals("POST", req.method());
-        Assert.assertEquals(String.format("https://discord.com/api/v7/webhooks/%d/%s?wait=false", 1234, "token"), req.url().toString());
+        Assert.assertEquals(String.format("https://discord.com/api/v8/webhooks/%d/%s", 1234, "token"), req.url().toString());
     }
 
     @Test

@@ -184,10 +184,10 @@ public class IOUtil { //TODO: test json
      * Wrapper for an {@link #OCTET} request body
      */
     public static class OctetBody extends RequestBody {
-        private final InputStream in;
+        private final byte[] data;
 
-        public OctetBody(@NotNull InputStream in) {
-            this.in = in;
+        public OctetBody(@NotNull byte[] data) {
+            this.data = data;
         }
 
         @Override
@@ -197,7 +197,6 @@ public class IOUtil { //TODO: test json
 
         @Override
         public void writeTo(BufferedSink sink) throws IOException {
-            byte[] data = readAllBytes(in);
             sink.write(data);
         }
     }

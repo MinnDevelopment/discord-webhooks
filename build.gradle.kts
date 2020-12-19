@@ -28,7 +28,7 @@ plugins {
 
 val major = "0"
 val minor = "5"
-val patch = "3"
+val patch = "4"
 
 group = "club.minnced"
 version = "$major.$minor.$patch"
@@ -44,26 +44,37 @@ repositories {
     jcenter()
 }
 
-val powermockVersion = "2.0.7"
+val versions = mapOf(
+    "slf4j" to "1.7.25",
+    "okhttp" to "3.14.9",
+    "json" to "20180813",
+    "jda" to "4.2.0_196",
+    "discord4j" to "3.1.0",
+    "javacord" to "3.0.6",
+    "junit" to "4.12",
+    "mockito" to "3.6.28",
+    "powermock" to "2.0.9",
+    "logback" to "1.2.3"
+)
 
 dependencies {
-    api("org.slf4j:slf4j-api:1.7.25")
-    api("com.squareup.okhttp3:okhttp:3.14.9")
-    api("org.json:json:20180813")
+    api("org.slf4j:slf4j-api:${versions["slf4j"]}")
+    api("com.squareup.okhttp3:okhttp:${versions["okhttp"]}")
+    api("org.json:json:${versions["json"]}")
     implementation("org.jetbrains:annotations:16.0.1")
 
-    compileOnly("net.dv8tion:JDA:4.2.0_196")
-    compileOnly("com.discord4j:discord4j-core:3.1.0")
-    compileOnly("org.javacord:javacord:3.0.6")
+    compileOnly("net.dv8tion:JDA:${versions["jda"]}")
+    compileOnly("com.discord4j:discord4j-core:${versions["discord4j"]}")
+    compileOnly("org.javacord:javacord:${versions["javacord"]}")
 
-    testImplementation("junit:junit:4.12")
-    testImplementation("org.mockito:mockito-core:3.5.5")
-    testImplementation("org.powermock:powermock-module-junit4:$powermockVersion")
-    testImplementation("org.powermock:powermock-api-mockito2:$powermockVersion")
-    testImplementation("net.dv8tion:JDA:4.2.0_196")
-    testImplementation("com.discord4j:discord4j-core:3.1.0")
-    testImplementation("org.javacord:javacord:3.0.6")
-    //testCompile("ch.qos.logback:logback-classic:1.2.3")
+    testImplementation("junit:junit:${versions["junit"]}")
+    testImplementation("org.mockito:mockito-core:${versions["mockito"]}")
+    testImplementation("org.powermock:powermock-module-junit4:${versions["powermock"]}")
+    testImplementation("org.powermock:powermock-api-mockito2:${versions["powermock"]}")
+    testImplementation("net.dv8tion:JDA:${versions["jda"]}")
+    testImplementation("com.discord4j:discord4j-core:${versions["discord4j"]}")
+    testImplementation("org.javacord:javacord:${versions["javacord"]}")
+    //testCompile("ch.qos.logback:logback-classic:${versions["logback"]}")
 }
 
 fun org.gradle.api.publish.maven.MavenPom.addDependencies() = withXml {

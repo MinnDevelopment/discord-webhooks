@@ -19,7 +19,10 @@ package club.minnced.discord.webhook.send;
 import club.minnced.discord.webhook.IOUtil;
 import org.jetbrains.annotations.NotNull;
 
-import java.io.*;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 
 /**
  * Internal representation of attachments for outgoing messages
@@ -50,7 +53,7 @@ public class MessageAttachment {
     }
 
     @NotNull
-    public InputStream getData() {
-        return new ByteArrayInputStream(data);
+    public byte[] getData() {
+        return data;
     }
 }
