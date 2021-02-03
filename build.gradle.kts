@@ -1,7 +1,6 @@
-import com.jfrog.bintray.gradle.BintrayExtension
-import com.jfrog.bintray.gradle.tasks.BintrayPublishTask
-import com.jfrog.bintray.gradle.tasks.BintrayUploadTask
+import io.codearte.gradle.nexus.NexusStagingExtension
 import org.apache.tools.ant.filters.ReplaceTokens
+import org.gradle.api.publish.maven.MavenPom
 
 /*
  * Copyright 2018-2019 Florian Spieß
@@ -22,9 +21,20 @@ import org.apache.tools.ant.filters.ReplaceTokens
 plugins {
     `java-library`
     `maven-publish`
-    id("com.jfrog.bintray") version "1.8.5"
-    id("com.github.johnrengelman.shadow") version "6.0.0"
+    signing
+
+//    id("net.researchgate.release") version "2.8.1"
+//    id("com.github.johnrengelman.shadow") version "6.0.0"
 }
+
+buildscript {
+    repositories { mavenCentral() }
+    dependencies {
+        classpath("io.codearte.gradle.nexus:gradle-nexus-staging-plugin:0.22.0")
+    }
+}
+
+apply(plugin="io.codearte.nexus-staging")
 
 val major = "0"
 val minor = "5"
@@ -41,7 +51,8 @@ val tokens = mapOf(
 )
 
 repositories {
-    jcenter()
+    mavenCentral()
+    jcenter() // Legacy :(
 }
 
 val versions = mapOf(
@@ -127,31 +138,6 @@ val sourcesJar = tasks.create("sourcesJar", Jar::class.java) {
     classifier = "sources"
 }
 
-publishing {
-    publications {
-        register("BintrayRelease", MavenPublication::class) {
-            from(components["java"])
-
-            artifactId = project.name
-            groupId = project.group as String
-            version = project.version as String
-
-            artifact(sourcesJar)
-            artifact(javadocJar)
-        }
-    }
-}
-
-
-val bintrayUpload: BintrayUploadTask by tasks
-bintrayUpload.apply {
-    onlyIf { getProjectProperty("bintrayUsername") != null }
-    onlyIf { getProjectProperty("bintrayApiKey") != null }
-}
-
-val bintrayPublish: BintrayPublishTask by tasks
-bintrayPublish.dependsOn(bintrayUpload)
-
 val compileJava: JavaCompile by tasks
 compileJava.options.isIncremental = true
 compileJava.source = fileTree(sources.destinationDir)
@@ -171,23 +157,122 @@ build.apply {
     dependsOn(test)
 }
 
-bintray {
-    user = getProjectProperty("bintrayUsername")
-    key = getProjectProperty("bintrayApiKey")
-    setPublications("BintrayRelease")
-    publish = true
 
-    pkg(delegateClosureOf<BintrayExtension.PackageConfig> {
-        repo = "maven"
-        name = project.name
-        vcsUrl = "https://github.com/MinnDevelopment/discord-webhooks.git"
-        githubRepo = "MinnDevelopment/discord-webhooks"
-        setLicenses("Apache-2.0")
-        version(delegateClosureOf<BintrayExtension.VersionConfig> {
-            name = project.version as String
-            vcsTag = project.version as String
-            gpg.sign = true
-        })
-    })
+// Signing
+
+
+val signJar = tasks.create("signJar", Sign::class.java) {
+    dependsOn(jar)
+    sign(jar)
 }
 
+val signJavadocJar = tasks.create("signJavadocJar", Sign::class.java) {
+    dependsOn(javadocJar)
+    sign(javadocJar)
+}
+
+val signSourcesJar = tasks.create("signSourcesJar", Sign::class.java) {
+    dependsOn(sourcesJar)
+    sign(sourcesJar)
+}
+
+val signPom = tasks.create("signPom", Sign::class.java) {
+    val pom = file("${buildDir}/publications/Release/pom-default.xml")
+    sign(pom)
+}
+
+val signFiles = tasks.create("signFiles") {
+    dependsOn(signJar, signJavadocJar, signSourcesJar, signPom)
+}
+
+// Generate pom file for maven central
+
+fun generatePom(): MavenPom.() -> Unit {
+    return {
+        name.set(project.name)
+        description.set("Provides easy to use bindings for the Discord Webhook API")
+        url.set("https://github.com/MinnDevelopment/discord-webhooks")
+        scm {
+            url.set("https://github.com/MinnDevelopment/discord-webhooks")
+            connection.set("scm:git:git://github.com/MinnDevelopment/discord-webhooks")
+            developerConnection.set("scm:git:ssh:git@github.com:MinnDevelopment/discord-webhooks")
+        }
+        licenses {
+            license {
+                name.set("The Apache Software License, Version 2.0")
+                url.set("http://www.apache.org/license/LICENSE-2.0.txt")
+                distribution.set("repo")
+            }
+        }
+        developers {
+            developer {
+                id.set("Minn")
+                name.set("Florian Spieß")
+                email.set("business@minnced.club")
+            }
+        }
+    }
+}
+
+
+// Publish
+
+publishing {
+    publications {
+        register("Release", MavenPublication::class) {
+            from(components["java"])
+
+            artifactId = project.name
+            groupId = project.group as String
+            version = project.version as String
+
+            artifact(sourcesJar)
+            artifact(javadocJar)
+            artifact(signJar.signatureFiles.first()) {
+                classifier = null
+                extension = "jar.asc"
+            }
+            artifact(signJavadocJar.signatureFiles.first()) {
+                classifier = "javadoc"
+                extension = "jar.asc"
+            }
+            artifact(signSourcesJar.signatureFiles.first()) {
+                classifier = "sources"
+                extension = "jar.asc"
+            }
+            artifact(signPom.signatureFiles.first()) {
+                classifier = null
+                extension = "pom.asc"
+            }
+
+            pom.apply(generatePom())
+        }
+    }
+
+    repositories.maven {
+        url = uri("https://oss.sonatype.org/service/local/staging/deploy/maven2")
+        credentials {
+            username = getProjectProperty("ossrhUser")
+            password = getProjectProperty("ossrhPassword")
+        }
+    }
+}
+
+// Prepare for publish
+
+val generatePomFileForReleasePublication: GenerateMavenPom by tasks
+signPom.dependsOn(generatePomFileForReleasePublication)
+signPom.mustRunAfter(generatePomFileForReleasePublication)
+
+tasks.withType(AbstractPublishToMaven::class.java) {
+    dependsOn(signFiles)
+    mustRunAfter(signFiles)
+}
+
+// Staging and Promotion
+
+configure<NexusStagingExtension> {
+    username = getProjectProperty("ossrhUser")
+    password = getProjectProperty("ossrhPassword")
+    stagingProfileId = getProjectProperty("stagingProfileId")
+}
