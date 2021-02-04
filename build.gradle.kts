@@ -1,25 +1,22 @@
+import de.marcphilipp.gradle.nexus.NexusPublishExtension
+import io.codearte.gradle.nexus.BaseStagingTask
 import io.codearte.gradle.nexus.NexusStagingExtension
 import org.apache.tools.ant.filters.ReplaceTokens
 import org.gradle.api.publish.maven.MavenPom
+import java.time.Duration
 
 plugins {
     `java-library`
     `maven-publish`
     signing
+    id("io.codearte.nexus-staging") version "0.22.0"
+    id("de.marcphilipp.nexus-publish") version "0.4.0"
 }
 
-buildscript {
-    repositories { mavenCentral() }
-    dependencies {
-        classpath("io.codearte.gradle.nexus:gradle-nexus-staging-plugin:0.22.0")
-    }
-}
-
-apply(plugin="io.codearte.nexus-staging")
 
 val major = "0"
 val minor = "5"
-val patch = "4"
+val patch = "5"
 
 group = "club.minnced"
 version = "$major.$minor.$patch"
@@ -217,15 +214,9 @@ publishing {
             pom.apply(generatePom())
         }
     }
-
-    repositories.maven {
-        url = uri("https://oss.sonatype.org/service/local/staging/deploy/maven2")
-        credentials {
-            username = getProjectProperty("ossrhUser")
-            password = getProjectProperty("ossrhPassword")
-        }
-    }
 }
+
+
 
 // Prepare for publish
 
@@ -248,4 +239,27 @@ configure<NexusStagingExtension> {
     username = getProjectProperty("ossrhUser")
     password = getProjectProperty("ossrhPassword")
     stagingProfileId = getProjectProperty("stagingProfileId")
+}
+
+configure<NexusPublishExtension> {
+    nexusPublishing {
+        repositories.sonatype {
+            username.set(getProjectProperty("ossrhUser"))
+            password.set(getProjectProperty("ossrhPassword"))
+            stagingProfileId.set(getProjectProperty("stagingProfileId"))
+        }
+        // Sonatype is very slow :)
+        connectTimeout.set(Duration.ofMinutes(1))
+        clientTimeout.set(Duration.ofMinutes(10))
+    }
+}
+
+// This links the close/release tasks to the right repository (from the publication above)
+val publishToSonatype: Task by tasks
+tasks.withType<BaseStagingTask> {
+    dependsOn(publishToSonatype)
+    mustRunAfter(publishToSonatype)
+    // We give each step half an hour because it takes very long sometimes ...
+    numberOfRetries = 30
+    delayBetweenRetriesInMillis = 60000
 }
