@@ -16,7 +16,7 @@ plugins {
 
 val major = "0"
 val minor = "5"
-val patch = "5"
+val patch = "5-rc"
 
 group = "club.minnced"
 version = "$major.$minor.$patch"
@@ -259,7 +259,7 @@ val publishToSonatype: Task by tasks
 tasks.withType<BaseStagingTask> {
     dependsOn(publishToSonatype)
     mustRunAfter(publishToSonatype)
-    // We give each step half an hour because it takes very long sometimes ...
-    numberOfRetries = 30
-    delayBetweenRetriesInMillis = 60000
+    // We give each step an hour because it takes very long sometimes ...
+    numberOfRetries = 30 // 30 tries
+    delayBetweenRetriesInMillis = 2 * 60 * 1000 // 2 minutes
 }
