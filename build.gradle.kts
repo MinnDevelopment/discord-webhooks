@@ -2,29 +2,10 @@ import io.codearte.gradle.nexus.NexusStagingExtension
 import org.apache.tools.ant.filters.ReplaceTokens
 import org.gradle.api.publish.maven.MavenPom
 
-/*
- * Copyright 2018-2019 Florian Spieß
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 plugins {
     `java-library`
     `maven-publish`
     signing
-
-//    id("net.researchgate.release") version "2.8.1"
-//    id("com.github.johnrengelman.shadow") version "6.0.0"
 }
 
 buildscript {
@@ -87,28 +68,6 @@ dependencies {
     testImplementation("org.javacord:javacord:${versions["javacord"]}")
     //testCompile("ch.qos.logback:logback-classic:${versions["logback"]}")
 }
-
-fun org.gradle.api.publish.maven.MavenPom.addDependencies() = withXml {
-    asNode().appendNode("dependencies").let { depNode ->
-        configurations.api.dependencies.forEach {
-            depNode.appendNode("dependency").apply {
-                appendNode("groupId", it.group)
-                appendNode("artifactId", it.name)
-                appendNode("version", it.version)
-                appendNode("scope", "compile")
-            }
-        }
-        configurations.implementation.dependencies.forEach {
-            depNode.appendNode("dependency").apply {
-                appendNode("groupId", it.group)
-                appendNode("artifactId", it.name)
-                appendNode("version", it.version)
-                appendNode("scope", "runtime")
-            }
-        }
-    }
-}
-
 
 fun getProjectProperty(name: String) = project.properties[name] as? String
 
@@ -181,14 +140,20 @@ val signPom = tasks.create("signPom", Sign::class.java) {
     sign(pom)
 }
 
+val signModule = tasks.create("signModule", Sign::class.java) {
+    val module = file("${buildDir}/publications/Release/module.json")
+    sign(module)
+}
+
 val signFiles = tasks.create("signFiles") {
-    dependsOn(signJar, signJavadocJar, signSourcesJar, signPom)
+    dependsOn(signJar, signJavadocJar, signSourcesJar, signPom, signModule)
 }
 
 // Generate pom file for maven central
 
 fun generatePom(): MavenPom.() -> Unit {
     return {
+        packaging = "jar"
         name.set(project.name)
         description.set("Provides easy to use bindings for the Discord Webhook API")
         url.set("https://github.com/MinnDevelopment/discord-webhooks")
@@ -244,6 +209,10 @@ publishing {
                 classifier = null
                 extension = "pom.asc"
             }
+            artifact(signModule.signatureFiles.first()) {
+                classifier = null
+                extension = "module.asc"
+            }
 
             pom.apply(generatePom())
         }
@@ -259,6 +228,10 @@ publishing {
 }
 
 // Prepare for publish
+
+val generateMetadataFileForReleasePublication: Task by tasks
+signModule.dependsOn(generateMetadataFileForReleasePublication)
+signModule.mustRunAfter(generateMetadataFileForReleasePublication)
 
 val generatePomFileForReleasePublication: GenerateMavenPom by tasks
 signPom.dependsOn(generatePomFileForReleasePublication)
