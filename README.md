@@ -1,5 +1,5 @@
-[version]: https://api.bintray.com/packages/minndevelopment/maven/discord-webhooks/images/download.svg
-[download]: https://bintray.com/minndevelopment/maven/discord-webhooks/_latestVersion
+[version]: https://img.shields.io/maven-central/v/club.minnced/discord-webhooks
+[download]: https://mvnrepository.com/artifact/club.minnced/discord-webhooks/latest
 [license]: https://img.shields.io/badge/License-Apache%202.0-lightgrey.svg
 [license-file]: https://github.com/MinnDevelopment/discord-webhooks/blob/master/LICENSE
 
@@ -103,6 +103,7 @@ Note: Replace `%VERSION%` below with the desired version.
 
 ```gradle
 repositories {
+    mavenCentral()
     jcenter()
 }
 ```
