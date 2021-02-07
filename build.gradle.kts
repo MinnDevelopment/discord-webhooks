@@ -1,34 +1,22 @@
-import com.jfrog.bintray.gradle.BintrayExtension
-import com.jfrog.bintray.gradle.tasks.BintrayPublishTask
-import com.jfrog.bintray.gradle.tasks.BintrayUploadTask
+import de.marcphilipp.gradle.nexus.NexusPublishExtension
+import io.codearte.gradle.nexus.BaseStagingTask
+import io.codearte.gradle.nexus.NexusStagingExtension
 import org.apache.tools.ant.filters.ReplaceTokens
-
-/*
- * Copyright 2018-2019 Florian Spieß
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import org.gradle.api.publish.maven.MavenPom
+import java.time.Duration
 
 plugins {
     `java-library`
     `maven-publish`
-    id("com.jfrog.bintray") version "1.8.5"
-    id("com.github.johnrengelman.shadow") version "6.0.0"
+    signing
+    id("io.codearte.nexus-staging") version "0.22.0"
+    id("de.marcphilipp.nexus-publish") version "0.4.0"
 }
+
 
 val major = "0"
 val minor = "5"
-val patch = "4"
+val patch = "5-rc"
 
 group = "club.minnced"
 version = "$major.$minor.$patch"
@@ -41,7 +29,8 @@ val tokens = mapOf(
 )
 
 repositories {
-    jcenter()
+    mavenCentral()
+    jcenter() // Legacy :(
 }
 
 val versions = mapOf(
@@ -77,28 +66,6 @@ dependencies {
     //testCompile("ch.qos.logback:logback-classic:${versions["logback"]}")
 }
 
-fun org.gradle.api.publish.maven.MavenPom.addDependencies() = withXml {
-    asNode().appendNode("dependencies").let { depNode ->
-        configurations.api.dependencies.forEach {
-            depNode.appendNode("dependency").apply {
-                appendNode("groupId", it.group)
-                appendNode("artifactId", it.name)
-                appendNode("version", it.version)
-                appendNode("scope", "compile")
-            }
-        }
-        configurations.implementation.dependencies.forEach {
-            depNode.appendNode("dependency").apply {
-                appendNode("groupId", it.group)
-                appendNode("artifactId", it.name)
-                appendNode("version", it.version)
-                appendNode("scope", "runtime")
-            }
-        }
-    }
-}
-
-
 fun getProjectProperty(name: String) = project.properties[name] as? String
 
 val javadoc: Javadoc by tasks
@@ -127,31 +94,6 @@ val sourcesJar = tasks.create("sourcesJar", Jar::class.java) {
     classifier = "sources"
 }
 
-publishing {
-    publications {
-        register("BintrayRelease", MavenPublication::class) {
-            from(components["java"])
-
-            artifactId = project.name
-            groupId = project.group as String
-            version = project.version as String
-
-            artifact(sourcesJar)
-            artifact(javadocJar)
-        }
-    }
-}
-
-
-val bintrayUpload: BintrayUploadTask by tasks
-bintrayUpload.apply {
-    onlyIf { getProjectProperty("bintrayUsername") != null }
-    onlyIf { getProjectProperty("bintrayApiKey") != null }
-}
-
-val bintrayPublish: BintrayPublishTask by tasks
-bintrayPublish.dependsOn(bintrayUpload)
-
 val compileJava: JavaCompile by tasks
 compileJava.options.isIncremental = true
 compileJava.source = fileTree(sources.destinationDir)
@@ -171,23 +113,153 @@ build.apply {
     dependsOn(test)
 }
 
-bintray {
-    user = getProjectProperty("bintrayUsername")
-    key = getProjectProperty("bintrayApiKey")
-    setPublications("BintrayRelease")
-    publish = true
 
-    pkg(delegateClosureOf<BintrayExtension.PackageConfig> {
-        repo = "maven"
-        name = project.name
-        vcsUrl = "https://github.com/MinnDevelopment/discord-webhooks.git"
-        githubRepo = "MinnDevelopment/discord-webhooks"
-        setLicenses("Apache-2.0")
-        version(delegateClosureOf<BintrayExtension.VersionConfig> {
-            name = project.version as String
-            vcsTag = project.version as String
-            gpg.sign = true
-        })
-    })
+// Signing
+
+
+val signJar = tasks.create("signJar", Sign::class.java) {
+    dependsOn(jar)
+    sign(jar)
 }
 
+val signJavadocJar = tasks.create("signJavadocJar", Sign::class.java) {
+    dependsOn(javadocJar)
+    sign(javadocJar)
+}
+
+val signSourcesJar = tasks.create("signSourcesJar", Sign::class.java) {
+    dependsOn(sourcesJar)
+    sign(sourcesJar)
+}
+
+val signPom = tasks.create("signPom", Sign::class.java) {
+    val pom = file("${buildDir}/publications/Release/pom-default.xml")
+    sign(pom)
+}
+
+val signModule = tasks.create("signModule", Sign::class.java) {
+    val module = file("${buildDir}/publications/Release/module.json")
+    sign(module)
+}
+
+val signFiles = tasks.create("signFiles") {
+    dependsOn(signJar, signJavadocJar, signSourcesJar, signPom, signModule)
+}
+
+// Generate pom file for maven central
+
+fun generatePom(): MavenPom.() -> Unit {
+    return {
+        packaging = "jar"
+        name.set(project.name)
+        description.set("Provides easy to use bindings for the Discord Webhook API")
+        url.set("https://github.com/MinnDevelopment/discord-webhooks")
+        scm {
+            url.set("https://github.com/MinnDevelopment/discord-webhooks")
+            connection.set("scm:git:git://github.com/MinnDevelopment/discord-webhooks")
+            developerConnection.set("scm:git:ssh:git@github.com:MinnDevelopment/discord-webhooks")
+        }
+        licenses {
+            license {
+                name.set("The Apache Software License, Version 2.0")
+                url.set("http://www.apache.org/licenses/LICENSE-2.0.txt")
+                distribution.set("repo")
+            }
+        }
+        developers {
+            developer {
+                id.set("Minn")
+                name.set("Florian Spieß")
+                email.set("business@minnced.club")
+            }
+        }
+    }
+}
+
+
+// Publish
+
+publishing {
+    publications {
+        register("Release", MavenPublication::class) {
+            from(components["java"])
+
+            artifactId = project.name
+            groupId = project.group as String
+            version = project.version as String
+
+            artifact(sourcesJar)
+            artifact(javadocJar)
+            artifact(signJar.signatureFiles.first()) {
+                classifier = null
+                extension = "jar.asc"
+            }
+            artifact(signJavadocJar.signatureFiles.first()) {
+                classifier = "javadoc"
+                extension = "jar.asc"
+            }
+            artifact(signSourcesJar.signatureFiles.first()) {
+                classifier = "sources"
+                extension = "jar.asc"
+            }
+            artifact(signPom.signatureFiles.first()) {
+                classifier = null
+                extension = "pom.asc"
+            }
+            artifact(signModule.signatureFiles.first()) {
+                classifier = null
+                extension = "module.asc"
+            }
+
+            pom.apply(generatePom())
+        }
+    }
+}
+
+
+
+// Prepare for publish
+
+val generateMetadataFileForReleasePublication: Task by tasks
+signModule.dependsOn(generateMetadataFileForReleasePublication)
+signModule.mustRunAfter(generateMetadataFileForReleasePublication)
+
+val generatePomFileForReleasePublication: GenerateMavenPom by tasks
+signPom.dependsOn(generatePomFileForReleasePublication)
+signPom.mustRunAfter(generatePomFileForReleasePublication)
+
+tasks.withType(AbstractPublishToMaven::class.java) {
+    dependsOn(signFiles)
+    mustRunAfter(signFiles)
+}
+
+// Staging and Promotion
+
+configure<NexusStagingExtension> {
+    username = getProjectProperty("ossrhUser")
+    password = getProjectProperty("ossrhPassword")
+    stagingProfileId = getProjectProperty("stagingProfileId")
+}
+
+configure<NexusPublishExtension> {
+    nexusPublishing {
+        repositories.sonatype {
+            username.set(getProjectProperty("ossrhUser"))
+            password.set(getProjectProperty("ossrhPassword"))
+            stagingProfileId.set(getProjectProperty("stagingProfileId"))
+        }
+        // Sonatype is very slow :)
+        connectTimeout.set(Duration.ofMinutes(1))
+        clientTimeout.set(Duration.ofMinutes(10))
+    }
+}
+
+// This links the close/release tasks to the right repository (from the publication above)
+val publishToSonatype: Task by tasks
+tasks.withType<BaseStagingTask> {
+    dependsOn(publishToSonatype)
+    mustRunAfter(publishToSonatype)
+    // We give each step an hour because it takes very long sometimes ...
+    numberOfRetries = 30 // 30 tries
+    delayBetweenRetriesInMillis = 2 * 60 * 1000 // 2 minutes
+}
