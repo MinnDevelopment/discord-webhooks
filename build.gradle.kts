@@ -16,7 +16,7 @@ plugins {
 
 val major = "0"
 val minor = "5"
-val patch = "5-rc"
+val patch = "6"
 
 group = "club.minnced"
 version = "$major.$minor.$patch"
@@ -36,8 +36,8 @@ repositories {
 val versions = mapOf(
     "slf4j" to "1.7.25",
     "okhttp" to "3.14.9",
-    "json" to "20180813",
-    "jda" to "4.2.0_196",
+    "json" to "20210307",
+    "jda" to "4.2.0_241",
     "discord4j" to "3.1.0",
     "javacord" to "3.0.6",
     "junit" to "4.12",
