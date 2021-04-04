@@ -582,7 +582,8 @@ public class WebhookClient implements AutoCloseable {
         }
 
         final okhttp3.Request request = newRequest(req);
-        try (Response response = client.newCall(request).execute()) {
+        try {
+            Response response = client.newCall(request).execute();
             bucket.update(response);
             if (response.code() == Bucket.RATE_LIMIT_CODE) {
                 backoffQueue();
