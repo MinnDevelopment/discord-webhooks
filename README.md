@@ -134,7 +134,7 @@ dependencies {
 
 ## Compile Yourself
 
-1. Clone repostiory
+1. Clone repository
 1. Run `gradlew shadowJar`
 1. Use jar suffixed with `-all.jar` in `build/libs`
 
