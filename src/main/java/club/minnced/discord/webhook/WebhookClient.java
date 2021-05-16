@@ -669,11 +669,11 @@ public class WebhookClient implements AutoCloseable {
                           response.code(), new IOUtil.Lazy(() -> new String(IOUtil.readAllBytes(IOUtil.getBody(response)))));
                 return;
             }
-            remainingUses = Integer.parseInt(response.header("X-RateLimit-Remaining"));
-            limit = Integer.parseInt(response.header("X-RateLimit-Limit"));
+            remainingUses = Integer.parseInt(response.header("X-RateLimit-Remaining","50"));
+            limit = Integer.parseInt(response.header("X-RateLimit-Limit","50"));
 
             if (!is429) {
-                final long reset = (long) Math.ceil(Double.parseDouble(response.header("X-RateLimit-Reset-After"))); // relative seconds
+                final long reset = (long) Math.ceil(Double.parseDouble(response.header("X-RateLimit-Reset-After","60"))); // relative seconds
                 final long delay = reset * 1000;
                 resetTime = current + delay;
             }
