@@ -645,38 +645,48 @@ public class WebhookClient implements AutoCloseable {
 
         private synchronized void handleRatelimit(Response response, long current) throws IOException {
             final String retryAfter = response.header("Retry-After");
+            final String limitHeader = response.header("X-RateLimit-Limit", "5");
             long delay;
-            if (retryAfter == null) {
+            if (retryAfter == null) { // this should never happen
                 InputStream stream = IOUtil.getBody(response);
-                final JSONObject body = IOUtil.toJSON(stream);
-                delay = (long) Math.ceil(body.getDouble("retry_after")) * 1000;
+                if (stream == null) // should never happen
+                    delay = 30000; // 30 seconds if we can't read the body
+                else {
+                    final JSONObject body = IOUtil.toJSON(stream);
+                    delay = (long) Math.ceil(body.getDouble("retry_after")) * 1000;
+                }
             }
             else {
                 delay = Long.parseLong(retryAfter) * 1000;
             }
-            LOG.error("Encountered 429, retrying after {}", delay);
+            LOG.error("Encountered 429, retrying after {} ms", delay);
             resetTime = current + delay;
+            remainingUses = 0;
+            //noinspection ConstantConditions
+            limit = Integer.parseInt(limitHeader);
         }
 
         private synchronized void update0(Response response) throws IOException {
             final long current = System.currentTimeMillis();
             final boolean is429 = response.code() == RATE_LIMIT_CODE;
+            final String remainingHeader = response.header("X-RateLimit-Remaining");
+            final String limitHeader = response.header("X-RateLimit-Limit");
+            final String resetHeader = response.header("X-RateLimit-Reset-After");
             if (is429) {
                 handleRatelimit(response, current);
-            }
-            else if (!response.isSuccessful()) {
-                LOG.debug("Failed to update buckets due to unsuccessful response with code: {} and body: \n{}",
-                          response.code(), new IOUtil.Lazy(() -> new String(IOUtil.readAllBytes(IOUtil.getBody(response)))));
                 return;
             }
-            remainingUses = Integer.parseInt(response.header("X-RateLimit-Remaining"));
-            limit = Integer.parseInt(response.header("X-RateLimit-Limit"));
-
-            if (!is429) {
-                final long reset = (long) Math.ceil(Double.parseDouble(response.header("X-RateLimit-Reset-After"))); // relative seconds
-                final long delay = reset * 1000;
-                resetTime = current + delay;
+            else if (remainingHeader == null || limitHeader == null || resetHeader == null) {
+                LOG.debug("Failed to update buckets due to missing headers in response with code: {} and headers: \n{}",
+                          response.code(), response.headers());
+                return;
             }
+            remainingUses = Integer.parseInt(remainingHeader);
+            limit = Integer.parseInt(limitHeader);
+
+            final long reset = (long) Math.ceil(Double.parseDouble(resetHeader)); // relative seconds
+            final long delay = reset * 1000;
+            resetTime = current + delay;
         }
 
         public void update(Response response) {
