@@ -144,27 +144,27 @@ public class ReadonlyEmbed extends WebhookEmbed {
     public static class EmbedProvider implements JSONString {
         private final String name, url;
 
-        public EmbedProvider(@NotNull String name, @NotNull String url) {
+        public EmbedProvider(@Nullable String name, @Nullable String url) {
             this.name = name;
             this.url = url;
         }
 
         /**
-         * The name of the provider
+         * The name of the provider, or {@code null} if none is set
          *
          * @return The name
          */
-        @NotNull
+        @Nullable
         public String getName() {
             return name;
         }
 
         /**
-         * The url of the provider
+         * The url of the provider, or {@code null} if none is set
          *
          * @return The url
          */
-        @NotNull
+        @Nullable
         public String getUrl() {
             return url;
         }
