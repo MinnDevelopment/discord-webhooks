@@ -173,8 +173,8 @@ public class EntityFactory {
     public static ReadonlyEmbed.EmbedProvider makeEmbedProvider(@Nullable JSONObject json) {
         if (json == null)
             return null;
-        final String url = json.getString("url");
-        final String name = json.getString("name");
+        final String url = json.optString("url", null);
+        final String name = json.optString("name", null);
         return new ReadonlyEmbed.EmbedProvider(name, url);
     }
 
