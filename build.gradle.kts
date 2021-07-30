@@ -30,6 +30,7 @@ val tokens = mapOf(
 
 repositories {
     mavenCentral()
+    maven("https://m2.dv8tion.net/releases")
     jcenter() // Legacy :(
 }
 
