@@ -97,6 +97,8 @@ webhookCluster.close(); // closes each client and can be used again
 
 # Download
 
+[ ![version] ][download]
+
 Note: Replace `%VERSION%` below with the desired version.
 
 ## Gradle
