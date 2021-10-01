@@ -20,12 +20,12 @@ import club.minnced.discord.webhook.external.D4JWebhookClient;
 import club.minnced.discord.webhook.external.JDAWebhookClient;
 import club.minnced.discord.webhook.external.JavacordWebhookClient;
 import club.minnced.discord.webhook.send.AllowedMentions;
+import club.minnced.discord.webhook.util.ThreadPools;
 import okhttp3.OkHttpClient;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Objects;
-import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ThreadFactory;
 import java.util.regex.Matcher;
@@ -257,7 +257,7 @@ public class WebhookClientBuilder { //TODO: tests
     @NotNull
     public WebhookClient build() {
         OkHttpClient client = this.client == null ? new OkHttpClient() : this.client;
-        ScheduledExecutorService pool = this.pool != null ? this.pool : getDefaultPool(id, threadFactory, isDaemon);
+        ScheduledExecutorService pool = this.pool != null ? this.pool : ThreadPools.getDefaultPool(id, threadFactory, isDaemon);
         return new WebhookClient(id, token, parseMessage, client, pool, allowedMentions);
     }
 
@@ -270,7 +270,7 @@ public class WebhookClientBuilder { //TODO: tests
     @NotNull
     public JDAWebhookClient buildJDA() {
         OkHttpClient client = this.client == null ? new OkHttpClient() : this.client;
-        ScheduledExecutorService pool = this.pool != null ? this.pool : getDefaultPool(id, threadFactory, isDaemon);
+        ScheduledExecutorService pool = this.pool != null ? this.pool : ThreadPools.getDefaultPool(id, threadFactory, isDaemon);
         return new JDAWebhookClient(id, token, parseMessage, client, pool, allowedMentions);
     }
 
@@ -283,7 +283,7 @@ public class WebhookClientBuilder { //TODO: tests
     @NotNull
     public D4JWebhookClient buildD4J() {
         OkHttpClient client = this.client == null ? new OkHttpClient() : this.client;
-        ScheduledExecutorService pool = this.pool != null ? this.pool : getDefaultPool(id, threadFactory, isDaemon);
+        ScheduledExecutorService pool = this.pool != null ? this.pool : ThreadPools.getDefaultPool(id, threadFactory, isDaemon);
         return new D4JWebhookClient(id, token, parseMessage, client, pool, allowedMentions);
     }
 
@@ -296,28 +296,7 @@ public class WebhookClientBuilder { //TODO: tests
     @NotNull
     public JavacordWebhookClient buildJavacord() {
         OkHttpClient client = this.client == null ? new OkHttpClient() : this.client;
-        ScheduledExecutorService pool = this.pool != null ? this.pool : getDefaultPool(id, threadFactory, isDaemon);
+        ScheduledExecutorService pool = this.pool != null ? this.pool : ThreadPools.getDefaultPool(id, threadFactory, isDaemon);
         return new JavacordWebhookClient(id, token, parseMessage, client, pool, allowedMentions);
-    }
-
-    protected static ScheduledExecutorService getDefaultPool(long id, ThreadFactory factory, boolean isDaemon) {
-        return Executors.newSingleThreadScheduledExecutor(factory == null ? new DefaultWebhookThreadFactory(id, isDaemon) : factory);
-    }
-
-    private static final class DefaultWebhookThreadFactory implements ThreadFactory {
-        private final long id;
-        private final boolean isDaemon;
-
-        public DefaultWebhookThreadFactory(long id, boolean isDaemon) {
-            this.id = id;
-            this.isDaemon = isDaemon;
-        }
-
-        @Override
-        public Thread newThread(Runnable r) {
-            final Thread thread = new Thread(r, "Webhook-RateLimit Thread WebhookID: " + id);
-            thread.setDaemon(isDaemon);
-            return thread;
-        }
     }
 }

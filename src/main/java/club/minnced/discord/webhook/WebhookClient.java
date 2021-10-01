@@ -23,6 +23,7 @@ import club.minnced.discord.webhook.send.AllowedMentions;
 import club.minnced.discord.webhook.send.WebhookEmbed;
 import club.minnced.discord.webhook.send.WebhookMessage;
 import club.minnced.discord.webhook.send.WebhookMessageBuilder;
+import club.minnced.discord.webhook.util.ThreadPools;
 import okhttp3.OkHttpClient;
 import okhttp3.RequestBody;
 import okhttp3.Response;
@@ -95,9 +96,10 @@ public class WebhookClient implements AutoCloseable {
      *
      * @return The WebhookClient for the provided id and token
      */
+    @NotNull
     public static WebhookClient withId(long id, @NotNull String token) {
         Objects.requireNonNull(token, "Token");
-        ScheduledExecutorService pool = WebhookClientBuilder.getDefaultPool(id, null, false);
+        ScheduledExecutorService pool = ThreadPools.getDefaultPool(id, null, false);
         return new WebhookClient(id, token, true, new OkHttpClient(), pool, AllowedMentions.all());
     }
 
@@ -114,6 +116,7 @@ public class WebhookClient implements AutoCloseable {
      *
      * @return The WebhookClient for the provided url
      */
+    @NotNull
     public static WebhookClient withUrl(@NotNull String url) {
         Objects.requireNonNull(url, "URL");
         Matcher matcher = WebhookClientBuilder.WEBHOOK_PATTERN.matcher(url);
