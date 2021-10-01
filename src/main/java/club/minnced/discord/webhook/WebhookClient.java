@@ -577,6 +577,7 @@ public class WebhookClient implements AutoCloseable {
     public CompletableFuture<Void> delete(@NotNull String messageId) {
         return execute(null, messageId, RequestType.DELETE).thenApply(v -> null);
     }
+
     /**
      * Get the message with the provided ID.
      * <br>Only messages sent by this webhook can be retrieved.
@@ -588,9 +589,25 @@ public class WebhookClient implements AutoCloseable {
      */
     @NotNull
     public CompletableFuture<ReadonlyMessage> get(long messageId) {
-        return execute(null, Long.toUnsignedString(messageId), RequestType.GET);
+        return get(Long.toUnsignedString(messageId));
     }
 
+    /**
+     * Get the message with the provided ID.
+     * <br>Only messages sent by this webhook can be retrieved.
+     *
+     * @param  messageId
+     *         The target message id
+     *
+     * @throws NullPointerException
+     *         If null is provided
+     *
+     * @return {@link java.util.concurrent.CompletableFuture}
+     */
+    @NotNull
+    public CompletableFuture<ReadonlyMessage> get(@NotNull String messageId) {
+        return execute(null, messageId, RequestType.GET);
+    }
 
     private JSONObject newJson()
     {
