@@ -79,4 +79,27 @@ public class D4JWebhookClient extends WebhookClient {
         WebhookMessage message = WebhookMessageBuilder.fromD4J(callback).build();
         return Mono.fromFuture(() -> edit(messageId, message));
     }
+
+    /**
+     * Edits the target message with the provided {@link MessageCreateSpec} to the webhook.
+     *
+     * @param  messageId
+     *         The target message id
+     * @param  callback
+     *         The callback used to specify the desired message settings
+     *
+     * @throws NullPointerException
+     *         If null is provided
+     *
+     * @return {@link Mono}
+     *
+     * @see    #isWait()
+     * @see    WebhookMessageBuilder#fromD4J(Consumer)
+     */
+    @NotNull
+    @CheckReturnValue
+    public Mono<ReadonlyMessage> edit(@NotNull String messageId, @NotNull Consumer<? super MessageCreateSpec> callback) {
+        WebhookMessage message = WebhookMessageBuilder.fromD4J(callback).build();
+        return Mono.fromFuture(() -> edit(messageId, message));
+    }
 }

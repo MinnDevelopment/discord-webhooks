@@ -459,6 +459,97 @@ public class WebhookClient implements AutoCloseable {
     }
 
     /**
+     * Edits the target message and updates it with the provided {@link club.minnced.discord.webhook.send.WebhookMessage}
+     * to the webhook.
+     * <br>The returned future receives {@code null} if {@link club.minnced.discord.webhook.WebhookClientBuilder#setWait(boolean)}
+     * was set to false.
+     *
+     * <p><b>This will override the default {@link AllowedMentions} of this client!</b>
+     *
+     * @param  messageId
+     *         The target message id
+     * @param  message
+     *         The message to send
+     *
+     * @return {@link java.util.concurrent.CompletableFuture}
+     *
+     * @see    #isWait()
+     */
+    @NotNull
+    public CompletableFuture<ReadonlyMessage> edit(@NotNull String messageId, @NotNull WebhookMessage message) {
+        Objects.requireNonNull(message, "WebhookMessage");
+        return execute(message.getBody(), messageId, RequestType.EDIT);
+    }
+
+    /**
+     * Edits the target message and updates it with the provided {@link club.minnced.discord.webhook.send.WebhookEmbed} to the webhook.
+     * <br>The returned future receives {@code null} if {@link club.minnced.discord.webhook.WebhookClientBuilder#setWait(boolean)}
+     * was set to false.
+     *
+     * @param  messageId
+     *         The target message id
+     * @param  first
+     *         The first embed to send
+     * @param  embeds
+     *         Optional additional embeds to send, up to 10
+     *
+     * @return {@link java.util.concurrent.CompletableFuture}
+     *
+     * @see    #isWait()
+     * @see    #edit(long, club.minnced.discord.webhook.send.WebhookMessage)
+     */
+    @NotNull
+    public CompletableFuture<ReadonlyMessage> edit(@NotNull String messageId, @NotNull WebhookEmbed first, @NotNull WebhookEmbed... embeds) {
+        return edit(messageId, WebhookMessage.embeds(first, embeds));
+    }
+
+    /**
+     * Edits the target message and updates it with the provided {@link club.minnced.discord.webhook.send.WebhookEmbed} to the webhook.
+     * <br>The returned future receives {@code null} if {@link club.minnced.discord.webhook.WebhookClientBuilder#setWait(boolean)}
+     * was set to false.
+     *
+     * @param  messageId
+     *         The target message id
+     * @param  embeds
+     *         The embeds to send
+     *
+     * @return {@link java.util.concurrent.CompletableFuture}
+     *
+     * @see    #isWait()
+     * @see    #edit(long, club.minnced.discord.webhook.send.WebhookMessage)
+     */
+    @NotNull
+    public CompletableFuture<ReadonlyMessage> edit(@NotNull String messageId, @NotNull Collection<WebhookEmbed> embeds) {
+        return edit(messageId, WebhookMessage.embeds(embeds));
+    }
+
+    /**
+     * Edits the target message and updates it with the provided content as normal message to the webhook.
+     * <br>The returned future receives {@code null} if {@link club.minnced.discord.webhook.WebhookClientBuilder#setWait(boolean)}
+     * was set to false.
+     *
+     * @param  messageId
+     *         The target message id
+     * @param  content
+     *         The content to send
+     *
+     * @return {@link java.util.concurrent.CompletableFuture}
+     *
+     * @see    #isWait()
+     * @see    #edit(long, club.minnced.discord.webhook.send.WebhookMessage)
+     */
+    @NotNull
+    public CompletableFuture<ReadonlyMessage> edit(@NotNull String messageId, @NotNull String content) {
+        Objects.requireNonNull(content, "Content");
+        content = content.trim();
+        if (content.isEmpty())
+            throw new IllegalArgumentException("Cannot send an empty message");
+        if (content.length() > 2000)
+            throw new IllegalArgumentException("Content may not exceed 2000 characters");
+        return edit(messageId, new WebhookMessageBuilder().setContent(content).build());
+    }
+
+    /**
      * Deletes the message with the provided ID.
      *
      * @param  messageId
@@ -471,6 +562,21 @@ public class WebhookClient implements AutoCloseable {
         return execute(null, Long.toUnsignedString(messageId), RequestType.DELETE).thenApply(v -> null);
     }
 
+    /**
+     * Deletes the message with the provided ID.
+     *
+     * @param  messageId
+     *         The target message id
+     *
+     * @throws NullPointerException
+     *         If null is provided
+     *
+     * @return {@link java.util.concurrent.CompletableFuture}
+     */
+    @NotNull
+    public CompletableFuture<Void> delete(@NotNull String messageId) {
+        return execute(null, messageId, RequestType.DELETE).thenApply(v -> null);
+    }
 
     private JSONObject newJson()
     {
@@ -503,8 +609,10 @@ public class WebhookClient implements AutoCloseable {
     protected CompletableFuture<ReadonlyMessage> execute(RequestBody body, @Nullable String messageId, @NotNull RequestType type) {
         checkShutdown();
         String endpoint = url;
-        if (type != RequestType.SEND)
+        if (type != RequestType.SEND) {
+            Objects.requireNonNull(messageId, "Message ID");
             endpoint += "/messages/" + messageId;
+        }
         if (parseMessage)
             endpoint += "?wait=true";
         return queueRequest(endpoint, type.method, body);
