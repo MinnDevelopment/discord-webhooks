@@ -473,6 +473,7 @@ public class WebhookClient implements AutoCloseable {
 
     /**
      * Get the message with the provided ID.
+     * <br>Only messages sent by this webhook can be retrieved.
      *
      * @param  messageId
      *         The target message id
