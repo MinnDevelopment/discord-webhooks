@@ -471,6 +471,20 @@ public class WebhookClient implements AutoCloseable {
         return execute(null, Long.toUnsignedString(messageId), RequestType.DELETE).thenApply(v -> null);
     }
 
+    /**
+     * Get the message with the provided ID.
+     * <br>Only messages sent by this webhook can be retrieved.
+     *
+     * @param  messageId
+     *         The target message id
+     *
+     * @return {@link java.util.concurrent.CompletableFuture}
+     */
+    @NotNull
+    public CompletableFuture<ReadonlyMessage> get(long messageId) {
+        return execute(null, Long.toUnsignedString(messageId), RequestType.GET);
+    }
+
 
     private JSONObject newJson()
     {
@@ -614,7 +628,7 @@ public class WebhookClient implements AutoCloseable {
     }
 
     enum RequestType {
-        SEND("POST"), EDIT("PATCH"), DELETE("DELETE");
+        SEND("POST"), EDIT("PATCH"), DELETE("DELETE"), GET("GET");
 
         private final String method;
 
