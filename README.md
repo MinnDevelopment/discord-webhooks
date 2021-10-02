@@ -120,10 +120,10 @@ public void sendWebhook(Webhook webhook) {
 ```java
 public void sendWebhook(Webhook webhook) {
     try (D4JWebhookClient client = D4JWebhookClient.from(webhook)) {
-        client.send(spec -> { // MessageCreateSpec support
-            spec.setContent("Hello World");
-            spec.addFile("cat.png", new FileInputStream("cat.png"));
-        });
+        client.send(MessageCreateSpec.create()
+            .withContent("Hello World")
+            .addFile("cat.png", new FileInputStream("cat.png"))
+        );
     }
 }
 ```

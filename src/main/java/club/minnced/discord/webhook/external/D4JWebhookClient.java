@@ -8,6 +8,7 @@ import club.minnced.discord.webhook.send.WebhookMessage;
 import club.minnced.discord.webhook.send.WebhookMessageBuilder;
 import club.minnced.discord.webhook.util.ThreadPools;
 import discord4j.core.spec.MessageCreateSpec;
+import discord4j.core.spec.MessageEditSpec;
 import okhttp3.OkHttpClient;
 import org.jetbrains.annotations.NotNull;
 import reactor.core.publisher.Mono;
@@ -93,13 +94,86 @@ public class D4JWebhookClient extends WebhookClient {
      *
      * @return {@link Mono}
      *
+     * @deprecated Replace wth {@link #send(MessageCreateSpec)}
+     *
      * @see    #isWait()
      * @see    WebhookMessageBuilder#fromD4J(Consumer)
      */
     @NotNull
+    @Deprecated
     @CheckReturnValue
     public Mono<ReadonlyMessage> send(@NotNull Consumer<? super MessageCreateSpec> callback) {
-        WebhookMessage message = WebhookMessageBuilder.fromD4J(callback).build();
+        throw new UnsupportedOperationException("Cannot build messages via consumers in Discord4J 3.2.0! Please change to fromD4J(spec)");
+    }
+
+    /**
+     * Edits the target message with the provided {@link MessageCreateSpec} to the webhook.
+     *
+     * @param  messageId
+     *         The target message id
+     * @param  callback
+     *         The callback used to specify the desired message settings
+     *
+     * @throws NullPointerException
+     *         If null is provided
+     *
+     * @return {@link Mono}
+     *
+     * @deprecated Replace with {@link #edit(long, MessageEditSpec)}
+     *
+     * @see    #isWait()
+     * @see    WebhookMessageBuilder#fromD4J(Consumer)
+     */
+    @NotNull
+    @Deprecated
+    @CheckReturnValue
+    public Mono<ReadonlyMessage> edit(long messageId, @NotNull Consumer<? super MessageCreateSpec> callback) {
+        throw new UnsupportedOperationException("Cannot build messages via consumers in Discord4J 3.2.0! Please change to fromD4J(spec)");
+    }
+
+    /**
+     * Edits the target message with the provided {@link MessageCreateSpec} to the webhook.
+     *
+     * @param  messageId
+     *         The target message id
+     * @param  callback
+     *         The callback used to specify the desired message settings
+     *
+     * @throws NullPointerException
+     *         If null is provided
+     *
+     * @return {@link Mono}
+     *
+     * @deprecated Replace with {@link #edit(long, MessageEditSpec)}
+     *
+     * @see    #isWait()
+     * @see    WebhookMessageBuilder#fromD4J(Consumer)
+     */
+    @NotNull
+    @Deprecated
+    @CheckReturnValue
+    public Mono<ReadonlyMessage> edit(@NotNull String messageId, @NotNull Consumer<? super MessageCreateSpec> callback) {
+        throw new UnsupportedOperationException("Cannot build messages via consumers in Discord4J 3.2.0! Please change to fromD4J(spec)");
+    }
+
+    /**
+     * Sends the provided {@link MessageCreateSpec} to the webhook.
+     *
+     * @param  spec
+     *         The message create spec used to specify the desired message settings
+     *
+     * @throws NullPointerException
+     *         If null is provided
+     *
+     * @return {@link Mono}
+     *
+     * @see    #isWait()
+     * @see    WebhookMessageBuilder#fromD4J(MessageCreateSpec)
+     */
+    @NotNull
+    @CheckReturnValue
+    public Mono<ReadonlyMessage> send(@NotNull MessageCreateSpec spec) {
+        WebhookMessage message = WebhookMessageBuilder.fromD4J(spec).build();
         return Mono.fromFuture(() -> send(message));
     }
 
@@ -108,8 +182,8 @@ public class D4JWebhookClient extends WebhookClient {
      *
      * @param  messageId
      *         The target message id
-     * @param  callback
-     *         The callback used to specify the desired message settings
+     * @param  spec
+     *         The message edit spec used to specify the desired message settings
      *
      * @throws NullPointerException
      *         If null is provided
@@ -117,12 +191,12 @@ public class D4JWebhookClient extends WebhookClient {
      * @return {@link Mono}
      *
      * @see    #isWait()
-     * @see    WebhookMessageBuilder#fromD4J(Consumer)
+     * @see    WebhookMessageBuilder#fromD4J(MessageEditSpec)
      */
     @NotNull
     @CheckReturnValue
-    public Mono<ReadonlyMessage> edit(long messageId, @NotNull Consumer<? super MessageCreateSpec> callback) {
-        WebhookMessage message = WebhookMessageBuilder.fromD4J(callback).build();
+    public Mono<ReadonlyMessage> edit(long messageId, @NotNull MessageEditSpec spec) {
+        WebhookMessage message = WebhookMessageBuilder.fromD4J(spec).build();
         return Mono.fromFuture(() -> edit(messageId, message));
     }
 
@@ -131,8 +205,8 @@ public class D4JWebhookClient extends WebhookClient {
      *
      * @param  messageId
      *         The target message id
-     * @param  callback
-     *         The callback used to specify the desired message settings
+     * @param  spec
+     *         The message edit spec used to specify the desired message settings
      *
      * @throws NullPointerException
      *         If null is provided
@@ -140,12 +214,12 @@ public class D4JWebhookClient extends WebhookClient {
      * @return {@link Mono}
      *
      * @see    #isWait()
-     * @see    WebhookMessageBuilder#fromD4J(Consumer)
+     * @see    WebhookMessageBuilder#fromD4J(MessageEditSpec)
      */
     @NotNull
     @CheckReturnValue
-    public Mono<ReadonlyMessage> edit(@NotNull String messageId, @NotNull Consumer<? super MessageCreateSpec> callback) {
-        WebhookMessage message = WebhookMessageBuilder.fromD4J(callback).build();
+    public Mono<ReadonlyMessage> edit(@NotNull String messageId, @NotNull MessageEditSpec spec) {
+        WebhookMessage message = WebhookMessageBuilder.fromD4J(spec).build();
         return Mono.fromFuture(() -> edit(messageId, message));
     }
 }

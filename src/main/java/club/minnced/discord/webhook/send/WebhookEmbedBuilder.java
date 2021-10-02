@@ -397,17 +397,33 @@ public class WebhookEmbedBuilder {
      *         If null is provided
      *
      * @return WebhookEmbedBuilder with the converted data
+     *
+     * @deprecated Replace with {@link #fromD4J(EmbedCreateSpec)}
      */
     @NotNull
+    @Deprecated
     public static WebhookEmbedBuilder fromD4J(@NotNull Consumer<? super EmbedCreateSpec> callback) {
-        EmbedCreateSpec spec = new EmbedCreateSpec();
-        callback.accept(spec);
-        EmbedData data = spec.asRequest();
-        return fromD4J(data);
+        throw new UnsupportedOperationException("Cannot build embeds via consumers in Discord4J 3.2.0! Please change to fromD4J(spec)");
     }
 
     /**
      * Converts a Discord4J {@link EmbedCreateSpec} into a compatible WebhookEmbedBuilder.
+     *
+     * @param  spec
+     *         The embed create spec which applies the desired settings
+     *
+     * @throws NullPointerException
+     *         If null is provided
+     *
+     * @return WebhookEmbedBuilder with the converted data
+     */
+    @NotNull
+    public static WebhookEmbedBuilder fromD4J(@NotNull EmbedCreateSpec spec) {
+        return fromD4J(spec.asRequest());
+    }
+
+    /**
+     * Converts a Discord4J {@link EmbedData} into a compatible WebhookEmbedBuilder.
      *
      * @param  data
      *         The embed data
@@ -421,7 +437,7 @@ public class WebhookEmbedBuilder {
     public static WebhookEmbedBuilder fromD4J(@NotNull EmbedData data) {
         WebhookEmbedBuilder builder = new WebhookEmbedBuilder();
 
-        // there aren't any docs for this so I'm completely going off of assumptions here
+        // there aren't any docs for this, so I'm completely going off of assumptions here
         Possible<String> title = data.title();
         Possible<String> description = data.description();
         Possible<String> url = data.url();
