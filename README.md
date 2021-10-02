@@ -99,9 +99,9 @@ webhookCluster.close(); // closes each client and can be used again
 
 This library also supports sending webhook messages with integration from other libraries such as
 
-- [JDA](/DV8FromTheWorld/JDA) with [JDAWebhookClient](https://github.com/MinnDevelopment/discord-webhooks/blob/master/src/main/java/club/minnced/discord/webhook/external/JDAWebhookClient.java)
-- [Discord4J](Discord4J/Discord4J) with [D4JWebhookClient](https://github.com/MinnDevelopment/discord-webhooks/blob/master/src/main/java/club/minnced/discord/webhook/external/D4JWebhookClient.java)
-- [Javacord](/Javacord/Javacord) with [JavacordWebhookClient](https://github.com/MinnDevelopment/discord-webhooks/blob/master/src/main/java/club/minnced/discord/webhook/external/JavacordWebhookClient.java)
+- [JDA](/DV8FromTheWorld/JDA) (version 4.3.0_331) with [JDAWebhookClient](https://github.com/MinnDevelopment/discord-webhooks/blob/master/src/main/java/club/minnced/discord/webhook/external/JDAWebhookClient.java)
+- [Discord4J](Discord4J/Discord4J) (version 3.2.0) with [D4JWebhookClient](https://github.com/MinnDevelopment/discord-webhooks/blob/master/src/main/java/club/minnced/discord/webhook/external/D4JWebhookClient.java)
+- [Javacord](/Javacord/Javacord) (version 3.3.2) with [JavacordWebhookClient](https://github.com/MinnDevelopment/discord-webhooks/blob/master/src/main/java/club/minnced/discord/webhook/external/JavacordWebhookClient.java)
 
 ### Example JDA
 
