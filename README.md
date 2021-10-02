@@ -95,6 +95,39 @@ try (WebhookClient client = WebhookClient.withUrl(url)) {
 webhookCluster.close(); // closes each client and can be used again
 ```
 
+## External Libraries
+
+This library also supports sending webhook messages with integration from other libraries such as
+
+- [JDA](/DV8FromTheWorld/JDA) (version 4.3.0_331) with [JDAWebhookClient](https://github.com/MinnDevelopment/discord-webhooks/blob/master/src/main/java/club/minnced/discord/webhook/external/JDAWebhookClient.java)
+- [Discord4J](Discord4J/Discord4J) (version 3.2.0) with [D4JWebhookClient](https://github.com/MinnDevelopment/discord-webhooks/blob/master/src/main/java/club/minnced/discord/webhook/external/D4JWebhookClient.java)
+- [Javacord](/Javacord/Javacord) (version 3.3.2) with [JavacordWebhookClient](https://github.com/MinnDevelopment/discord-webhooks/blob/master/src/main/java/club/minnced/discord/webhook/external/JavacordWebhookClient.java)
+
+### Example JDA
+
+```java
+public void sendWebhook(Webhook webhook) {
+    Message message = new MessageBuilder();
+    message.append("Hello World!");
+    try (JDAWebhookClient client = JDAWebhookClient.from(webhook)) { // create a client instance from the JDA webhook
+        client.send(message); // send a JDA message instance
+    }
+}
+```
+
+### Example Discord4J
+
+```java
+public void sendWebhook(Webhook webhook) {
+    try (D4JWebhookClient client = D4JWebhookClient.from(webhook)) {
+        client.send(MessageCreateSpec.create()
+            .withContent("Hello World")
+            .addFile("cat.png", new FileInputStream("cat.png"))
+        );
+    }
+}
+```
+
 # Download
 
 [ ![version] ][download]

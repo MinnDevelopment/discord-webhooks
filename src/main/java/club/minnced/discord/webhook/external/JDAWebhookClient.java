@@ -6,12 +6,15 @@ import club.minnced.discord.webhook.receive.ReadonlyMessage;
 import club.minnced.discord.webhook.send.AllowedMentions;
 import club.minnced.discord.webhook.send.WebhookEmbedBuilder;
 import club.minnced.discord.webhook.send.WebhookMessageBuilder;
+import club.minnced.discord.webhook.util.ThreadPools;
 import net.dv8tion.jda.api.entities.Message;
 import okhttp3.OkHttpClient;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.regex.Matcher;
 
 public class JDAWebhookClient extends WebhookClient {
     public JDAWebhookClient(long id, String token, boolean parseMessage, OkHttpClient client, ScheduledExecutorService pool, AllowedMentions mentions) {
@@ -21,13 +24,60 @@ public class JDAWebhookClient extends WebhookClient {
     /**
      * Creates a WebhookClient for the provided webhook.
      *
-     * @param webhook The webhook
-     * @return The WebhookClient
-     * @throws NullPointerException If the webhook is null or does not provide a token
+     * @param  webhook
+     *         The webhook
+     *
+     * @throws NullPointerException
+     *         If the webhook is null or does not provide a token
+     *
+     * @return The JDAWebhookClient
      */
     @NotNull
-    public static WebhookClient fromJDA(@NotNull net.dv8tion.jda.api.entities.Webhook webhook) {
-        return WebhookClientBuilder.fromJDA(webhook).build();
+    public static JDAWebhookClient from(@NotNull net.dv8tion.jda.api.entities.Webhook webhook) {
+        return WebhookClientBuilder.fromJDA(webhook).buildJDA();
+    }
+
+    /**
+     * Factory method to create a basic JDAWebhookClient with the provided id and token.
+     *
+     * @param  id
+     *         The webhook id
+     * @param  token
+     *         The webhook token
+     *
+     * @throws java.lang.NullPointerException
+     *         If provided with null
+     *
+     * @return The JDAWebhookClient for the provided id and token
+     */
+    @NotNull
+    public static JDAWebhookClient withId(long id, @NotNull String token) {
+        Objects.requireNonNull(token, "Token");
+        ScheduledExecutorService pool = ThreadPools.getDefaultPool(id, null, false);
+        return new JDAWebhookClient(id, token, true, new OkHttpClient(), pool, AllowedMentions.all());
+    }
+
+    /**
+     * Factory method to create a basic JDAWebhookClient with the provided id and token.
+     *
+     * @param  url
+     *         The url for the webhook
+     *
+     * @throws java.lang.NullPointerException
+     *         If provided with null
+     * @throws java.lang.NumberFormatException
+     *         If no valid id is part o the url
+     *
+     * @return The JDAWebhookClient for the provided url
+     */
+    @NotNull
+    public static JDAWebhookClient withUrl(@NotNull String url) {
+        Objects.requireNonNull(url, "URL");
+        Matcher matcher = WebhookClientBuilder.WEBHOOK_PATTERN.matcher(url);
+        if (!matcher.matches()) {
+            throw new IllegalArgumentException("Failed to parse webhook URL");
+        }
+        return withId(Long.parseUnsignedLong(matcher.group(1)), matcher.group(2));
     }
 
     /**

@@ -17,9 +17,11 @@
 package club.minnced.discord.webhook.send;
 
 import discord4j.core.spec.MessageCreateSpec;
+import discord4j.core.spec.MessageEditSpec;
 import discord4j.discordjson.json.AllowedMentionsData;
 import discord4j.discordjson.json.EmbedData;
 import discord4j.discordjson.json.MessageCreateRequest;
+import discord4j.discordjson.json.MessageEditRequest;
 import discord4j.discordjson.possible.Possible;
 import discord4j.rest.util.MultipartRequest;
 import net.dv8tion.jda.api.entities.Message;
@@ -484,32 +486,109 @@ public class WebhookMessageBuilder {
      *         If null is provided
      *
      * @return WebhookMessageBuilder with the converted data
+     *
+     * @deprecated Replace with {@link #fromD4J(MessageCreateSpec)}
      */
     @NotNull
+    @Deprecated
     public static WebhookMessageBuilder fromD4J(@NotNull Consumer<? super MessageCreateSpec> callback) {
+        throw new UnsupportedOperationException("Cannot build messages via consumers in Discord4J 3.2.0! Please change to fromD4J(spec)");
+    }
+
+    /**
+     * Converts a Discord4J {@link MessageCreateSpec} into a compatible WebhookMessageBuilder.
+     *
+     * @param  spec
+     *         The message create spec used to specify the desired message settings
+     *
+     * @throws NullPointerException
+     *         If null is provided
+     *
+     * @return WebhookMessageBuilder with the converted data
+     */
+    @NotNull
+    public static WebhookMessageBuilder fromD4J(@NotNull MessageCreateSpec spec) {
         WebhookMessageBuilder builder = new WebhookMessageBuilder();
-        MessageCreateSpec spec = new MessageCreateSpec();
-        callback.accept(spec);
-        MultipartRequest data = spec.asRequest();
+        MultipartRequest<MessageCreateRequest> data = spec.asRequest();
         data.getFiles().forEach(tuple -> builder.addFile(tuple.getT1(), tuple.getT2()));
-        MessageCreateRequest parts = data.getCreateRequest();
-        if (parts == null)
+        MessageCreateRequest jsonPayload = data.getJsonPayload();
+        if (jsonPayload == null)
             return builder;
 
-        Possible<String> content = parts.content();
-        Possible<EmbedData> embed = parts.embed();
-        Possible<Boolean> tts = parts.tts();
-        Possible<AllowedMentionsData> allowedMentions = parts.allowedMentions();
+        Possible<String> content = jsonPayload.content();
+        Possible<List<EmbedData>> embeds = jsonPayload.embeds();
+        Possible<Boolean> tts = jsonPayload.tts();
+        Possible<AllowedMentionsData> allowedMentions = jsonPayload.allowedMentions();
 
         if (!content.isAbsent())
             builder.setContent(content.get());
-        if (!embed.isAbsent())
-            builder.addEmbeds(WebhookEmbedBuilder.fromD4J(embed.get()).build());
         if (!tts.isAbsent())
             builder.setTTS(tts.get());
+        if (!embeds.isAbsent()) {
+            builder.addEmbeds(
+                embeds.get().stream()
+                    .map(WebhookEmbedBuilder::fromD4J)
+                    .map(WebhookEmbedBuilder::build)
+                    .collect(Collectors.toList())
+            );
+        }
 
         if (!allowedMentions.isAbsent()) {
             AllowedMentionsData mentions = allowedMentions.get();
+            AllowedMentions whitelist = AllowedMentions.none();
+            if (!mentions.users().isAbsent())
+                whitelist.withUsers(mentions.users().get());
+            if (!mentions.roles().isAbsent())
+                whitelist.withRoles(mentions.roles().get());
+            if (!mentions.parse().isAbsent()) {
+                List<String> parse = mentions.parse().get();
+                whitelist.withParseRoles(parse.contains("roles"));
+                whitelist.withParseEveryone(parse.contains("everyone"));
+                whitelist.withParseUsers(parse.contains("users"));
+            }
+            builder.setAllowedMentions(whitelist);
+        }
+
+        return builder;
+    }
+
+    /**
+     * Converts a Discord4J {@link MessageCreateSpec} into a compatible WebhookMessageBuilder.
+     *
+     * @param  spec
+     *         The message create spec used to specify the desired message settings
+     *
+     * @throws NullPointerException
+     *         If null is provided
+     *
+     * @return WebhookMessageBuilder with the converted data
+     */
+    @NotNull
+    public static WebhookMessageBuilder fromD4J(@NotNull MessageEditSpec spec) {
+        WebhookMessageBuilder builder = new WebhookMessageBuilder();
+        MultipartRequest<MessageEditRequest> data = spec.asRequest();
+        data.getFiles().forEach(tuple -> builder.addFile(tuple.getT1(), tuple.getT2()));
+        MessageEditRequest jsonPayload = data.getJsonPayload();
+        if (jsonPayload == null)
+            return builder;
+
+        Possible<Optional<String>> content = jsonPayload.content();
+        Possible<Optional<List<EmbedData>>> embeds = jsonPayload.embeds();
+        Possible<Optional<AllowedMentionsData>> allowedMentions = jsonPayload.allowedMentions();
+
+        if (!content.isAbsent() && content.get().isPresent())
+            builder.setContent(content.get().get());
+        if (!embeds.isAbsent() && embeds.get().isPresent()) {
+            builder.addEmbeds(
+                    embeds.get().get().stream()
+                            .map(WebhookEmbedBuilder::fromD4J)
+                            .map(WebhookEmbedBuilder::build)
+                            .collect(Collectors.toList())
+            );
+        }
+
+        if (!allowedMentions.isAbsent() && allowedMentions.get().isPresent()) {
+            AllowedMentionsData mentions = allowedMentions.get().get();
             AllowedMentions whitelist = AllowedMentions.none();
             if (!mentions.users().isAbsent())
                 whitelist.withUsers(mentions.users().get());
