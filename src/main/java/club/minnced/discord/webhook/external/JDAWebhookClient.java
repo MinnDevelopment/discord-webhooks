@@ -33,7 +33,7 @@ public class JDAWebhookClient extends WebhookClient {
      * @return The JDAWebhookClient
      */
     @NotNull
-    public static JDAWebhookClient fromJDA(@NotNull net.dv8tion.jda.api.entities.Webhook webhook) {
+    public static JDAWebhookClient from(@NotNull net.dv8tion.jda.api.entities.Webhook webhook) {
         return WebhookClientBuilder.fromJDA(webhook).buildJDA();
     }
 
