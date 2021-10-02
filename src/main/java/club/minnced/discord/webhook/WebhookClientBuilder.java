@@ -22,6 +22,7 @@ import club.minnced.discord.webhook.external.JavacordWebhookClient;
 import club.minnced.discord.webhook.send.AllowedMentions;
 import club.minnced.discord.webhook.util.ThreadPools;
 import okhttp3.OkHttpClient;
+import org.javacord.api.entity.webhook.IncomingWebhook;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -128,10 +129,9 @@ public class WebhookClientBuilder { //TODO: tests
     @NotNull
     public static WebhookClientBuilder fromD4J(@NotNull discord4j.core.object.entity.Webhook webhook) {
         Objects.requireNonNull(webhook, "Webhook");
-        String token = webhook.getToken();
-        Objects.requireNonNull(token, "Webhook Token");
+        String token = webhook.getToken().orElseThrow(() -> new NullPointerException("Webhook Token is missing"));
         if (token.isEmpty())
-            throw new NullPointerException("Webhook Token");
+            throw new NullPointerException("Webhook Token is empty");
         return new WebhookClientBuilder(webhook.getId().asLong(), token);
     }
 
@@ -149,7 +149,11 @@ public class WebhookClientBuilder { //TODO: tests
     @NotNull
     public static WebhookClientBuilder fromJavacord(@NotNull org.javacord.api.entity.webhook.Webhook webhook) {
         Objects.requireNonNull(webhook, "Webhook");
-        return new WebhookClientBuilder(webhook.getId(), webhook.getToken().orElseThrow(NullPointerException::new));
+        return new WebhookClientBuilder(webhook.getId(),
+            webhook.asIncomingWebhook()
+                .map(IncomingWebhook::getToken)
+                .orElseThrow(() -> new NullPointerException("Webhook Token is missing"))
+        );
     }
 
 
