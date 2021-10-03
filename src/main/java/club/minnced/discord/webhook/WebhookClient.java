@@ -672,11 +672,14 @@ public class WebhookClient implements AutoCloseable {
     }
 
     /**
-     * Stops the executor used by this pool
+     * Stops the thread pool used by this client.
+     * <br>Any further requests to this client or clients with the same thread pool will be rejected.
      */
     @Override
     public void close() {
         isShutdown = true;
+        if (parent != null)
+            parent.close();
         if (queue.isEmpty())
             pool.shutdown();
     }
