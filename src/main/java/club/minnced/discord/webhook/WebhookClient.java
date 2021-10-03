@@ -724,23 +724,21 @@ public class WebhookClient implements AutoCloseable {
 
     @NotNull
     protected CompletableFuture<ReadonlyMessage> queueRequest(String url, String method, RequestBody body) {
-        final boolean wasQueued = isQueued;
-        isQueued = true;
         CompletableFuture<ReadonlyMessage> callback = new CompletableFuture<>();
         Request req = new Request(callback, body, method, url);
         if (defaultTimeout > 0)
             req.deadline = System.currentTimeMillis() + defaultTimeout;
 
         // If this is a forked client, we need to use the parent rate limiting
-        if (parent != null)
-        {
-            parent.enqueuePair(req);
-            return callback;
-        }
+        return parent == null ? schedule(callback, req) : parent.schedule(callback, req);
+    }
 
+    @NotNull
+    protected CompletableFuture<ReadonlyMessage> schedule(@NotNull CompletableFuture<ReadonlyMessage> callback, @NotNull Request req) {
         enqueuePair(req);
-        if (!wasQueued)
+        if (!isQueued)
             backoffQueue();
+        isQueued = true;
         return callback;
     }
 
