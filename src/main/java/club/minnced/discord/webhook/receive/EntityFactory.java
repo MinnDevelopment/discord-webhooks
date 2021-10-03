@@ -249,6 +249,7 @@ public class EntityFactory {
         final String content = json.getString("content");
         final boolean tts = json.getBoolean("tts");
         final boolean mentionEveryone = json.getBoolean("mention_everyone");
+        final int flags = json.optInt("flags", 0);
         final JSONArray usersArray = json.getJSONArray("mentions");
         final JSONArray rolesArray = json.getJSONArray("mention_roles");
         final JSONArray embedArray = json.getJSONArray("embeds");
@@ -262,7 +263,7 @@ public class EntityFactory {
         }
         return new ReadonlyMessage(
                 id, channelId, mentionEveryone, tts,
-                author, content,
+                flags, author, content,
                 embeds, attachments,
                 mentionedUsers, mentionedRoles);
     }

@@ -17,6 +17,7 @@
 package club.minnced.discord.webhook.send;
 
 import club.minnced.discord.webhook.IOUtil;
+import club.minnced.discord.webhook.MessageFlags;
 import club.minnced.discord.webhook.receive.ReadonlyMessage;
 import okhttp3.MultipartBody;
 import okhttp3.RequestBody;
@@ -48,10 +49,12 @@ public class WebhookMessage {
     protected final boolean isTTS;
     protected final MessageAttachment[] attachments;
     protected final AllowedMentions allowedMentions;
+    protected final int flags;
 
     protected WebhookMessage(final String username, final String avatarUrl, final String content,
                              final List<WebhookEmbed> embeds, final boolean isTTS,
-                             final MessageAttachment[] files, AllowedMentions allowedMentions) {
+                             final MessageAttachment[] files, final AllowedMentions allowedMentions,
+                             final int flags) {
         this.username = username;
         this.avatarUrl = avatarUrl;
         this.content = content;
@@ -59,6 +62,7 @@ public class WebhookMessage {
         this.isTTS = isTTS;
         this.attachments = files;
         this.allowedMentions = allowedMentions;
+        this.flags = flags;
     }
 
     /**
@@ -121,6 +125,34 @@ public class WebhookMessage {
     }
 
     /**
+     * The message flags used for this message.
+     *
+     * @return The flags
+     */
+    public int getFlags() {
+        return flags;
+    }
+
+    /**
+     * Returns a new WebhookMessage instance with the ephemeral flag turned on/off (true/false).
+     * <br>This instance remains unchanged and a new instance is returned.
+     *
+     * @param  ephemeral
+     *         Whether to make this message ephemeral
+     *
+     * @return New WebhookMessage instance
+     */
+    @NotNull
+    public WebhookMessage asEphemeral(boolean ephemeral) {
+        int flags = this.flags;
+        if (ephemeral)
+            flags |= MessageFlags.EPHEMERAL;
+        else
+            flags &= ~MessageFlags.EPHEMERAL;
+        return new WebhookMessage(username, avatarUrl, content, embeds, isTTS, attachments, allowedMentions, flags);
+    }
+
+    /**
      * Converts a {@link club.minnced.discord.webhook.receive.ReadonlyMessage} to a
      * WebhookMessage.
      * <br>This does not convert attachments.
@@ -141,6 +173,7 @@ public class WebhookMessage {
         builder.setUsername(message.getAuthor().getName());
         builder.setContent(message.getContent());
         builder.setTTS(message.isTTS());
+        builder.setEphemeral((message.getFlags() & MessageFlags.EPHEMERAL) != 0);
         builder.addEmbeds(message.getEmbeds());
         return builder.build();
     }
@@ -172,7 +205,7 @@ public class WebhookMessage {
         List<WebhookEmbed> list = new ArrayList<>(1 + embeds.length);
         list.add(first);
         Collections.addAll(list, embeds);
-        return new WebhookMessage(null, null, null, list, false, null, AllowedMentions.all());
+        return new WebhookMessage(null, null, null, list, false, null, AllowedMentions.all(), 0);
     }
 
     /**
@@ -197,7 +230,7 @@ public class WebhookMessage {
         if (embeds.isEmpty())
             throw new IllegalArgumentException("Cannot build an empty message");
         embeds.forEach(Objects::requireNonNull);
-        return new WebhookMessage(null, null, null, new ArrayList<>(embeds), false, null, AllowedMentions.all());
+        return new WebhookMessage(null, null, null, new ArrayList<>(embeds), false, null, AllowedMentions.all(), 0);
     }
 
     /**
@@ -234,7 +267,7 @@ public class WebhookMessage {
             Object data = attachment.getValue();
             files[i++] = convertAttachment(name, data);
         }
-        return new WebhookMessage(null, null, null, null, false, files, AllowedMentions.all());
+        return new WebhookMessage(null, null, null, null, false, files, AllowedMentions.all(), 0);
     }
 
     /**
@@ -280,7 +313,7 @@ public class WebhookMessage {
                 throw new IllegalArgumentException("Provided arguments must be pairs for (String, Data). Expected String and found " + (name == null ? null : name.getClass().getName()));
             files[j] = convertAttachment((String) name, data);
         }
-        return new WebhookMessage(null, null, null, null, false, files, AllowedMentions.all());
+        return new WebhookMessage(null, null, null, null, false, files, AllowedMentions.all(), 0);
     }
 
     /**
@@ -317,6 +350,7 @@ public class WebhookMessage {
             payload.put("username", username);
         payload.put("tts", isTTS);
         payload.put("allowed_mentions", allowedMentions);
+        payload.put("flags", flags);
         String json = payload.toString();
         if (isFile()) {
             final MultipartBody.Builder builder = new MultipartBody.Builder().setType(MultipartBody.FORM);

@@ -106,7 +106,7 @@ public class ReceiveMock {
 
     private ReadonlyMessage setupFakeResponse(String json, boolean useGzip) {
         when(httpClient.newCall(any())).thenAnswer(invoc -> IOTestUtil.forgeCall(invoc.getArgument(0), json, useGzip));
-        ReadonlyMessage msg = new ReadonlyMessage(1, 2, false, false,
+        ReadonlyMessage msg = new ReadonlyMessage(1, 2, false, false, 0,
                 new ReadonlyUser(3, (short)4, false, "wh", null),
                 "content", Collections.emptyList(), Collections.emptyList(), Collections.emptyList(), Collections.emptyList()
         );
