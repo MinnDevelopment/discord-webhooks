@@ -21,11 +21,21 @@ import java.util.regex.Matcher;
 
 public class D4JWebhookClient extends WebhookClient {
     public D4JWebhookClient(long id, String token, boolean parseMessage, OkHttpClient client, ScheduledExecutorService pool, AllowedMentions mentions) {
-        super(id, token, parseMessage, client, pool, mentions);
+        this(id, token, parseMessage, client, pool, mentions, 0L);
+    }
+
+    public D4JWebhookClient(long id, String token, boolean parseMessage, OkHttpClient client, ScheduledExecutorService pool, AllowedMentions mentions, long threadId) {
+        super(id, token, parseMessage, client, pool, mentions, threadId);
+    }
+
+    protected D4JWebhookClient(D4JWebhookClient parent, long threadId) {
+        super(parent, threadId);
     }
 
     /**
      * Creates a D4JWebhookClient for the provided webhook.
+     *
+     * <p>You can use {@link #onThread(long)} to target specific threads on the channel.
      *
      * @param  webhook
      *         The webhook
@@ -43,6 +53,8 @@ public class D4JWebhookClient extends WebhookClient {
     /**
      * Factory method to create a basic D4JWebhookClient with the provided id and token.
      *
+     * <p>You can use {@link #onThread(long)} to target specific threads on the channel.
+     *
      * @param  id
      *         The webhook id
      * @param  token
@@ -57,11 +69,13 @@ public class D4JWebhookClient extends WebhookClient {
     public static D4JWebhookClient withId(long id, @NotNull String token) {
         Objects.requireNonNull(token, "Token");
         ScheduledExecutorService pool = ThreadPools.getDefaultPool(id, null, false);
-        return new D4JWebhookClient(id, token, true, new OkHttpClient(), pool, AllowedMentions.all());
+        return new D4JWebhookClient(id, token, true, new OkHttpClient(), pool, AllowedMentions.all(), 0L);
     }
 
     /**
      * Factory method to create a basic D4JWebhookClient with the provided id and token.
+     *
+     * <p>You can use {@link #onThread(long)} to target specific threads on the channel.
      *
      * @param  url
      *         The url for the webhook
@@ -81,6 +95,12 @@ public class D4JWebhookClient extends WebhookClient {
             throw new IllegalArgumentException("Failed to parse webhook URL");
         }
         return withId(Long.parseUnsignedLong(matcher.group(1)), matcher.group(2));
+    }
+
+    @NotNull
+    @Override
+    public D4JWebhookClient onThread(final long threadId) {
+        return new D4JWebhookClient(this, threadId);
     }
 
     /**

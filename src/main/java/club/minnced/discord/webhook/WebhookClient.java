@@ -39,7 +39,9 @@ import javax.annotation.Nonnegative;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.*;
 import java.util.regex.Matcher;
@@ -57,8 +59,11 @@ public class WebhookClient implements AutoCloseable {
     public static final String USER_AGENT = "Webhook(https://github.com/MinnDevelopment/discord-webhooks, " + LibraryInfo.VERSION + ")";
     private static final Logger LOG = LoggerFactory.getLogger(WebhookClient.class);
 
+    protected final WebhookClient parent;
+
     protected final String url;
     protected final long id;
+    protected final long threadId;
     protected final OkHttpClient client;
     protected final ScheduledExecutorService pool;
     protected final Bucket bucket;
@@ -71,20 +76,39 @@ public class WebhookClient implements AutoCloseable {
 
     protected WebhookClient(
             final long id, final String token, final boolean parseMessage,
-            final OkHttpClient client, final ScheduledExecutorService pool, AllowedMentions mentions) {
+            final OkHttpClient client, final ScheduledExecutorService pool, AllowedMentions mentions,
+            final long threadId) {
         this.client = client;
         this.id = id;
+        this.threadId = threadId;
         this.parseMessage = parseMessage;
         this.url = String.format(WEBHOOK_URL, Long.toUnsignedString(id), token);
         this.pool = pool;
         this.bucket = new Bucket();
         this.queue = new LinkedBlockingQueue<>();
         this.allowedMentions = mentions;
+        this.parent = null;
+        this.isQueued = false;
+    }
+
+    protected WebhookClient(final WebhookClient parent, final long threadId) {
+        this.client = parent.client;
+        this.id = parent.id;
+        this.threadId = threadId;
+        this.parseMessage = parent.parseMessage;
+        this.url = parent.url;
+        this.parent = parent;
+        this.pool = parent.pool;
+        this.bucket = parent.bucket;
+        this.queue = parent.queue;
+        this.allowedMentions = parent.allowedMentions;
         this.isQueued = false;
     }
 
     /**
      * Factory method to create a basic WebhookClient with the provided id and token.
+     *
+     * <p>You can use {@link #onThread(long)} to target specific threads on the channel.
      *
      * @param  id
      *         The webhook id
@@ -100,11 +124,13 @@ public class WebhookClient implements AutoCloseable {
     public static WebhookClient withId(long id, @NotNull String token) {
         Objects.requireNonNull(token, "Token");
         ScheduledExecutorService pool = ThreadPools.getDefaultPool(id, null, false);
-        return new WebhookClient(id, token, true, new OkHttpClient(), pool, AllowedMentions.all());
+        return new WebhookClient(id, token, true, new OkHttpClient(), pool, AllowedMentions.all(), 0);
     }
 
     /**
      * Factory method to create a basic WebhookClient with the provided id and token.
+     *
+     * <p>You can use {@link #onThread(long)} to target specific threads on the channel.
      *
      * @param  url
      *         The url for the webhook
@@ -127,12 +153,38 @@ public class WebhookClient implements AutoCloseable {
     }
 
     /**
+     * Returns a wrapper of this WebhookClient that targets the specified thread.
+     * <br>The thread should be on the same channel as the webhook.
+     *
+     * <p>The returned webhook client inherits all the settings (including the thread pool) from this client instance.
+     * If either of the clients is shutdown/closed, the other instance will no longer send any messages.
+     *
+     * @param  threadId
+     *         The target thread id, or 0 to send directly to the parent channel
+     *
+     * @return A new webhook client instance which targets the specified thread
+     */
+    @NotNull
+    public WebhookClient onThread(final long threadId) {
+        return new WebhookClient(this, threadId);
+    }
+
+    /**
      * The id for this webhook
      *
      * @return The id
      */
     public long getId() {
         return id;
+    }
+
+    /**
+     * The target thread id this webhook client uses.
+     *
+     * @return The thread id or 0 if the messages are not sent to threads
+     */
+    public long getThreadId() {
+        return threadId;
     }
 
     /**
@@ -620,11 +672,14 @@ public class WebhookClient implements AutoCloseable {
     }
 
     /**
-     * Stops the executor used by this pool
+     * Stops the thread pool used by this client.
+     * <br>Any further requests to this client or clients with the same thread pool will be rejected.
      */
     @Override
     public void close() {
         isShutdown = true;
+        if (parent != null)
+            parent.close();
         if (queue.isEmpty())
             pool.shutdown();
     }
@@ -647,8 +702,13 @@ public class WebhookClient implements AutoCloseable {
             Objects.requireNonNull(messageId, "Message ID");
             endpoint += "/messages/" + messageId;
         }
+        List<String> query = new ArrayList<>(2);
         if (parseMessage)
-            endpoint += "?wait=true";
+            query.add("wait=true");
+        if (threadId != 0L)
+            query.add("thread_id=" + Long.toUnsignedString(threadId));
+        if (!query.isEmpty())
+            endpoint += "?" + String.join("&", query);
         return queueRequest(endpoint, type.method, body);
     }
 
@@ -667,15 +727,21 @@ public class WebhookClient implements AutoCloseable {
 
     @NotNull
     protected CompletableFuture<ReadonlyMessage> queueRequest(String url, String method, RequestBody body) {
-        final boolean wasQueued = isQueued;
-        isQueued = true;
         CompletableFuture<ReadonlyMessage> callback = new CompletableFuture<>();
         Request req = new Request(callback, body, method, url);
         if (defaultTimeout > 0)
             req.deadline = System.currentTimeMillis() + defaultTimeout;
+
+        // If this is a forked client, we need to use the parent rate limiting
+        return parent == null ? schedule(callback, req) : parent.schedule(callback, req);
+    }
+
+    @NotNull
+    protected CompletableFuture<ReadonlyMessage> schedule(@NotNull CompletableFuture<ReadonlyMessage> callback, @NotNull Request req) {
         enqueuePair(req);
-        if (!wasQueued)
+        if (!isQueued)
             backoffQueue();
+        isQueued = true;
         return callback;
     }
 

@@ -17,11 +17,21 @@ import java.util.regex.Matcher;
 
 public class JavacordWebhookClient extends WebhookClient {
     public JavacordWebhookClient(long id, String token, boolean parseMessage, OkHttpClient client, ScheduledExecutorService pool, AllowedMentions mentions) {
-        super(id, token, parseMessage, client, pool, mentions);
+        this(id, token, parseMessage, client, pool, mentions, 0L);
+    }
+
+    public JavacordWebhookClient(long id, String token, boolean parseMessage, OkHttpClient client, ScheduledExecutorService pool, AllowedMentions mentions, long threadId) {
+        super(id, token, parseMessage, client, pool, mentions, threadId);
+    }
+
+    protected JavacordWebhookClient(JavacordWebhookClient parent, long threadId) {
+        super(parent, threadId);
     }
 
     /**
      * Creates a WebhookClient for the provided webhook.
+     *
+     * <p>You can use {@link #onThread(long)} to target specific threads on the channel.
      *
      * @param  webhook
      *         The webhook
@@ -38,6 +48,8 @@ public class JavacordWebhookClient extends WebhookClient {
 
     /**
      * Factory method to create a basic JavacordWebhookClient with the provided id and token.
+     *
+     * <p>You can use {@link #onThread(long)} to target specific threads on the channel.
      *
      * @param  id
      *         The webhook id
@@ -59,6 +71,8 @@ public class JavacordWebhookClient extends WebhookClient {
     /**
      * Factory method to create a basic JavacordWebhookClient with the provided id and token.
      *
+     * <p>You can use {@link #onThread(long)} to target specific threads on the channel.
+     *
      * @param  url
      *         The url for the webhook
      *
@@ -77,6 +91,12 @@ public class JavacordWebhookClient extends WebhookClient {
             throw new IllegalArgumentException("Failed to parse webhook URL");
         }
         return withId(Long.parseUnsignedLong(matcher.group(1)), matcher.group(2));
+    }
+
+    @NotNull
+    @Override
+    public JavacordWebhookClient onThread(long threadId) {
+        return new JavacordWebhookClient(this, threadId);
     }
 
     /**

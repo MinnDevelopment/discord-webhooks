@@ -47,6 +47,7 @@ public class WebhookClientBuilder { //TODO: tests
 
     protected final long id;
     protected final String token;
+    protected long threadId;
     protected ScheduledExecutorService pool;
     protected OkHttpClient client;
     protected ThreadFactory threadFactory;
@@ -253,6 +254,21 @@ public class WebhookClientBuilder { //TODO: tests
     }
 
     /**
+     * The ID for the thread you want the messages to be posted to.
+     * <br>You can use {@link WebhookClient#onThread(long)} to send specific messages to threads.
+     *
+     * @param  threadId
+     *         The target thread id, or 0 to not use threads
+     *
+     * @return The current builder, for chaining convenience
+     */
+    @NotNull
+    public WebhookClientBuilder setThreadId(long threadId) {
+        this.threadId = threadId;
+        return this;
+    }
+
+    /**
      * Builds the {@link club.minnced.discord.webhook.WebhookClient}
      * with the current settings
      *
@@ -262,7 +278,7 @@ public class WebhookClientBuilder { //TODO: tests
     public WebhookClient build() {
         OkHttpClient client = this.client == null ? new OkHttpClient() : this.client;
         ScheduledExecutorService pool = this.pool != null ? this.pool : ThreadPools.getDefaultPool(id, threadFactory, isDaemon);
-        return new WebhookClient(id, token, parseMessage, client, pool, allowedMentions);
+        return new WebhookClient(id, token, parseMessage, client, pool, allowedMentions, threadId);
     }
 
     /**
@@ -275,7 +291,7 @@ public class WebhookClientBuilder { //TODO: tests
     public JDAWebhookClient buildJDA() {
         OkHttpClient client = this.client == null ? new OkHttpClient() : this.client;
         ScheduledExecutorService pool = this.pool != null ? this.pool : ThreadPools.getDefaultPool(id, threadFactory, isDaemon);
-        return new JDAWebhookClient(id, token, parseMessage, client, pool, allowedMentions);
+        return new JDAWebhookClient(id, token, parseMessage, client, pool, allowedMentions, threadId);
     }
 
     /**
@@ -288,7 +304,7 @@ public class WebhookClientBuilder { //TODO: tests
     public D4JWebhookClient buildD4J() {
         OkHttpClient client = this.client == null ? new OkHttpClient() : this.client;
         ScheduledExecutorService pool = this.pool != null ? this.pool : ThreadPools.getDefaultPool(id, threadFactory, isDaemon);
-        return new D4JWebhookClient(id, token, parseMessage, client, pool, allowedMentions);
+        return new D4JWebhookClient(id, token, parseMessage, client, pool, allowedMentions, threadId);
     }
 
     /**
@@ -301,6 +317,6 @@ public class WebhookClientBuilder { //TODO: tests
     public JavacordWebhookClient buildJavacord() {
         OkHttpClient client = this.client == null ? new OkHttpClient() : this.client;
         ScheduledExecutorService pool = this.pool != null ? this.pool : ThreadPools.getDefaultPool(id, threadFactory, isDaemon);
-        return new JavacordWebhookClient(id, token, parseMessage, client, pool, allowedMentions);
+        return new JavacordWebhookClient(id, token, parseMessage, client, pool, allowedMentions, threadId);
     }
 }

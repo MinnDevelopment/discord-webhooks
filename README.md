@@ -83,6 +83,46 @@ builder.setContent("Hello World");
 client.send(builder.build());
 ```
 
+## Threads
+
+You can use the webhook clients provided by this library to send messages in threads. There are two ways to accomplish this.
+
+Set a thread id in the client builder to send all messages in that client to the thread:
+
+```java
+WebhookClient client = new WebhookClientBuilder(url)
+        .setThreadId(threadId)
+        .build();
+
+client.send("Hello"); // appears in the thread
+```
+
+Use `onThread` to create a client with a thread id and all other settings inherited:
+
+```java
+try (WebhookClient client = WebhookClient.withUrl(url)) {
+    WebhookClient thread = client.onThread(123L);
+    thread.send("Hello"); // appears only in the thread with id 123
+    client.send("Friend"); // appears in the channel instead
+} // calls client.close() which automatically also closes all onThread clients as well.
+```
+
+All `WebhookClient` instances created with `onThread` will share the same thread pool used by the original client. This means that shutting down or closing any of the clients will also close all other clients associated with that underlying thread pool.
+
+```java
+WebhookClient thread = null;
+try (WebhookClient client = WebhookClient.withUrl(url)) {
+    thread = client.onThread(id);
+} // closes client
+thread.send("Hello"); // <- throws rejected execution due to pool being shutdown by client.close() above ^
+
+WebhookClient client = WebhookClient.withUrl(url);
+try (WebhookClient thread = client.onThread(id)) {
+    thread.send("...");
+} // closes thread
+client.send("Hello");  // <- throws rejected execution due to pool being shutdown by thread.close() above ^
+```
+
 ### Shutdown
 
 Since the clients use threads for sending messages you should close the client to end the threads. This can be ignored if a shared thread-pool is used between multiple clients but that pool has to be shutdown by the user accordingly.
