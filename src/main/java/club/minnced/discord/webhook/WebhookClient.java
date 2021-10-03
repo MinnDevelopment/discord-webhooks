@@ -170,7 +170,7 @@ public class WebhookClient implements AutoCloseable {
      * <br>The {@link CompletableFuture} returned by the various send methods will be completed exceptionally with a {@link TimeoutException} when the timeout expires.
      * By default, no timeout is used.
      *
-     * <p>Note that this timeout is independent from the timeouts configured in {@link OkHttpClient} and will only prevent queued requests from being executed.
+     * <p>Note that this timeout is independent of the timeouts configured in {@link OkHttpClient} and will only prevent queued requests from being executed.
      *
      * @param  millis
      *         The timeout in milliseconds, or 0 for no timeout

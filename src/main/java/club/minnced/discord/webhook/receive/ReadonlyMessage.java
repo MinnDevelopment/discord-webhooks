@@ -34,6 +34,7 @@ public class ReadonlyMessage implements JSONString {
     private final long channelId;
     private final boolean mentionsEveryone;
     private final boolean tts;
+    private final int flags;
 
     private final ReadonlyUser author;
 
@@ -45,7 +46,7 @@ public class ReadonlyMessage implements JSONString {
     private final List<Long> mentionedRoles;
 
     public ReadonlyMessage(
-            long id, long channelId, boolean mentionsEveryone, boolean tts,
+            long id, long channelId, boolean mentionsEveryone, boolean tts, int flags,
             @NotNull ReadonlyUser author, @NotNull String content,
             @NotNull List<ReadonlyEmbed> embeds, @NotNull List<ReadonlyAttachment> attachments,
             @NotNull List<ReadonlyUser> mentionedUsers, @NotNull List<Long> mentionedRoles) {
@@ -53,6 +54,7 @@ public class ReadonlyMessage implements JSONString {
         this.channelId = channelId;
         this.mentionsEveryone = mentionsEveryone;
         this.tts = tts;
+        this.flags = flags;
         this.author = author;
         this.content = content;
         this.embeds = embeds;
@@ -95,6 +97,16 @@ public class ReadonlyMessage implements JSONString {
      */
     public boolean isTTS() {
         return tts;
+    }
+
+    /**
+     * The flags for this message.
+     * <br>You can use {@link club.minnced.discord.webhook.MessageFlags} to determine which flags are set.
+     *
+     * @return The flags
+     */
+    public int getFlags() {
+        return flags;
     }
 
     /**
