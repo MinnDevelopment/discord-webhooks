@@ -59,6 +59,8 @@ public class WebhookClient implements AutoCloseable {
     public static final String USER_AGENT = "Webhook(https://github.com/MinnDevelopment/discord-webhooks, " + LibraryInfo.VERSION + ")";
     private static final Logger LOG = LoggerFactory.getLogger(WebhookClient.class);
 
+    protected final WebhookClient parent;
+
     protected final String url;
     protected final long id;
     protected final long threadId;
@@ -85,6 +87,7 @@ public class WebhookClient implements AutoCloseable {
         this.bucket = new Bucket();
         this.queue = new LinkedBlockingQueue<>();
         this.allowedMentions = mentions;
+        this.parent = null;
         this.isQueued = false;
     }
 
@@ -93,10 +96,11 @@ public class WebhookClient implements AutoCloseable {
         this.id = parent.id;
         this.threadId = threadId;
         this.parseMessage = parent.parseMessage;
-        this.url = parent.url;;
+        this.url = parent.url;
+        this.parent = parent;
         this.pool = parent.pool;
-        this.bucket = new Bucket();
-        this.queue = new LinkedBlockingQueue<>();
+        this.bucket = parent.bucket;
+        this.queue = parent.queue;
         this.allowedMentions = parent.allowedMentions;
         this.isQueued = false;
     }
@@ -726,6 +730,14 @@ public class WebhookClient implements AutoCloseable {
         Request req = new Request(callback, body, method, url);
         if (defaultTimeout > 0)
             req.deadline = System.currentTimeMillis() + defaultTimeout;
+
+        // If this is a forked client, we need to use the parent rate limiting
+        if (parent != null)
+        {
+            parent.enqueuePair(req);
+            return callback;
+        }
+
         enqueuePair(req);
         if (!wasQueued)
             backoffQueue();
