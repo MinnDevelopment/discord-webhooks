@@ -700,7 +700,8 @@ public class WebhookClient implements AutoCloseable {
             query.add("wait=true");
         if (threadId != 0L)
             query.add("thread_id=" + Long.toUnsignedString(threadId));
-        endpoint += "?" + String.join("&", query);
+        if (!query.isEmpty())
+            endpoint += "?" + String.join("&", query);
         return queueRequest(endpoint, type.method, body);
     }
 
