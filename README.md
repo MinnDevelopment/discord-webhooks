@@ -185,7 +185,7 @@ repositories {
 
 ```gradle
 dependencies {
-    compile("club.minnced:discord-webhooks:%VERSION%")
+    implementation("club.minnced:discord-webhooks:%VERSION%")
 }
 ```
 
