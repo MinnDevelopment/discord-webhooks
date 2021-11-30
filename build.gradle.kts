@@ -1,4 +1,5 @@
 import org.apache.tools.ant.filters.ReplaceTokens
+import java.io.ByteArrayOutputStream
 import java.time.Duration
 
 plugins {
@@ -16,11 +17,25 @@ val patch = "3"
 group = "club.minnced"
 version = "$major.$minor.$patch"
 
+fun getCommit()
+    =  System.getenv("GITHUB_SHA")
+    ?: System.getenv("GIT_COMMIT")
+    ?: try {
+        val out = ByteArrayOutputStream()
+        exec {
+            commandLine("git rev-parse --verify --short HEAD".split(" "))
+            standardOutput = out
+            workingDir = projectDir
+        }
+        out.toString("UTF-8").trim()
+    } catch (ignored: Throwable) { "N/A" }
+
 val tokens = mapOf(
     "MAJOR" to major,
     "MINOR" to minor,
     "PATCH" to patch,
-    "VERSION" to version
+    "VERSION" to version,
+    "COMMIT" to getCommit()
 )
 
 repositories {

@@ -22,4 +22,5 @@ public class LibraryInfo {
     public static final String VERSION_MINOR = "@MINOR@";
     public static final String VERSION_PATCH = "@PATCH@";
     public static final String VERSION = "@VERSION@";
+    public static final String COMMIT = "@COMMIT@";
 }
