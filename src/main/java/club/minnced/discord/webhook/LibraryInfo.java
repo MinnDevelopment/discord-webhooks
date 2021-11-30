@@ -17,7 +17,7 @@
 package club.minnced.discord.webhook;
 
 public class LibraryInfo {
-    public static final int DISCORD_API_VERSION = 8;
+    public static final int DISCORD_API_VERSION = 9;
     public static final String VERSION_MAJOR = "@MAJOR@";
     public static final String VERSION_MINOR = "@MINOR@";
     public static final String VERSION_PATCH = "@PATCH@";
