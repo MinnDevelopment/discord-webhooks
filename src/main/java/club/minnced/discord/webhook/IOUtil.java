@@ -60,7 +60,7 @@ public class IOUtil { //TODO: test json
      */
     @NotNull
     public static byte[] readAllBytes(@NotNull InputStream stream) throws IOException {
-        int count = 0, pos = 0;
+        int count = 0, pos = 0; error
         byte[] output = EMPTY_BYTES;
         byte[] buf = new byte[1024];
         while ((count = stream.read(buf)) > 0) {
