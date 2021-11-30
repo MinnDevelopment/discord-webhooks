@@ -23,4 +23,8 @@ public class LibraryInfo {
     public static final String VERSION_PATCH = "@PATCH@";
     public static final String VERSION = "@VERSION@";
     public static final String COMMIT = "@COMMIT@";
+
+    public static final String DEBUG_INFO = "DISCORD_API_VERSION: " + DISCORD_API_VERSION +
+                                            "\nVERSION: " + VERSION +
+                                            "\nCOMMIT: " + COMMIT;
 }
