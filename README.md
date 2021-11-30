@@ -179,7 +179,6 @@ Note: Replace `%VERSION%` below with the desired version.
 ```gradle
 repositories {
     mavenCentral()
-    jcenter()
 }
 ```
 
@@ -190,14 +189,6 @@ dependencies {
 ```
 
 ## Maven
-
-```xml
-<repository>
-    <name>jcenter</name>
-    <id>bintray-jcenter</id>
-    <url>https://jcenter.bintray.com</url>
-</repository>
-```
 
 ```xml
 <dependency>

@@ -1,22 +1,17 @@
-import de.marcphilipp.gradle.nexus.NexusPublishExtension
-import io.codearte.gradle.nexus.BaseStagingTask
-import io.codearte.gradle.nexus.NexusStagingExtension
 import org.apache.tools.ant.filters.ReplaceTokens
-import org.gradle.api.publish.maven.MavenPom
 import java.time.Duration
 
 plugins {
     `java-library`
     `maven-publish`
     signing
-    id("io.codearte.nexus-staging") version "0.22.0"
-    id("de.marcphilipp.nexus-publish") version "0.4.0"
-}
 
+    id("io.github.gradle-nexus.publish-plugin") version "1.1.0"
+}
 
 val major = "0"
 val minor = "7"
-val patch = "2"
+val patch = "3"
 
 group = "club.minnced"
 version = "$major.$minor.$patch"
@@ -30,28 +25,27 @@ val tokens = mapOf(
 
 repositories {
     mavenCentral()
-    maven("https://m2.dv8tion.net/releases")
-    jcenter() // Legacy :(
 }
 
 val versions = mapOf(
-    "slf4j" to "1.7.25",
+    "slf4j" to "1.7.32",
     "okhttp" to "3.14.9",
     "json" to "20210307",
-    "jda" to "4.3.0_331",
-    "discord4j" to "3.2.0",
+    "jda" to "5.0.0-alpha.1",
+    "discord4j" to "3.2.1",
     "javacord" to "3.3.2",
-    "junit" to "4.12",
-    "mockito" to "3.6.28",
+    "junit" to "4.13.2",
+    "mockito" to "3.6.28", // must be compatible with powermock
     "powermock" to "2.0.9",
-    "logback" to "1.2.3"
+    "logback" to "1.2.3",
+    "annotations" to "22.0.0"
 )
 
 dependencies {
     api("org.slf4j:slf4j-api:${versions["slf4j"]}")
     api("com.squareup.okhttp3:okhttp:${versions["okhttp"]}")
     api("org.json:json:${versions["json"]}")
-    implementation("org.jetbrains:annotations:16.0.1")
+    implementation("org.jetbrains:annotations:${versions["annotations"]}")
 
     compileOnly("net.dv8tion:JDA:${versions["jda"]}")
     compileOnly("com.discord4j:discord4j-core:${versions["discord4j"]}")
@@ -86,21 +80,35 @@ if (!System.getProperty("java.version").startsWith("1.8"))
 val javadocJar = tasks.create("javadocJar", Jar::class.java) {
     dependsOn(javadoc)
     from(javadoc.destinationDir)
-    classifier = "javadoc"
+    archiveClassifier.set("javadoc")
 }
 
 val sourcesJar = tasks.create("sourcesJar", Jar::class.java) {
     dependsOn(sources)
     from(sources.destinationDir)
-    classifier = "sources"
+    archiveClassifier.set("sources")
+}
+
+tasks.withType<JavaCompile> {
+    val arguments = mutableListOf("-Xlint:deprecation,unchecked,divzero,cast,static,varargs,try")
+    options.isIncremental = true
+    options.encoding = "UTF-8"
+    if (JavaVersion.current().isJava9Compatible) doFirst {
+        arguments += "--release"
+        arguments += "8"
+    }
+    doFirst {
+        options.compilerArgs = arguments
+    }
 }
 
 val compileJava: JavaCompile by tasks
-compileJava.options.isIncremental = true
-compileJava.source = fileTree(sources.destinationDir)
-compileJava.dependsOn(sources)
+compileJava.apply {
+    source = fileTree(sources.destinationDir)
+    dependsOn(sources)
+}
 
-configure<JavaPluginConvention> {
+configure<JavaPluginExtension> {
     sourceCompatibility = JavaVersion.VERSION_1_8
     targetCompatibility = JavaVersion.VERSION_1_8
 }
@@ -112,39 +120,6 @@ build.apply {
     dependsOn(sourcesJar)
     dependsOn(jar)
     dependsOn(test)
-}
-
-
-// Signing
-
-
-val signJar = tasks.create("signJar", Sign::class.java) {
-    dependsOn(jar)
-    sign(jar)
-}
-
-val signJavadocJar = tasks.create("signJavadocJar", Sign::class.java) {
-    dependsOn(javadocJar)
-    sign(javadocJar)
-}
-
-val signSourcesJar = tasks.create("signSourcesJar", Sign::class.java) {
-    dependsOn(sourcesJar)
-    sign(sourcesJar)
-}
-
-val signPom = tasks.create("signPom", Sign::class.java) {
-    val pom = file("${buildDir}/publications/Release/pom-default.xml")
-    sign(pom)
-}
-
-val signModule = tasks.create("signModule", Sign::class.java) {
-    val module = file("${buildDir}/publications/Release/module.json")
-    sign(module)
-}
-
-val signFiles = tasks.create("signFiles") {
-    dependsOn(signJar, signJavadocJar, signSourcesJar, signPom, signModule)
 }
 
 // Generate pom file for maven central
@@ -191,26 +166,6 @@ publishing {
 
             artifact(sourcesJar)
             artifact(javadocJar)
-            artifact(signJar.signatureFiles.first()) {
-                classifier = null
-                extension = "jar.asc"
-            }
-            artifact(signJavadocJar.signatureFiles.first()) {
-                classifier = "javadoc"
-                extension = "jar.asc"
-            }
-            artifact(signSourcesJar.signatureFiles.first()) {
-                classifier = "sources"
-                extension = "jar.asc"
-            }
-            artifact(signPom.signatureFiles.first()) {
-                classifier = null
-                extension = "pom.asc"
-            }
-            artifact(signModule.signatureFiles.first()) {
-                classifier = null
-                extension = "module.asc"
-            }
 
             pom.apply(generatePom())
         }
@@ -218,49 +173,56 @@ publishing {
 }
 
 
-
-// Prepare for publish
-
-val generateMetadataFileForReleasePublication: Task by tasks
-signModule.dependsOn(generateMetadataFileForReleasePublication)
-signModule.mustRunAfter(generateMetadataFileForReleasePublication)
-
-val generatePomFileForReleasePublication: GenerateMavenPom by tasks
-signPom.dependsOn(generatePomFileForReleasePublication)
-signPom.mustRunAfter(generatePomFileForReleasePublication)
-
-tasks.withType(AbstractPublishToMaven::class.java) {
-    dependsOn(signFiles)
-    mustRunAfter(signFiles)
-}
-
 // Staging and Promotion
 
-configure<NexusStagingExtension> {
-    username = getProjectProperty("ossrhUser")
-    password = getProjectProperty("ossrhPassword")
-    stagingProfileId = getProjectProperty("stagingProfileId")
-}
-
-configure<NexusPublishExtension> {
-    nexusPublishing {
-        repositories.sonatype {
-            username.set(getProjectProperty("ossrhUser"))
-            password.set(getProjectProperty("ossrhPassword"))
-            stagingProfileId.set(getProjectProperty("stagingProfileId"))
-        }
-        // Sonatype is very slow :)
-        connectTimeout.set(Duration.ofMinutes(1))
-        clientTimeout.set(Duration.ofMinutes(10))
+if ("signing.keyId" in properties) {
+    signing {
+        sign(publishing.publications["Release"])
     }
 }
 
-// This links the close/release tasks to the right repository (from the publication above)
-val publishToSonatype: Task by tasks
-tasks.withType<BaseStagingTask> {
-    dependsOn(publishToSonatype)
-    mustRunAfter(publishToSonatype)
-    // We give each step an hour because it takes very long sometimes ...
-    numberOfRetries = 30 // 30 tries
-    delayBetweenRetriesInMillis = 2 * 60 * 1000 // 2 minutes
+nexusPublishing {
+    repositories.sonatype {
+        username.set(getProjectProperty("ossrhUser"))
+        password.set(getProjectProperty("ossrhPassword"))
+        stagingProfileId.set(getProjectProperty("stagingProfileId"))
+    }
+
+    // Sonatype is very slow :)
+    connectTimeout.set(Duration.ofMinutes(1))
+    clientTimeout.set(Duration.ofMinutes(10))
+
+    transitionCheckOptions {
+        maxRetries.set(100)
+        delayBetween.set(Duration.ofSeconds(5))
+    }
+}
+
+
+// To publish run ./gradlew release
+
+val rebuild = tasks.create("rebuild") {
+    val clean = tasks.getByName("clean")
+    dependsOn(build)
+    dependsOn(clean)
+    build.mustRunAfter(clean)
+}
+
+// Only enable publishing task for properly configured projects
+val publishingTasks = tasks.withType<PublishToMavenRepository> {
+    enabled = "ossrhUser" in properties
+    mustRunAfter(rebuild)
+    dependsOn(rebuild)
+}
+
+tasks.create("release") {
+    dependsOn(publishingTasks)
+    afterEvaluate {
+        // Collect all the publishing task which upload the archives to nexus staging
+        val closeAndReleaseSonatypeStagingRepository: Task by tasks
+
+        // Make sure the close and release happens after uploading
+        dependsOn(closeAndReleaseSonatypeStagingRepository)
+        closeAndReleaseSonatypeStagingRepository.mustRunAfter(publishingTasks)
+    }
 }

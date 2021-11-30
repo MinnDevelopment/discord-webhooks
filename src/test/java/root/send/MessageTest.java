@@ -26,9 +26,7 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 import org.junit.Assert;
 import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
 import root.IOTestUtil;
 
 import java.io.File;
@@ -41,8 +39,6 @@ import java.util.List;
 import java.util.Map;
 
 public class MessageTest {
-    @Rule
-    public ExpectedException expectedException = ExpectedException.none();
     private WebhookMessageBuilder builder;
 
     @Before
@@ -159,8 +155,7 @@ public class MessageTest {
 
     @Test
     public void buildEmptyMessage() {
-        expectedException.expect(IllegalStateException.class);
-        builder.build();
+        Assert.assertThrows(IllegalStateException.class, () -> builder.build());
     }
 
     @Test
