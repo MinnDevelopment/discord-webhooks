@@ -22,9 +22,7 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 import org.junit.Assert;
 import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
 
 import java.time.Instant;
 import java.time.OffsetDateTime;
@@ -34,8 +32,6 @@ import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class SendEmbedTest {
-    @Rule
-    public ExpectedException expectedException = ExpectedException.none();
     private WebhookEmbedBuilder builder;
 
     @Before
@@ -136,8 +132,7 @@ public class SendEmbedTest {
 
     @Test
     public void buildEmptyEmbed() {
-        expectedException.expect(IllegalStateException.class);
-        builder.build();
+        Assert.assertThrows(IllegalStateException.class, () -> builder.build());
     }
 
     @Test

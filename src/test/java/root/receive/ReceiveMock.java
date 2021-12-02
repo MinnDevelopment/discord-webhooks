@@ -57,16 +57,19 @@ public class ReceiveMock {
 
     private WebhookClient client;
 
+    private AutoCloseable mocks;
+
     @Before
     public void init() {
-        MockitoAnnotations.initMocks(this);
+        mocks = MockitoAnnotations.openMocks(this);
         PowerMockito.mockStatic(EntityFactory.class);
         client = new WebhookClientBuilder(1234, "token").setWait(true).setHttpClient(httpClient).build();
     }
 
     @After
-    public void cleanup() {
+    public void cleanup() throws Exception {
         client.close();
+        mocks.close();
     }
 
     @Test
