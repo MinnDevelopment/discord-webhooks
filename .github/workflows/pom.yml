@@ -1,0 +1,35 @@
+name: Generate .github/pom.xml
+
+on:
+  push:
+    branches: [ master ]
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up JDK 11
+        uses: actions/setup-java@v2
+        with:
+          java-version: 11
+          distribution: temurin
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
+      - name: Generate pom.xml
+        uses: gradle/gradle-build-action@v2
+        with:
+          arguments: generatePomFileForReleasePublication
+      - name: Move pom file to github folder
+        run: |
+          mv build/publications/Release/pom-default.xml .github/pom.xml
+      - name: Commit pom.xml
+        id: commit
+        continue-on-error: true
+        run: |
+          git config --local user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+          git commit -am "Update pom.xml"
+      - name: Push changes
+        if: steps.commit.outcome == 'success' && steps.commit.conclusion == 'success'
+        uses: ad-m/github-push-action@8407731efefc0d8f72af254c74276b7a90be36e1
