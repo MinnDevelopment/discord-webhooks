@@ -87,10 +87,28 @@ val sources = tasks.create("sources", Copy::class.java) {
     filter<ReplaceTokens>("tokens" to tokens)
 }
 
-javadoc.dependsOn(sources)
-javadoc.source = fileTree(sources.destinationDir)
-if (!System.getProperty("java.version").startsWith("1.8"))
-    (javadoc.options as CoreJavadocOptions).addBooleanOption("html5", true)
+javadoc.apply {
+    dependsOn(sources)
+    isFailOnError = false
+    source = fileTree(sources.destinationDir)
+    options.encoding = "UTF-8"
+    options.memberLevel = JavadocMemberLevel.PUBLIC
+
+    if (options is StandardJavadocDocletOptions) {
+        val opt = options as StandardJavadocDocletOptions
+
+        val extLinks = arrayOf(
+            "https://docs.oracle.com/en/java/javase/11/docs/api/",
+            "https://square.github.io/okhttp/3.x/okhttp/",
+        )
+        opt.links(*extLinks)
+        if (JavaVersion.current().isJava9Compatible)
+            opt.addBooleanOption("html5", true)
+        if (JavaVersion.current().isJava11Compatible)
+            opt.addBooleanOption("-no-module-directories", true)
+    }
+}
+
 
 val javadocJar = tasks.create("javadocJar", Jar::class.java) {
     dependsOn(javadoc)

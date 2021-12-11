@@ -15,6 +15,8 @@ Discord Webhook API.
 
 Here we will give a small overview of the proper usage and applicability of the resources provided by this library.
 
+Documentation is available via the GitHub pages on this repository: [Javadoc](https://minndevelopment.github.io/discord-webhooks/overview-tree.html)
+
 ## Limitations
 
 Webhooks on discord are only capable of sending messages, nothing more. For anything else you either have to use OAuth2 or a bot account. This library does not provide any functionality for creating or modifying webhooks.
