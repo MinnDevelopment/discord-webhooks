@@ -22,6 +22,8 @@ import org.json.JSONObject;
 import org.json.JSONPropertyName;
 import org.json.JSONString;
 
+import java.util.Locale;
+
 /**
  * Readonly POJO of a discord user
  */
@@ -56,7 +58,7 @@ public class ReadonlyUser implements JSONString {
      * @return The discriminator
      */
     public String getDiscriminator() {
-        return String.format("%04d", discriminator);
+        return String.format(Locale.ROOT, "%04d", discriminator);
     }
 
     /**

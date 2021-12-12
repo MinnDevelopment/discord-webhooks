@@ -39,10 +39,7 @@ import javax.annotation.Nonnegative;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 import java.util.concurrent.*;
 import java.util.regex.Matcher;
 
@@ -82,7 +79,7 @@ public class WebhookClient implements AutoCloseable {
         this.id = id;
         this.threadId = threadId;
         this.parseMessage = parseMessage;
-        this.url = String.format(WEBHOOK_URL, Long.toUnsignedString(id), token);
+        this.url = String.format(Locale.ROOT, WEBHOOK_URL, Long.toUnsignedString(id), token);
         this.pool = pool;
         this.bucket = new Bucket();
         this.queue = new LinkedBlockingQueue<>();
