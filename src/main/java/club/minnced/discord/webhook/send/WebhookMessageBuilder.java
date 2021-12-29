@@ -433,7 +433,6 @@ public class WebhookMessageBuilder {
         WebhookMessageBuilder builder = new WebhookMessageBuilder();
         builder.setTTS(message.isTTS());
         builder.setContent(message.getContentRaw());
-        builder.setEphemeral(message.isEphemeral());
         message.getEmbeds().forEach(embed -> builder.addEmbeds(WebhookEmbedBuilder.fromJDA(embed).build()));
 
         if (message instanceof DataMessage) {
@@ -460,6 +459,7 @@ public class WebhookMessageBuilder {
                     .collect(Collectors.toList()));
             allowedMentions.withParseEveryone(message.mentionsEveryone());
             builder.setAllowedMentions(allowedMentions);
+            builder.setEphemeral(message.isEphemeral());
         }
         return builder;
     }
