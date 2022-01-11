@@ -17,6 +17,7 @@
 package club.minnced.discord.webhook.send;
 
 import club.minnced.discord.webhook.MessageFlags;
+import club.minnced.discord.webhook.send.component.LayoutComponent;
 import discord4j.core.spec.MessageCreateSpec;
 import discord4j.core.spec.MessageEditSpec;
 import discord4j.discordjson.json.AllowedMentionsData;
@@ -47,6 +48,7 @@ import java.util.stream.Collectors;
 public class WebhookMessageBuilder {
     protected final StringBuilder content = new StringBuilder();
     protected final List<WebhookEmbed> embeds = new LinkedList<>();
+    protected final List<LayoutComponent> components = new ArrayList<>();
     protected final MessageAttachment[] files = new MessageAttachment[WebhookMessage.MAX_FILES];
     protected AllowedMentions allowedMentions = AllowedMentions.all();
     protected String username, avatarUrl;
@@ -60,7 +62,7 @@ public class WebhookMessageBuilder {
      * @return True, if this builder is empty
      */
     public boolean isEmpty() {
-        return content.length() == 0 && embeds.isEmpty() && getFileAmount() == 0;
+        return content.length() == 0 && embeds.isEmpty() && components.isEmpty() && getFileAmount() == 0;
     }
 
     /**
@@ -182,6 +184,55 @@ public class WebhookMessageBuilder {
         return this;
     }
 
+    /**
+     * Adds the provided embeds to the builder
+     *
+     * @param components
+     *         The layout components to add
+     *
+     * @return This builder for chaining convenience
+     *
+     * @throws java.lang.NullPointerException
+     *         If provided with null
+     * @throws java.lang.IllegalStateException
+     *         If more than {@value LayoutComponent#MAX_COMPONENTS} are added
+     */
+    @NotNull
+    public WebhookMessageBuilder addComponents(LayoutComponent... components) {
+        Objects.requireNonNull(components, "Components");
+        if (this.components.size() + components.length > 5)
+            throw new IllegalStateException("Cannot have more than 5 action rows in a message");
+        for (LayoutComponent component : components) {
+            Objects.requireNonNull(component, "Component");
+            this.components.add(component);
+        }
+        return this;
+    }
+
+    /**
+     * Adds the provided embeds to the builder
+     *
+     * @param components
+     *         The layout components to add
+     *
+     * @return This builder for chaining convenience
+     *
+     * @throws java.lang.NullPointerException
+     *         If provided with null
+     * @throws java.lang.IllegalStateException
+     *         If more than {@value LayoutComponent#MAX_COMPONENTS} are added
+     */
+    @NotNull
+    public WebhookMessageBuilder addComponents(Collection<? extends LayoutComponent> components) {
+        Objects.requireNonNull(components, "Components");
+        if (this.components.size() + components.size() > 5)
+            throw new IllegalStateException("Cannot have more than 5 action rows in a message");
+        for (LayoutComponent component : components) {
+            Objects.requireNonNull(component, "Component");
+            this.components.add(component);
+        }
+        return this;
+    }
     /**
      * Configures the content for this builder
      *
@@ -408,7 +459,7 @@ public class WebhookMessageBuilder {
     public WebhookMessage build() {
         if (isEmpty())
             throw new IllegalStateException("Cannot build an empty message!");
-        return new WebhookMessage(username, avatarUrl, content.toString(), embeds, isTTS,
+        return new WebhookMessage(username, avatarUrl, content.toString(), embeds, components, isTTS,
                 fileIndex == 0 ? null : Arrays.copyOf(files, fileIndex), allowedMentions, flags);
     }
 
