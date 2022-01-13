@@ -27,10 +27,23 @@ public class SelectMenu implements ActionComponent{
         this.disabled = disabled;
     }
 
+    /**
+     * A select menu with the defined id and options
+     * @param customID the dev-defined id
+     * @param options the options in the dropdown menu
+     * @return A select menu with the defined id and options
+     */
     public static SelectMenu of(@NotNull String customID, @NotNull SelectOption... options) {
         return new SelectMenu(customID, Arrays.asList(options), null, 1, 1, false);
     }
 
+    /**
+     * A select menu with the defined id, placeholder and options
+     * @param customID the dev-defined id
+     * @param placeholder the placeholder text if nothing is selected
+     * @param options the options in the dropdown menu
+     * @return A select menu with the defined id, placeholder and options
+     */
     public static SelectMenu of(@NotNull String customID, @Nullable String placeholder, @NotNull SelectOption... options) {
         return new SelectMenu(customID, Arrays.asList(options), placeholder, 1, 1, false);
 

@@ -11,10 +11,22 @@ public class PartialEmoji implements JSONString {
     private final long id;
     private final boolean animated;
 
+    /**
+     * Emoji with only necessary features required by webhooks
+     * @param name the name of the emoji
+     * @param id the id of the emoji
+     * @param animated if the emoji is animated
+     */
     public PartialEmoji(@NotNull String name, @NotNull String id, boolean animated) {
         this(name, Long.parseLong(id), animated);
     }
 
+    /**
+     * Emoji with only necessary features required by webhooks
+     * @param name the name of the emoji
+     * @param id the id of the emoji
+     * @param animated if the emoji is animated
+     */
     public PartialEmoji(@NotNull String name, long id, boolean animated) {
         this.name = name;
         this.id  = id;

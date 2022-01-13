@@ -11,6 +11,15 @@ public class ActionRow implements LayoutComponent {
 
     private final List<ActionComponent> components;
 
+    /**
+     * Creates an action row with the given list of components
+     * @param components The components to be added in action row
+     *
+     * @throws IllegalStateException
+     *         If a select menu is added with any other component
+     * @throws IllegalStateException
+     *         If more than 5 buttons are added in the same action row
+     */
     public ActionRow(@NotNull List<ActionComponent> components) {
         int buttonCount = 0;
         boolean hasSelectMenu = false;
@@ -25,6 +34,15 @@ public class ActionRow implements LayoutComponent {
         this.components = components;
     }
 
+    /**
+     * Creates an action row with the given components
+     * @param components The components to be added in action row
+     *
+     * @throws IllegalStateException
+     *         If a select menu is added with any other component
+     * @throws IllegalStateException
+     *         If more than 5 buttons are added in the same action row
+     */
     public static ActionRow of(ActionComponent... components) {
         if (components == null || components.length == 0)
             return new ActionRow(new ArrayList<>());

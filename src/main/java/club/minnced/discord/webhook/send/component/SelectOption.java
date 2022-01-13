@@ -21,10 +21,32 @@ public class SelectOption implements JSONString {
         this.def = def;
     }
 
+    /**
+     * A SelectOption with the provided label and value
+     * @param label The label for the option
+     * @param value The dev-defined value for the option
+     * @return A SelectOption with the provided label and value
+     */
     public static SelectOption of(@NotNull String label, @NotNull String value) {
         return new SelectOption(label, value, null, false);
     }
 
+    /**
+     * A SelectOption with the provided label, value and description
+     * @param label The label for the option
+     * @param value The dev-defined value for the option
+     * @param description The description for the option
+     * @return A SelectOption with the provided label and value and description
+     */
+    public static SelectOption of(@NotNull String label, @NotNull String value, String description) {
+        return new SelectOption(label, value, description, false);
+    }
+
+    /**
+     * Adds an emoji to the option. Replaces it if it already exists
+     * @param emoji the emoji to add
+     * @return this instance of option
+     */
     public SelectOption withEmoji(PartialEmoji emoji) {
         this.emoji = emoji;
         return this;
