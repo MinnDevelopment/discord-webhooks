@@ -1,20 +1,43 @@
+/*
+ * Copyright 2018-2020 Florian Spieﬂ
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package club.minnced.discord.webhook.send.component;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.json.JSONObject;
-import org.json.JSONPropertyIgnore;
 
 import java.net.URL;
 
-public class Button implements ActionComponent {
+/**
+ * Button components that can be placed inside a {@link LayoutComponent}
+ *
+ * @see LayoutComponent#addComponent(ActionComponent) 
+ */
 
-    private final ButtonStyle style;
+public class Button implements ActionComponent, SingleEmojiContainer<Button> {
+
+    public static final int MAX_BUTTONS = 5;
+
+    private final Style style;
     private final String label, customID, url;
-    private final boolean disabled;
+    private boolean disabled;
     private PartialEmoji emoji;
 
-    public Button(@NotNull ButtonStyle style, @NotNull String label, @Nullable String customID, @Nullable String url, boolean disabled) {
+    private Button(@NotNull Style style, @NotNull String label, @Nullable String customID, @Nullable String url, boolean disabled) {
         this.style = style;
         this.label = label;
         this.customID = customID;
@@ -23,71 +46,85 @@ public class Button implements ActionComponent {
     }
 
     /**
-     * A primary style button with the provided id and label
-     * @param customID dev-defined id
-     * @param label text on button
+     * A button with style set to {@link Style#PRIMARY}
+     *
+     * @param  customID
+     *         Custom id used for handling of interactions
+     * @param  label
+     *         Label used to display text on a button
+     *
      * @return A primary style button with the provided id and label
      */
+    @NotNull
     public static Button primary(@NotNull String customID, @NotNull String label) {
-        return new Button(ButtonStyle.PRIMARY, label, customID, null, false);
+        return new Button(Style.PRIMARY, label, customID, null, false);
     }
 
     /**
-     * A success style button with the provided id and label
-     * @param customID dev-defined id
-     * @param label text on button
-     * @return A success style button with the provided id and label
+     * A button with style set to {@link Style#SUCCESS}
+     *
+     * @param  customID
+     *         Custom id used for handling of interactions
+     * @param  label
+     *         Label used to display text on a button
+     *
+     * @return A primary style button with the provided id and label
      */
+    @NotNull
     public static Button success(@NotNull String customID, @NotNull String label) {
-        return new Button(ButtonStyle.SUCCESS, label, customID, null, false);
+        return new Button(Style.SUCCESS, label, customID, null, false);
     }
 
     /**
-     * A secondary style button with the provided id and label
-     * @param customID dev-defined id
-     * @param label text on button
-     * @return A secondary style button with the provided id and label
+     * A button with style set to {@link Style#SECONDARY}
+     *
+     * @param  customID
+     *         Custom id used for handling of interactions
+     * @param  label
+     *         Label used to display text on a button
+     *
+     * @return A primary style button with the provided id and label
      */
+    @NotNull
     public static Button secondary(@NotNull String customID, @NotNull String label) {
-        return new Button(ButtonStyle.SECONDARY, label, customID, null, false);
+        return new Button(Style.SECONDARY, label, customID, null, false);
     }
 
     /**
-     * A destructive style button with the provided id and label
-     * @param customID dev-defined id
-     * @param label text on button
-     * @return A destructive style button with the provided id and label
+     * A button with style set to {@link Style#DANGER}
+     *
+     * @param  customID
+     *         Custom id used for handling of interactions
+     * @param  label
+     *         Label used to display text on a button
+     *
+     * @return A primary style button with the provided id and label
      */
-    public static Button destructive(@NotNull String customID, @NotNull String label) {
-        return new Button(ButtonStyle.DANGER, label, customID, null, false);
+    @NotNull
+    public static Button danger(@NotNull String customID, @NotNull String label) {
+        return new Button(Style.DANGER, label, customID, null, false);
     }
 
     /**
-     * A link style button with the provided id and label
-     * @param url The URL to link
-     * @param label text on button
-     * @return A link style button with the provided link and label
+     * A button with style set to {@link Style#LINK}
+     *
+     * @param  url
+     *         URL to link the user to
+     * @param  label
+     *         Label used to display text on a button
+     *
+     * @return A primary style button with the provided id and label
      */
+    @NotNull
     public static Button link(@NotNull URL url, @NotNull String label) {
-        return new Button(ButtonStyle.LINK, label, null, url.toString(), false);
-    }
-
-    /**
-     * Adds an emoji to the button. Replaces it if it already exists
-     * @param emoji the emoji to add
-     * @return this instance of button
-     */
-    public Button withEmoji(@NotNull PartialEmoji emoji) {
-        this.emoji = emoji;
-        return this;
+        return new Button(Style.LINK, label, null, url.toString(), false);
     }
 
     /**
      * @return The style of the button
      */
     @NotNull
-    @JSONPropertyIgnore
-    public ButtonStyle getStyle() {
+    public Style getStyle() {
         return style;
     }
 
@@ -95,7 +132,6 @@ public class Button implements ActionComponent {
      * @return The label/button text of the button
      */
     @NotNull
-    @JSONPropertyIgnore
     public String getLabel() {
         return label;
     }
@@ -104,7 +140,6 @@ public class Button implements ActionComponent {
      * @return The dev-defined id of the button
      */
     @Nullable
-    @JSONPropertyIgnore
     @Override
     public String getCustomID() {
         return customID;
@@ -114,24 +149,15 @@ public class Button implements ActionComponent {
      * @return The url the button links to
      */
     @Nullable
-    @JSONPropertyIgnore
     public String getUrl() {
         return url;
-    }
-
-    /**
-     * @return If the button is disabled
-     */
-    @JSONPropertyIgnore
-    public boolean isDisabled() {
-        return disabled;
     }
 
     @Override
     public String toJSONString() {
         JSONObject json = new JSONObject();
         json.put("type", this.getType());
-        json.put("style", this.style.VALUE);
+        json.put("style", this.style.value);
         json.put("label", this.label);
         if (this.customID != null)
             json.put("custom_id", this.customID);
@@ -142,25 +168,53 @@ public class Button implements ActionComponent {
         return json.toString();
     }
 
+    @NotNull
     @Override
-    public int getType() {
-        return 2;
+    public Type getType() {
+        return Type.BUTTON;
     }
 
-    public enum ButtonStyle {
+    @Override
+    public void withDisabled(boolean disabled) {
+        this.disabled = disabled;
+    }
+
+    @Override
+    public boolean isDisabled() {
+        return disabled;
+    }
+
+    @NotNull
+    @Override
+    public Button withEmoji(@NotNull PartialEmoji emoji) {
+        this.emoji = emoji;
+        return this;
+    }
+
+    @Override
+    @Nullable
+    public PartialEmoji getEmoji() {
+        return this.emoji;
+    }
+
+    public enum Style {
         PRIMARY(1),
         SECONDARY(2),
         SUCCESS(3),
         DANGER(4),
         LINK(5);
 
-        ButtonStyle(int value) {
-            this.VALUE = value;
+        Style(int value) {
+            this.value = value;
         }
 
+        private final int value;
+
         /**
-         * Discord defined value for the button styles
+         * @return Integer used by discord to determine the button style
          */
-        public final int VALUE;
+        public int getValue() {
+            return value;
+        }
     }
 }

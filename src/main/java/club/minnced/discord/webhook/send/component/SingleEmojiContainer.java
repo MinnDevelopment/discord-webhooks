@@ -17,38 +17,21 @@
 package club.minnced.discord.webhook.send.component;
 
 import org.jetbrains.annotations.NotNull;
-import org.json.JSONString;
+import org.jetbrains.annotations.Nullable;
 
-/**
- * Components are a framework for adding interactive elements to the messages your app sends.
- * They're accessible, customizable, and easy to use
- */
-
-public interface Component extends JSONString {
+public interface SingleEmojiContainer <T>{
 
     /**
-     * @return The type of the component
+     * Adds an emoji to the container. Replaces it if it already exists
+     * @param emoji
+     *        the emoji to add
+     * @return this instance of container for chaining
      */
-    @NotNull Type getType();
+    @NotNull T withEmoji(PartialEmoji emoji);
 
-    enum Type {
-        ACTION_ROW(1),
-        BUTTON(2),
-        SELECT_MENU(3);
-
-        private final int ID;
-
-        Type(int ID) {
-            this.ID = ID;
-        }
-
-        /**
-         * @return Integer used by discord to determine the type of component
-         */
-        public int getID() {
-            return this.ID;
-        }
-
-    }
+    /**
+     * @return The emoji inside the container, null if there is no emoji
+     */
+    @Nullable PartialEmoji getEmoji();
 
 }

@@ -62,7 +62,7 @@ public class WebhookMessageBuilder {
      * @return True, if this builder is empty
      */
     public boolean isEmpty() {
-        return content.length() == 0 && embeds.isEmpty() && components.isEmpty() && getFileAmount() == 0;
+        return content.length() == 0 && embeds.isEmpty() && getFileAmount() == 0;
     }
 
     /**
@@ -198,10 +198,10 @@ public class WebhookMessageBuilder {
      *         If more than {@value LayoutComponent#MAX_COMPONENTS} are added
      */
     @NotNull
-    public WebhookMessageBuilder addComponents(LayoutComponent... components) {
+    public WebhookMessageBuilder addComponents(@NotNull LayoutComponent... components) {
         Objects.requireNonNull(components, "Components");
-        if (this.components.size() + components.length > 5)
-            throw new IllegalStateException("Cannot have more than 5 action rows in a message");
+        if (this.components.size() + components.length > LayoutComponent.MAX_COMPONENTS)
+            throw new IllegalStateException("Cannot have more than " + LayoutComponent.MAX_COMPONENTS + " component layouts in a message");
         for (LayoutComponent component : components) {
             Objects.requireNonNull(component, "Component");
             this.components.add(component);
@@ -223,10 +223,10 @@ public class WebhookMessageBuilder {
      *         If more than {@value LayoutComponent#MAX_COMPONENTS} are added
      */
     @NotNull
-    public WebhookMessageBuilder addComponents(Collection<? extends LayoutComponent> components) {
+    public WebhookMessageBuilder addComponents(@NotNull Collection<? extends LayoutComponent> components) {
         Objects.requireNonNull(components, "Components");
-        if (this.components.size() + components.size() > 5)
-            throw new IllegalStateException("Cannot have more than 5 action rows in a message");
+        if (this.components.size() + components.size() > LayoutComponent.MAX_COMPONENTS)
+            throw new IllegalStateException("Cannot have more than " + LayoutComponent.MAX_COMPONENTS + " component layouts in a message");
         for (LayoutComponent component : components) {
             Objects.requireNonNull(component, "Component");
             this.components.add(component);

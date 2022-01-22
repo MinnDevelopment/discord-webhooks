@@ -375,7 +375,6 @@ public class WebhookMessage {
             }
             return builder.addFormDataPart("payload_json", json).build();
         }
-        System.out.println("json.toString() = " + json.toString());
         return RequestBody.create(IOUtil.JSON, json);
     }
 
