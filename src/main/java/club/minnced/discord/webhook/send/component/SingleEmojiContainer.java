@@ -27,7 +27,7 @@ public interface SingleEmojiContainer <T>{
      *        the emoji to add
      * @return this instance of container for chaining
      */
-    @NotNull T withEmoji(PartialEmoji emoji);
+    @NotNull T withEmoji(@NotNull PartialEmoji emoji);
 
     /**
      * @return The emoji inside the container, null if there is no emoji

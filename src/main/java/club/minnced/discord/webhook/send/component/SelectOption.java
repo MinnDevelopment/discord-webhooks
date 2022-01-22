@@ -92,7 +92,7 @@ public class SelectOption implements JSONString, SingleEmojiContainer<SelectOpti
 
     @Override
     @NotNull
-    public SelectOption withEmoji(PartialEmoji emoji) {
+    public SelectOption withEmoji(@NotNull PartialEmoji emoji) {
         this.emoji = emoji;
         return this;
     }
