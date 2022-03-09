@@ -139,7 +139,8 @@ webhookCluster.close(); // closes each client and can be used again
 
 ## Error Handling
 
-By default, this library will log every exception encountered when sending a message using the SLF4J logger implementation. This can be configured using [WebhookClient#setErrorHandler]() to custom behavior per client or [WebhookClient#setDefaultErrorHandler]() for all clients.
+By default, this library will log every exception encountered when sending a message using the SLF4J logger implementation.
+This can be configured using [WebhookClient#setErrorHandler](https://github.com/MinnDevelopment/discord-webhooks/blob/master/src/main/java/club/minnced/discord/webhook/WebhookClient.java#L259-L274) to custom behavior per client or [WebhookClient#setDefaultErrorHandler](https://github.com/MinnDevelopment/discord-webhooks/blob/master/src/main/java/club/minnced/discord/webhook/WebhookClient.java#L108-L121) for all clients.
 
 ### Example
 
