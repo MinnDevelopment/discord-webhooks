@@ -137,6 +137,24 @@ try (WebhookClient client = WebhookClient.withUrl(url)) {
 webhookCluster.close(); // closes each client and can be used again
 ```
 
+## Error Handling
+
+By default, this library will log every exception encountered when sending a message using the SLF4J logger implementation. This can be configured using [WebhookClient#setErrorHandler]() to custom behavior per client or [WebhookClient#setDefaultErrorHandler]() for all clients.
+
+### Example
+
+```java
+WebhookClient.setDefaultErrorHandler((client, message, throwable) -> {
+    System.err.printf("[%s] %s%n", client.getId(), message);
+    if (throwable != null)
+        throwable.printStackTrace();
+    // Shutdown the webhook client when you get 404 response (may also trigger for client#edit calls, be careful)
+    if (throwable instanceof HttpException ex && ex.getCode() == 404) {
+        client.close();
+    }
+});
+```
+
 ## External Libraries
 
 This library also supports sending webhook messages with integration from other libraries such as
