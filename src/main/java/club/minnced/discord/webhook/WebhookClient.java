@@ -24,6 +24,7 @@ import club.minnced.discord.webhook.send.WebhookEmbed;
 import club.minnced.discord.webhook.send.WebhookMessage;
 import club.minnced.discord.webhook.send.WebhookMessageBuilder;
 import club.minnced.discord.webhook.util.ThreadPools;
+import club.minnced.discord.webhook.util.WebhookErrorHandler;
 import okhttp3.OkHttpClient;
 import okhttp3.RequestBody;
 import okhttp3.Response;
@@ -55,6 +56,7 @@ public class WebhookClient implements AutoCloseable {
     /** User-Agent used for REST requests */
     public static final String USER_AGENT = "Webhook(https://github.com/MinnDevelopment/discord-webhooks, " + LibraryInfo.VERSION + ")";
     private static final Logger LOG = LoggerFactory.getLogger(WebhookClient.class);
+    private static WebhookErrorHandler DEFAULT_ERROR_HANDLER = WebhookErrorHandler.DEFAULT;
 
     protected final WebhookClient parent;
 
@@ -70,6 +72,7 @@ public class WebhookClient implements AutoCloseable {
     protected long defaultTimeout;
     protected volatile boolean isQueued;
     protected boolean isShutdown;
+    protected WebhookErrorHandler errorHandler = DEFAULT_ERROR_HANDLER;
 
     protected WebhookClient(
             final long id, final String token, final boolean parseMessage,
@@ -100,6 +103,21 @@ public class WebhookClient implements AutoCloseable {
         this.queue = parent.queue;
         this.allowedMentions = parent.allowedMentions;
         this.isQueued = false;
+    }
+
+    /**
+     * Configures which default error handler to use instead of {@link WebhookErrorHandler#DEFAULT}.
+     *
+     * <p>You can use this to avoid having to set the error handler on each new webhook client instance.
+     *
+     * @param  handler
+     *         The error handler to use
+     *
+     * @throws NullPointerException
+     *         If null is povided
+     */
+    public static void setDefaultErrorHandler(@NotNull WebhookErrorHandler handler) {
+        DEFAULT_ERROR_HANDLER = Objects.requireNonNull(handler, "Error Handler must not be null!");
     }
 
     /**
@@ -235,6 +253,23 @@ public class WebhookClient implements AutoCloseable {
         if (millis < 0)
             throw new IllegalArgumentException("Cannot set a negative timeout");
         this.defaultTimeout = millis;
+        return this;
+    }
+
+    /**
+     * Configures the error handling behavior used for all asynchronous send/edit/delete calls.
+     *
+     * @param  handler
+     *         The error handler
+     *
+     * @throws java.lang.NullPointerException
+     *         If provided with null
+     *
+     * @return The current WebhookClient instance
+     */
+    @NotNull
+    public WebhookClient setErrorHandler(@NotNull WebhookErrorHandler handler) {
+        this.errorHandler = Objects.requireNonNull(handler, "Error Handler must not be null!");
         return this;
     }
 
@@ -795,7 +830,7 @@ public class WebhookClient implements AutoCloseable {
             }
             else if (!response.isSuccessful()) {
                 final HttpException exception = failure(response);
-                LOG.error("Sending a webhook message failed with non-OK http response", exception);
+                errorHandler.handle(this, "Sending a webhook message failed with non-OK http response", exception);
                 queue.poll().future.completeExceptionally(exception);
                 return true;
             }
@@ -812,7 +847,7 @@ public class WebhookClient implements AutoCloseable {
             }
         }
         catch (JSONException | IOException e) {
-            LOG.error("There was some error while sending a webhook message", e);
+            errorHandler.handle(this, "There was some error while sending a webhook message", e);
             queue.poll().future.completeExceptionally(e);
         }
         return true;
@@ -832,7 +867,7 @@ public class WebhookClient implements AutoCloseable {
         }
     }
 
-    protected static final class Bucket {
+    protected final class Bucket {
         public static final int RATE_LIMIT_CODE = 429;
         public long resetTime;
         public int remainingUses;
@@ -899,7 +934,7 @@ public class WebhookClient implements AutoCloseable {
                 update0(response);
             }
             catch (Exception ex) {
-                LOG.error("Could not read http response", ex);
+                errorHandler.handle(WebhookClient.this, "Could not read http response", ex);
             }
         }
     }
