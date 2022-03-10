@@ -143,8 +143,7 @@ webhookCluster.close(); // closes each client and can be used again
 ## Error Handling
 
 By default, this library will log every exception encountered when sending a message using the SLF4J logger implementation.
-This can be configured using [WebhookClient#setErrorHandler]
-to custom behavior per client or [WebhookClient#setDefaultErrorHandler] for all clients.
+This can be configured using [WebhookClient#setErrorHandler] to custom behavior per client or [WebhookClient#setDefaultErrorHandler] for all clients.
 
 ### Example
 
