@@ -3,7 +3,7 @@
 [license]: https://img.shields.io/badge/License-Apache%202.0-lightgrey.svg
 [license-file]: https://github.com/MinnDevelopment/discord-webhooks/blob/master/LICENSE
 
-[WebhookClient#setErrorHandler]: https://minndevelopment.github.io/discord-webhooks/club/minnced/discord/webhook/WebhookClient.html#setErrorHandler(club.minnced.discord.webhook.util.WebhookErrorHandler
+[WebhookClient#setErrorHandler]: https://minndevelopment.github.io/discord-webhooks/club/minnced/discord/webhook/WebhookClient.html#setErrorHandler(club.minnced.discord.webhook.util.WebhookErrorHandler)
 [WebhookClient#setDefaultErrorHandler]: https://minndevelopment.github.io/discord-webhooks/club/minnced/discord/webhook/WebhookClient.html#setDefaultErrorHandler(club.minnced.discord.webhook.util.WebhookErrorHandler)
 
 [ ![version] ][download]
