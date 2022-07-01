@@ -23,6 +23,7 @@ import club.minnced.discord.webhook.send.WebhookMessage;
 import club.minnced.discord.webhook.send.WebhookMessageBuilder;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.MessageBuilder;
+import net.dv8tion.jda.api.entities.Mentions;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.internal.entities.DataMessage;
@@ -44,9 +45,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static org.mockito.Answers.RETURNS_DEFAULTS;
 import static org.mockito.Mockito.CALLS_REAL_METHODS;
-import static org.powermock.api.mockito.PowerMockito.mock;
-import static org.powermock.api.mockito.PowerMockito.when;
+import static org.powermock.api.mockito.PowerMockito.*;
 
 public class MessageTest {
     private WebhookMessageBuilder builder;
@@ -170,9 +171,11 @@ public class MessageTest {
               .build();
     
         Message jdaMessage = mock(ReceivedMessage.class, CALLS_REAL_METHODS);
+        Mentions mentions = mock(Mentions.class, RETURNS_DEFAULTS);
         when(jdaMessage.isTTS()).thenReturn(true);
         when(jdaMessage.getContentRaw()).thenReturn("myContent");
         when(jdaMessage.getEmbeds()).thenReturn(Arrays.asList(jdaEmbed));
+        when(jdaMessage.getMentions()).thenReturn(mentions);
 
         WebhookMessage webhookMessage = WebhookMessageBuilder.fromJDA(jdaMessage).build();
         List<WebhookEmbed> webhookEmbeds = webhookMessage.getEmbeds();

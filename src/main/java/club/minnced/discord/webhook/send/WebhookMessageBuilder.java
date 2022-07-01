@@ -25,6 +25,7 @@ import discord4j.discordjson.json.MessageCreateRequest;
 import discord4j.discordjson.json.MessageEditRequest;
 import discord4j.discordjson.possible.Possible;
 import discord4j.rest.util.MultipartRequest;
+import net.dv8tion.jda.api.entities.Mentions;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.Role;
 import net.dv8tion.jda.api.entities.User;
@@ -449,15 +450,16 @@ public class WebhookMessageBuilder {
             builder.setAllowedMentions(allowedMentions);
         } else if (message instanceof ReceivedMessage) {
             AllowedMentions allowedMentions = AllowedMentions.none();
+            Mentions mentions = message.getMentions();
             allowedMentions.withRoles(
-                message.getMentionedRoles().stream()
+                mentions.getRoles().stream()
                     .map(Role::getId)
                     .collect(Collectors.toList()));
             allowedMentions.withUsers(
-                message.getMentionedUsers().stream()
+                mentions.getUsers().stream()
                     .map(User::getId)
                     .collect(Collectors.toList()));
-            allowedMentions.withParseEveryone(message.mentionsEveryone());
+            allowedMentions.withParseEveryone(mentions.mentionsEveryone());
             builder.setAllowedMentions(allowedMentions);
             builder.setEphemeral(message.isEphemeral());
         }

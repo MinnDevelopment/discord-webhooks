@@ -30,6 +30,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.zip.GZIPOutputStream;
 
+@SuppressWarnings("deprecation")
 public class IOTestUtil {
 
     public static boolean isMultiPart(RequestBody body) {

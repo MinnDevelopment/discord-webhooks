@@ -12,7 +12,7 @@ plugins {
 
 val major = "0"
 val minor = "8"
-val patch = "0"
+val patch = "2"
 
 group = "club.minnced"
 version = "$major.$minor.$patch"
@@ -44,13 +44,13 @@ repositories {
 
 val versions = mapOf(
     "slf4j" to "1.7.32",
-    "okhttp" to "3.14.9",
+    "okhttp" to "4.10.0",
     "json" to "20210307",
-    "jda" to "5.0.0-alpha.1",
-    "discord4j" to "3.2.1",
-    "javacord" to "3.3.2",
+    "jda" to "5.0.0-alpha.13",
+    "discord4j" to "3.2.2",
+    "javacord" to "3.4.0",
     "junit" to "4.13.2",
-    "mockito" to "3.6.28", // must be compatible with powermock
+    "mockito" to "3.12.4", // must be compatible with powermock
     "powermock" to "2.0.9",
     "logback" to "1.2.3",
     "annotations" to "22.0.0"
@@ -146,13 +146,19 @@ configure<JavaPluginExtension> {
     targetCompatibility = JavaVersion.VERSION_1_8
 }
 
-val test: Task by tasks
+val test: Test by tasks
 val build: Task by tasks
 build.apply {
     dependsOn(javadocJar)
     dependsOn(sourcesJar)
     dependsOn(jar)
     dependsOn(test)
+}
+
+test.apply {
+    if (JavaVersion.current().isJava11Compatible) doFirst {
+        jvmArgs = listOf("--illegal-access=permit")
+    }
 }
 
 // Generate pom file for maven central
