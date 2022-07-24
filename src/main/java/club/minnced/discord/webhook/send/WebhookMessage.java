@@ -19,6 +19,7 @@ package club.minnced.discord.webhook.send;
 import club.minnced.discord.webhook.IOUtil;
 import club.minnced.discord.webhook.MessageFlags;
 import club.minnced.discord.webhook.receive.ReadonlyMessage;
+import club.minnced.discord.webhook.send.component.LayoutComponent;
 import okhttp3.MultipartBody;
 import okhttp3.RequestBody;
 import org.jetbrains.annotations.NotNull;
@@ -46,19 +47,21 @@ public class WebhookMessage {
 
     protected final String username, avatarUrl, content;
     protected final List<WebhookEmbed> embeds;
+    protected final List<LayoutComponent> components;
     protected final boolean isTTS;
     protected final MessageAttachment[] attachments;
     protected final AllowedMentions allowedMentions;
     protected final int flags;
 
     protected WebhookMessage(final String username, final String avatarUrl, final String content,
-                             final List<WebhookEmbed> embeds, final boolean isTTS,
+                             final List<WebhookEmbed> embeds, List<LayoutComponent> components, final boolean isTTS,
                              final MessageAttachment[] files, final AllowedMentions allowedMentions,
                              final int flags) {
         this.username = username;
         this.avatarUrl = avatarUrl;
         this.content = content;
         this.embeds = embeds;
+        this.components = components;
         this.isTTS = isTTS;
         this.attachments = files;
         this.allowedMentions = allowedMentions;
@@ -149,7 +152,7 @@ public class WebhookMessage {
             flags |= MessageFlags.EPHEMERAL;
         else
             flags &= ~MessageFlags.EPHEMERAL;
-        return new WebhookMessage(username, avatarUrl, content, embeds, isTTS, attachments, allowedMentions, flags);
+        return new WebhookMessage(username, avatarUrl, content, embeds, components, isTTS, attachments, allowedMentions, flags);
     }
 
     /**
@@ -205,7 +208,7 @@ public class WebhookMessage {
         List<WebhookEmbed> list = new ArrayList<>(1 + embeds.length);
         list.add(first);
         Collections.addAll(list, embeds);
-        return new WebhookMessage(null, null, null, list, false, null, AllowedMentions.all(), 0);
+        return new WebhookMessage(null, null, null, list, null, false, null, AllowedMentions.all(), 0);
     }
 
     /**
@@ -230,7 +233,7 @@ public class WebhookMessage {
         if (embeds.isEmpty())
             throw new IllegalArgumentException("Cannot build an empty message");
         embeds.forEach(Objects::requireNonNull);
-        return new WebhookMessage(null, null, null, new ArrayList<>(embeds), false, null, AllowedMentions.all(), 0);
+        return new WebhookMessage(null, null, null, new ArrayList<>(embeds), null, false, null, AllowedMentions.all(), 0);
     }
 
     /**
@@ -267,7 +270,7 @@ public class WebhookMessage {
             Object data = attachment.getValue();
             files[i++] = convertAttachment(name, data);
         }
-        return new WebhookMessage(null, null, null, null, false, files, AllowedMentions.all(), 0);
+        return new WebhookMessage(null, null, null, null, null, false, files, AllowedMentions.all(), 0);
     }
 
     /**
@@ -313,7 +316,7 @@ public class WebhookMessage {
                 throw new IllegalArgumentException("Provided arguments must be pairs for (String, Data). Expected String and found " + (name == null ? null : name.getClass().getName()));
             files[j] = convertAttachment((String) name, data);
         }
-        return new WebhookMessage(null, null, null, null, false, files, AllowedMentions.all(), 0);
+        return new WebhookMessage(null, null, null, null, null, false, files, AllowedMentions.all(), 0);
     }
 
     /**
@@ -343,6 +346,15 @@ public class WebhookMessage {
             payload.put("embeds", array);
         } else {
             payload.put("embeds", new JSONArray());
+        }
+        if (components != null && !components.isEmpty()) {
+            final JSONArray array = new JSONArray();
+            for (LayoutComponent component : components) {
+                array.put(component);
+            }
+            payload.put("components", array);
+        } else {
+            payload.put("components", new JSONArray());
         }
         if (avatarUrl != null)
             payload.put("avatar_url", avatarUrl);
