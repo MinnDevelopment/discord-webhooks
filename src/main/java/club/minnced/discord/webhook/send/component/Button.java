@@ -33,14 +33,14 @@ public class Button implements ActionComponent, SingleEmojiContainer<Button> {
 	public static final int MAX_BUTTONS = 5;
 
 	private final Style style;
-	private final String label, customID, url;
+	private final String label, customId, url;
 	private boolean disabled;
 	private PartialEmoji emoji;
 
-	private Button(@NotNull Style style, @NotNull String label, @Nullable String customID, @Nullable String url, boolean disabled) {
+	private Button(@NotNull Style style, @NotNull String label, @Nullable String customId, @Nullable String url, boolean disabled) {
 		this.style = style;
 		this.label = label;
-		this.customID = customID;
+		this.customId = customId;
 		this.url = url;
 		this.disabled = disabled;
 	}
@@ -48,7 +48,7 @@ public class Button implements ActionComponent, SingleEmojiContainer<Button> {
 	/**
 	 * A button with style set to {@link Style#PRIMARY}
 	 *
-	 * @param  customID
+	 * @param  customId
 	 *         Custom id used for handling of interactions
 	 * @param  label
 	 *         Label used to display text on a button
@@ -56,14 +56,14 @@ public class Button implements ActionComponent, SingleEmojiContainer<Button> {
 	 * @return A primary style button with the provided id and label
 	 */
 	@NotNull
-	public static Button primary(@NotNull String customID, @NotNull String label) {
-		return new Button(Style.PRIMARY, label, customID, null, false);
+	public static Button primary(@NotNull String customId, @NotNull String label) {
+		return new Button(Style.PRIMARY, label, customId, null, false);
 	}
 
 	/**
 	 * A button with style set to {@link Style#SUCCESS}
 	 *
-	 * @param  customID
+	 * @param  customId
 	 *         Custom id used for handling of interactions
 	 * @param  label
 	 *         Label used to display text on a button
@@ -71,14 +71,14 @@ public class Button implements ActionComponent, SingleEmojiContainer<Button> {
 	 * @return A primary style button with the provided id and label
 	 */
 	@NotNull
-	public static Button success(@NotNull String customID, @NotNull String label) {
-		return new Button(Style.SUCCESS, label, customID, null, false);
+	public static Button success(@NotNull String customId, @NotNull String label) {
+		return new Button(Style.SUCCESS, label, customId, null, false);
 	}
 
 	/**
 	 * A button with style set to {@link Style#SECONDARY}
 	 *
-	 * @param  customID
+	 * @param  customId
 	 *         Custom id used for handling of interactions
 	 * @param  label
 	 *         Label used to display text on a button
@@ -86,14 +86,14 @@ public class Button implements ActionComponent, SingleEmojiContainer<Button> {
 	 * @return A primary style button with the provided id and label
 	 */
 	@NotNull
-	public static Button secondary(@NotNull String customID, @NotNull String label) {
-		return new Button(Style.SECONDARY, label, customID, null, false);
+	public static Button secondary(@NotNull String customId, @NotNull String label) {
+		return new Button(Style.SECONDARY, label, customId, null, false);
 	}
 
 	/**
 	 * A button with style set to {@link Style#DANGER}
 	 *
-	 * @param  customID
+	 * @param  customId
 	 *         Custom id used for handling of interactions
 	 * @param  label
 	 *         Label used to display text on a button
@@ -101,8 +101,8 @@ public class Button implements ActionComponent, SingleEmojiContainer<Button> {
 	 * @return A primary style button with the provided id and label
 	 */
 	@NotNull
-	public static Button danger(@NotNull String customID, @NotNull String label) {
-		return new Button(Style.DANGER, label, customID, null, false);
+	public static Button danger(@NotNull String customId, @NotNull String label) {
+		return new Button(Style.DANGER, label, customId, null, false);
 	}
 
 	/**
@@ -141,8 +141,8 @@ public class Button implements ActionComponent, SingleEmojiContainer<Button> {
 	 */
 	@Nullable
 	@Override
-	public String getCustomID() {
-		return customID;
+	public String getCustomId() {
+		return customId;
 	}
 
 	/**
@@ -159,8 +159,8 @@ public class Button implements ActionComponent, SingleEmojiContainer<Button> {
 		json.put("type", this.getType());
 		json.put("style", this.style.value);
 		json.put("label", this.label);
-		if (this.customID != null)
-			json.put("custom_id", this.customID);
+		if (this.customId != null)
+			json.put("custom_id", this.customId);
 		if (this.url != null)
 			json.put("url", this.url);
 		json.put("disabled", this.disabled);

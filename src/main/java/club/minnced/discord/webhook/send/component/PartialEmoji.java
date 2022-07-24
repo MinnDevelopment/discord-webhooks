@@ -23,17 +23,17 @@ import org.json.JSONString;
 public class PartialEmoji implements JSONString {
 
 	private final String name;
-	private final long ID;
+	private final long id;
 	private final boolean animated;
 
-	private PartialEmoji(@NotNull String name, @NotNull String ID, boolean animated) {
-		this(name, Long.parseLong(ID), animated);
+	private PartialEmoji(@NotNull String name, @NotNull String id, boolean animated) {
+		this(name, Long.parseLong(id), animated);
 	}
 
 
-	private PartialEmoji(@NotNull String name, long ID, boolean animated) {
+	private PartialEmoji(@NotNull String name, long id, boolean animated) {
 		this.name = name;
-		this.ID = ID;
+		this.id = id;
 		this.animated = animated;
 	}
 
@@ -77,8 +77,8 @@ public class PartialEmoji implements JSONString {
 	/**
 	 * @return The snowflake id of the emoji
 	 */
-	public long getID() {
-		return ID;
+	public long getId() {
+		return id;
 	}
 
 	/**
@@ -91,7 +91,7 @@ public class PartialEmoji implements JSONString {
 	@Override
 	public String toJSONString() {
 		JSONObject json = new JSONObject();
-		json.put("id", this.ID);
+		json.put("id", this.id);
 		json.put("name", this.name);
 		json.put("animated", this.animated);
 		return json.toString();

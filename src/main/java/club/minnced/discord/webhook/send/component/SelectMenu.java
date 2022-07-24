@@ -33,15 +33,15 @@ import java.util.List;
 
 public class SelectMenu implements ActionComponent{
 
-	private final String customID;
+	private final String customId;
 	private final List<SelectOption> options;
 	private final String placeholder;
 	private final int minValues;
 	private final int maxValues;
 	private boolean disabled;
 
-	public SelectMenu(@NotNull String customID, @NotNull Collection<SelectOption> options, @Nullable String placeholder, int minValues, int maxValues, boolean disabled) {
-		this.customID = customID;
+	public SelectMenu(@NotNull String customId, @NotNull Collection<SelectOption> options, @Nullable String placeholder, int minValues, int maxValues, boolean disabled) {
+		this.customId = customId;
 		this.options = new ArrayList<>(options);
 		this.placeholder = placeholder;
 		this.minValues = minValues;
@@ -51,29 +51,29 @@ public class SelectMenu implements ActionComponent{
 
 	/**
 	 * A select menu with the defined id and options
-	 * @param customID the dev-defined id
+	 * @param customId the dev-defined id
 	 * @param options the options in the dropdown menu
 	 * @return A select menu with the defined id and options
 	 */
-	public static SelectMenu of(@NotNull String customID, @NotNull SelectOption... options) {
-		return new SelectMenu(customID, Arrays.asList(options), null, 1, 1, false);
+	public static SelectMenu of(@NotNull String customId, @NotNull SelectOption... options) {
+		return new SelectMenu(customId, Arrays.asList(options), null, 1, 1, false);
 	}
 
 	/**
 	 * A select menu with the defined id, placeholder and options
-	 * @param customID the dev-defined id
+	 * @param customId the dev-defined id
 	 * @param placeholder the placeholder text if nothing is selected
 	 * @param options the options in the dropdown menu
 	 * @return A select menu with the defined id, placeholder and options
 	 */
-	public static SelectMenu of(@NotNull String customID, @Nullable String placeholder, @NotNull SelectOption... options) {
-		return new SelectMenu(customID, Arrays.asList(options), placeholder, 1, 1, false);
+	public static SelectMenu of(@NotNull String customId, @Nullable String placeholder, @NotNull SelectOption... options) {
+		return new SelectMenu(customId, Arrays.asList(options), placeholder, 1, 1, false);
 	}
 
 	@Nullable
 	@Override
-	public String getCustomID() {
-		return customID;
+	public String getCustomId() {
+		return customId;
 	}
 
 	@NotNull
@@ -96,7 +96,7 @@ public class SelectMenu implements ActionComponent{
 	public String toJSONString() {
 		JSONObject json = new JSONObject();
 		json.put("type", this.getType());
-		json.put("custom_id", this.customID);
+		json.put("custom_id", this.customId);
 		json.put("options", this.options);
 		if (placeholder != null)
 			json.put("placeholder", this.placeholder);

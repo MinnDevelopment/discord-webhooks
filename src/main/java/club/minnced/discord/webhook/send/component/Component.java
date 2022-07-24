@@ -36,17 +36,17 @@ public interface Component extends JSONString {
 		BUTTON(2),
 		SELECT_MENU(3);
 
-		private final int ID;
+		private final int id;
 
-		Type(int ID) {
-			this.ID = ID;
+		Type(int id) {
+			this.id = id;
 		}
 
 		/**
 		 * @return Integer used by discord to determine the type of component
 		 */
-		public int getID() {
-			return this.ID;
+		public int getId() {
+			return this.id;
 		}
 
 	}
