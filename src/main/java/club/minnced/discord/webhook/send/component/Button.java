@@ -116,8 +116,8 @@ public class Button implements ActionComponent, SingleEmojiContainer<Button> {
 	 * @return A primary style button with the provided id and label
 	 */
 	@NotNull
-	public static Button link(@NotNull URL url, @NotNull String label) {
-		return new Button(Style.LINK, label, null, url.toString(), false);
+	public static Button link(@NotNull String url, @NotNull String label) {
+		return new Button(Style.LINK, label, null, url, false);
 	}
 
 	/**
