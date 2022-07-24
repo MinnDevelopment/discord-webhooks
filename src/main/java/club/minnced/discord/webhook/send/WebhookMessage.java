@@ -352,6 +352,7 @@ public class WebhookMessage {
             for (LayoutComponent component : components) {
                 array.put(component);
             }
+            System.out.println(array.toString());
             payload.put("components", array);
         } else {
             payload.put("components", new JSONArray());
