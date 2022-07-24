@@ -156,7 +156,7 @@ public class Button implements ActionComponent, SingleEmojiContainer<Button> {
 	@Override
 	public String toJSONString() {
 		JSONObject json = new JSONObject();
-		json.put("type", this.getType());
+		json.put("type", this.getType().getId());
 		json.put("style", this.style.value);
 		json.put("label", this.label);
 		if (this.customId != null)

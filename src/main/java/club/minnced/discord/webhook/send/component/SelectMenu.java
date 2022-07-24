@@ -95,7 +95,7 @@ public class SelectMenu implements ActionComponent{
 	@Override
 	public String toJSONString() {
 		JSONObject json = new JSONObject();
-		json.put("type", this.getType());
+		json.put("type", this.getType().getId());
 		json.put("custom_id", this.customId);
 		json.put("options", this.options);
 		if (placeholder != null)

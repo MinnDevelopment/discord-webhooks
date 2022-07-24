@@ -93,7 +93,7 @@ public class ActionRow implements LayoutComponent {
 	@Override
 	public String toJSONString() {
 		JSONObject json = new JSONObject();
-		json.put("type", this.getType());
+		json.put("type", this.getType().getId());
 		json.put("components", this.components);
 		return json.toString();
 	}
