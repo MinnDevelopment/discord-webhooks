@@ -51,13 +51,13 @@ public class WebhookEmbed implements JSONString {
     private final EmbedFooter footer;
     private final EmbedTitle title;
     private final EmbedAuthor author;
-    private final List<EmbedField> fields;
+    private final /*~~>*/List<EmbedField> fields;
 
     public WebhookEmbed(
             @Nullable OffsetDateTime timestamp, @Nullable Integer color,
             @Nullable String description, @Nullable String thumbnailUrl, @Nullable String imageUrl,
             @Nullable EmbedFooter footer, @Nullable EmbedTitle title, @Nullable EmbedAuthor author,
-            @NotNull List<EmbedField> fields) {
+            @NotNull /*~~>*/List<EmbedField> fields) {
         this.timestamp = timestamp;
         this.color = color;
         this.description = description;
@@ -66,7 +66,7 @@ public class WebhookEmbed implements JSONString {
         this.footer = footer;
         this.title = title;
         this.author = author;
-        this.fields = Collections.unmodifiableList(fields);
+        /*~~>*/this.fields = Collections.unmodifiableList(fields);
     }
 
     /**
@@ -166,7 +166,7 @@ public class WebhookEmbed implements JSONString {
      * @return List of fields for this embed
      */
     @NotNull
-    public List<EmbedField> getFields() {
+    public /*~~>*/List<EmbedField> getFields() {
         return fields;
     }
 

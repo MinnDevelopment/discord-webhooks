@@ -90,7 +90,7 @@ public class IOUtil { //TODO: test json
      */
     @Nullable
     public static InputStream getBody(@NotNull okhttp3.Response req) throws IOException {
-        List<String> encoding = req.headers("content-encoding");
+        /*~~>*/List<String> encoding = req.headers("content-encoding");
         ResponseBody body = req.body();
         if (!encoding.isEmpty() && body != null) {
             return new GZIPInputStream(body.byteStream());
@@ -125,16 +125,16 @@ public class IOUtil { //TODO: test json
      * @return A future that will be completed with the resulting list
      */
     @NotNull
-    public static <T> CompletableFuture<List<T>> flipFuture(@NotNull List<CompletableFuture<T>> list) {
-        List<T> result = new ArrayList<>(list.size());
-        List<CompletableFuture<Void>> updatedStages = new ArrayList<>(list.size());
+    public static <T> CompletableFuture</*~~>*/List<T>> flipFuture(@NotNull /*~~>*/List<CompletableFuture<T>> list) {
+        /*~~>*/List<T> result = new ArrayList<>(list.size());
+        /*~~>*/List<CompletableFuture<Void>> updatedStages = new ArrayList<>(list.size());
 
         list.stream()
             .map(it -> it.thenAccept(result::add))
             .forEach(updatedStages::add);
 
         CompletableFuture<Void> tracker = CompletableFuture.allOf(updatedStages.toArray(EMPTY_FUTURES));
-        CompletableFuture<List<T>> future = new CompletableFuture<>();
+        CompletableFuture</*~~>*/List<T>> future = new CompletableFuture<>();
 
         tracker.thenRun(() -> future.complete(result)).exceptionally((e) -> {
             future.completeExceptionally(e);

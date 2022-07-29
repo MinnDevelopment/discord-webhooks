@@ -221,7 +221,7 @@ public class EntityFactory {
         else
             timestamp = OffsetDateTime.parse(json.getString("timestamp"));
         final JSONArray fieldArray = json.optJSONArray("fields");
-        final List<WebhookEmbed.EmbedField> fields = new ArrayList<>();
+        final /*~~>*/List<WebhookEmbed.EmbedField> fields = new ArrayList<>();
         if (fieldArray != null) {
             for (int i = 0; i < fieldArray.length(); i++) {
                 JSONObject obj = fieldArray.getJSONObject(i);
@@ -254,10 +254,10 @@ public class EntityFactory {
         final JSONArray rolesArray = json.getJSONArray("mention_roles");
         final JSONArray embedArray = json.getJSONArray("embeds");
         final JSONArray attachmentArray = json.getJSONArray("attachments");
-        final List<ReadonlyUser> mentionedUsers = convertToList(usersArray, EntityFactory::makeUser);
-        final List<ReadonlyEmbed> embeds = convertToList(embedArray, EntityFactory::makeEmbed);
-        final List<ReadonlyAttachment> attachments = convertToList(attachmentArray, EntityFactory::makeAttachment);
-        final List<Long> mentionedRoles = new ArrayList<>();
+        final /*~~>*/List<ReadonlyUser> mentionedUsers = convertToList(usersArray, EntityFactory::makeUser);
+        final /*~~>*/List<ReadonlyEmbed> embeds = convertToList(embedArray, EntityFactory::makeEmbed);
+        final /*~~>*/List<ReadonlyAttachment> attachments = convertToList(attachmentArray, EntityFactory::makeAttachment);
+        final /*~~>*/List<Long> mentionedRoles = new ArrayList<>();
         for (int i = 0; i < rolesArray.length(); i++) {
             mentionedRoles.add(Long.parseUnsignedLong(rolesArray.getString(i)));
         }
@@ -268,10 +268,10 @@ public class EntityFactory {
                 mentionedUsers, mentionedRoles);
     }
 
-    private static <T> List<T> convertToList(JSONArray arr, Function<JSONObject, T> converter) {
+    private static <T> /*~~>*/List<T> convertToList(JSONArray arr, Function<JSONObject, T> converter) {
         if (arr == null)
             return Collections.emptyList();
-        final List<T> list = new ArrayList<>();
+        final /*~~>*/List<T> list = new ArrayList<>();
         for (int i = 0; i < arr.length(); i++) {
             JSONObject json = arr.getJSONObject(i);
             T out = converter.apply(json);

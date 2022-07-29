@@ -734,7 +734,7 @@ public class WebhookClient implements AutoCloseable {
             Objects.requireNonNull(messageId, "Message ID");
             endpoint += "/messages/" + messageId;
         }
-        List<String> query = new ArrayList<>(2);
+        /*~~>*/List<String> query = new ArrayList<>(2);
         if (parseMessage)
             query.add("wait=true");
         if (threadId != 0L)

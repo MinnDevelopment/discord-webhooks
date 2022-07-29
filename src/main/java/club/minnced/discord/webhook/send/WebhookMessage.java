@@ -45,20 +45,20 @@ public class WebhookMessage {
     public static final int MAX_EMBEDS = 10;
 
     protected final String username, avatarUrl, content;
-    protected final List<WebhookEmbed> embeds;
+    protected final /*~~>*/List<WebhookEmbed> embeds;
     protected final boolean isTTS;
     protected final MessageAttachment[] attachments;
     protected final AllowedMentions allowedMentions;
     protected final int flags;
 
     protected WebhookMessage(final String username, final String avatarUrl, final String content,
-                             final List<WebhookEmbed> embeds, final boolean isTTS,
+                             final /*~~>*/List<WebhookEmbed> embeds, final boolean isTTS,
                              final MessageAttachment[] files, final AllowedMentions allowedMentions,
                              final int flags) {
         this.username = username;
         this.avatarUrl = avatarUrl;
         this.content = content;
-        this.embeds = embeds;
+        /*~~>*/this.embeds = embeds;
         this.isTTS = isTTS;
         this.attachments = files;
         this.allowedMentions = allowedMentions;
@@ -101,7 +101,7 @@ public class WebhookMessage {
      * @return The embeds
      */
     @NotNull
-    public List<WebhookEmbed> getEmbeds() {
+    public /*~~>*/List<WebhookEmbed> getEmbeds() {
         return embeds == null ? Collections.emptyList() : embeds;
     }
 
@@ -202,7 +202,7 @@ public class WebhookMessage {
         for (WebhookEmbed e : embeds) {
             Objects.requireNonNull(e);
         }
-        List<WebhookEmbed> list = new ArrayList<>(1 + embeds.length);
+        /*~~>*/List<WebhookEmbed> list = new ArrayList<>(1 + embeds.length);
         list.add(first);
         Collections.addAll(list, embeds);
         return new WebhookMessage(null, null, null, list, false, null, AllowedMentions.all(), 0);

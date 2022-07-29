@@ -47,7 +47,7 @@ import java.util.stream.Collectors;
  */
 public class WebhookMessageBuilder {
     protected final StringBuilder content = new StringBuilder();
-    protected final List<WebhookEmbed> embeds = new LinkedList<>();
+    protected final /*~~>*/List<WebhookEmbed> embeds = new LinkedList<>();
     protected final MessageAttachment[] files = new MessageAttachment[WebhookMessage.MAX_FILES];
     protected AllowedMentions allowedMentions = AllowedMentions.all();
     protected String username, avatarUrl;
@@ -110,7 +110,7 @@ public class WebhookMessageBuilder {
      */
     @NotNull
     public WebhookMessageBuilder resetEmbeds() {
-        this.embeds.clear();
+        /*~~>*/this.embeds.clear();
         return this;
     }
 
@@ -149,11 +149,11 @@ public class WebhookMessageBuilder {
     @NotNull
     public WebhookMessageBuilder addEmbeds(@NotNull WebhookEmbed... embeds) {
         Objects.requireNonNull(embeds, "Embeds");
-        if (this.embeds.size() + embeds.length > WebhookMessage.MAX_EMBEDS)
+        if (/*~~>*/this.embeds.size() + embeds.length > WebhookMessage.MAX_EMBEDS)
             throw new IllegalStateException("Cannot add more than 10 embeds to a message");
         for (WebhookEmbed embed : embeds) {
             Objects.requireNonNull(embed, "Embed");
-            this.embeds.add(embed);
+            /*~~>*/this.embeds.add(embed);
         }
         return this;
     }
@@ -174,11 +174,11 @@ public class WebhookMessageBuilder {
     @NotNull
     public WebhookMessageBuilder addEmbeds(@NotNull Collection<? extends WebhookEmbed> embeds) {
         Objects.requireNonNull(embeds, "Embeds");
-        if (this.embeds.size() + embeds.size() > WebhookMessage.MAX_EMBEDS)
+        if (/*~~>*/this.embeds.size() + embeds.size() > WebhookMessage.MAX_EMBEDS)
             throw new IllegalStateException("Cannot add more than 10 embeds to a message");
         for (WebhookEmbed embed : embeds) {
             Objects.requireNonNull(embed, "Embed");
-            this.embeds.add(embed);
+            /*~~>*/this.embeds.add(embed);
         }
         return this;
     }
@@ -538,7 +538,7 @@ public class WebhookMessageBuilder {
             return builder;
 
         Possible<String> content = jsonPayload.content();
-        Possible<List<EmbedData>> embeds = jsonPayload.embeds();
+        Possible</*~~>*/List<EmbedData>> embeds = jsonPayload.embeds();
         Possible<Boolean> tts = jsonPayload.tts();
         Possible<AllowedMentionsData> allowedMentions = jsonPayload.allowedMentions();
 
@@ -563,7 +563,7 @@ public class WebhookMessageBuilder {
             if (!mentions.roles().isAbsent())
                 whitelist.withRoles(mentions.roles().get());
             if (!mentions.parse().isAbsent()) {
-                List<String> parse = mentions.parse().get();
+                /*~~>*/List<String> parse = mentions.parse().get();
                 whitelist.withParseRoles(parse.contains("roles"));
                 whitelist.withParseEveryone(parse.contains("everyone"));
                 whitelist.withParseUsers(parse.contains("users"));
@@ -595,7 +595,7 @@ public class WebhookMessageBuilder {
             return builder;
 
         Possible<Optional<String>> content = jsonPayload.content();
-        Possible<Optional<List<EmbedData>>> embeds = jsonPayload.embeds();
+        Possible<Optional</*~~>*/List<EmbedData>>> embeds = jsonPayload.embeds();
         Possible<Optional<AllowedMentionsData>> allowedMentions = jsonPayload.allowedMentions();
 
         if (!content.isAbsent() && content.get().isPresent())
@@ -617,7 +617,7 @@ public class WebhookMessageBuilder {
             if (!mentions.roles().isAbsent())
                 whitelist.withRoles(mentions.roles().get());
             if (!mentions.parse().isAbsent()) {
-                List<String> parse = mentions.parse().get();
+                /*~~>*/List<String> parse = mentions.parse().get();
                 whitelist.withParseRoles(parse.contains("roles"));
                 whitelist.withParseEveryone(parse.contains("everyone"));
                 whitelist.withParseUsers(parse.contains("users"));

@@ -108,7 +108,7 @@ public class MessageTest {
 
     @Test
     public void buildMessageWithEmbed() {
-        List<WebhookEmbed> embedList = Arrays.asList(
+        /*~~>*/List<WebhookEmbed> embedList = Arrays.asList(
                 new WebhookEmbedBuilder()
                         .setDescription("Hello World")
                         .build(),
@@ -152,7 +152,7 @@ public class MessageTest {
               .build();
         
         WebhookMessage webhookMessage = WebhookMessageBuilder.fromJDA(jdaMessage).build();
-        List<WebhookEmbed> webhookEmbeds = webhookMessage.getEmbeds();
+        /*~~>*/List<WebhookEmbed> webhookEmbeds = webhookMessage.getEmbeds();
         
         Assert.assertEquals(webhookEmbeds.size(), 1);
         
@@ -178,7 +178,7 @@ public class MessageTest {
         when(jdaMessage.getMentions()).thenReturn(mentions);
 
         WebhookMessage webhookMessage = WebhookMessageBuilder.fromJDA(jdaMessage).build();
-        List<WebhookEmbed> webhookEmbeds = webhookMessage.getEmbeds();
+        /*~~>*/List<WebhookEmbed> webhookEmbeds = webhookMessage.getEmbeds();
         
         Assert.assertEquals(webhookEmbeds.size(), 1);
         

@@ -38,7 +38,7 @@ public class ReadonlyEmbed extends WebhookEmbed {
     public ReadonlyEmbed(
             @Nullable OffsetDateTime timestamp, @Nullable Integer color, @Nullable String description,
             @Nullable EmbedImage thumbnail, @Nullable EmbedImage image, @Nullable EmbedFooter footer,
-            @Nullable EmbedTitle title, @Nullable EmbedAuthor author, @NotNull List<EmbedField> fields,
+            @Nullable EmbedTitle title, @Nullable EmbedAuthor author, @NotNull /*~~>*/List<EmbedField> fields,
             @Nullable EmbedProvider provider, @Nullable EmbedVideo video) {
         super(timestamp, color, description,
               thumbnail == null ? null : thumbnail.getUrl(),

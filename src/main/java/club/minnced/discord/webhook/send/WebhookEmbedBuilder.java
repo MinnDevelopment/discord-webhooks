@@ -40,7 +40,7 @@ import java.util.function.Consumer;
  * Builder for a {@link club.minnced.discord.webhook.send.WebhookEmbed} instance.
  */
 public class WebhookEmbedBuilder {
-    private final List<WebhookEmbed.EmbedField> fields;
+    private final /*~~>*/List<WebhookEmbed.EmbedField> fields;
 
     private OffsetDateTime timestamp;
     private Integer color;
@@ -332,7 +332,7 @@ public class WebhookEmbedBuilder {
         MessageEmbed.AuthorInfo author = embed.getAuthor();
         MessageEmbed.Footer footer = embed.getFooter();
         MessageEmbed.ImageInfo image = embed.getImage();
-        List<MessageEmbed.Field> fields = embed.getFields();
+        /*~~>*/List<MessageEmbed.Field> fields = embed.getFields();
         int color = embed.getColorRaw();
         OffsetDateTime timestamp = embed.getTimestamp();
 
@@ -447,7 +447,7 @@ public class WebhookEmbedBuilder {
         Possible<EmbedImageData> image = data.image();
         Possible<EmbedThumbnailData> thumbnail = data.thumbnail();
         Possible<EmbedAuthorData> author = data.author();
-        Possible<List<EmbedFieldData>> fields = data.fields();
+        Possible</*~~>*/List<EmbedFieldData>> fields = data.fields();
 
         if (!title.isAbsent())
             builder.setTitle(new WebhookEmbed.EmbedTitle(title.get(), url.toOptional().orElse(null)));

@@ -39,17 +39,17 @@ public class ReadonlyMessage implements JSONString {
     private final ReadonlyUser author;
 
     private final String content;
-    private final List<ReadonlyEmbed> embeds;
-    private final List<ReadonlyAttachment> attachments;
+    private final /*~~>*/List<ReadonlyEmbed> embeds;
+    private final /*~~>*/List<ReadonlyAttachment> attachments;
 
-    private final List<ReadonlyUser> mentionedUsers;
-    private final List<Long> mentionedRoles;
+    private final /*~~>*/List<ReadonlyUser> mentionedUsers;
+    private final /*~~>*/List<Long> mentionedRoles;
 
     public ReadonlyMessage(
             long id, long channelId, boolean mentionsEveryone, boolean tts, int flags,
             @NotNull ReadonlyUser author, @NotNull String content,
-            @NotNull List<ReadonlyEmbed> embeds, @NotNull List<ReadonlyAttachment> attachments,
-            @NotNull List<ReadonlyUser> mentionedUsers, @NotNull List<Long> mentionedRoles) {
+            @NotNull /*~~>*/List<ReadonlyEmbed> embeds, @NotNull /*~~>*/List<ReadonlyAttachment> attachments,
+            @NotNull /*~~>*/List<ReadonlyUser> mentionedUsers, @NotNull /*~~>*/List<Long> mentionedRoles) {
         this.id = id;
         this.channelId = channelId;
         this.mentionsEveryone = mentionsEveryone;
@@ -57,10 +57,10 @@ public class ReadonlyMessage implements JSONString {
         this.flags = flags;
         this.author = author;
         this.content = content;
-        this.embeds = embeds;
-        this.attachments = attachments;
-        this.mentionedUsers = mentionedUsers;
-        this.mentionedRoles = mentionedRoles;
+        /*~~>*/this.embeds = embeds;
+        /*~~>*/this.attachments = attachments;
+        /*~~>*/this.mentionedUsers = mentionedUsers;
+        /*~~>*/this.mentionedRoles = mentionedRoles;
     }
 
     /**
@@ -136,7 +136,7 @@ public class ReadonlyMessage implements JSONString {
      * @return List of embeds for this message
      */
     @NotNull
-    public List<ReadonlyEmbed> getEmbeds() {
+    public /*~~>*/List<ReadonlyEmbed> getEmbeds() {
         return embeds;
     }
 
@@ -148,7 +148,7 @@ public class ReadonlyMessage implements JSONString {
      * @return List of attachments
      */
     @NotNull
-    public List<ReadonlyAttachment> getAttachments() {
+    public /*~~>*/List<ReadonlyAttachment> getAttachments() {
         return attachments;
     }
 
@@ -160,7 +160,7 @@ public class ReadonlyMessage implements JSONString {
      * @return List of mentioned users.
      */
     @NotNull
-    public List<ReadonlyUser> getMentionedUsers() {
+    public /*~~>*/List<ReadonlyUser> getMentionedUsers() {
         return mentionedUsers;
     }
 
@@ -170,7 +170,7 @@ public class ReadonlyMessage implements JSONString {
      * @return List of ids for directly mentioned roles
      */
     @NotNull
-    public List<Long> getMentionedRoles() {
+    public /*~~>*/List<Long> getMentionedRoles() {
         return mentionedRoles;
     }
 
