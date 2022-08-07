@@ -27,7 +27,6 @@ import java.util.List;
  * @see club.minnced.discord.webhook.send.WebhookMessageBuilder#addComponents(LayoutComponent...)
  */
 public interface LayoutComponent extends Component {
-
 	/**
 	 * Maximum allowed layout components (action rows) in a message
 	 */
