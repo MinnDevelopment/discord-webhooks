@@ -26,7 +26,6 @@ import java.util.Collection;
 import java.util.List;
 
 public class ActionRow implements LayoutComponent {
-
 	private final List<ActionComponent> components;
 
 	private ActionRow(@NotNull List<ActionComponent> components) {
