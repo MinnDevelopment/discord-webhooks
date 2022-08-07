@@ -21,7 +21,6 @@ import org.json.JSONString;
 
 /**
  * Components are a framework for adding interactive elements to the messages your app sends.
- * They're accessible, customizable, and easy to use
  */
 
 public interface Component extends JSONString {
