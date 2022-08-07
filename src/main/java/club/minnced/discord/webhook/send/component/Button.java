@@ -27,7 +27,6 @@ import java.net.URL;
  *
  * @see LayoutComponent#addComponent(ActionComponent)
  */
-
 public class Button implements ActionComponent, SingleEmojiContainer<Button> {
 
 	public static final int MAX_BUTTONS = 5;
