@@ -107,7 +107,7 @@ public class ActionRow implements LayoutComponent {
 			else throw new IllegalArgumentException("Provided component not an instance of Button or SelectMenu");
 		}
 		if (hasSelectMenu && components.size() > 1)
-			throw new IllegalArgumentException("An action row containing a select menu cant have have more than 1 component");
+			throw new IllegalArgumentException("An action row containing a select menu cannot have have more than 1 component");
 		if (buttonCount > Button.MAX_BUTTONS)
 			throw new IllegalArgumentException("An action row cannot contain more than " + Button.MAX_BUTTONS + " buttons");
 	}
