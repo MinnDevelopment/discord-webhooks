@@ -55,6 +55,7 @@ public class SelectMenu implements ActionComponent{
 	 * @param options the options in the dropdown menu
 	 * @return A select menu with the defined id and options
 	 */
+        @NotNull
 	public static SelectMenu of(@NotNull String customId, @NotNull SelectOption... options) {
 		return new SelectMenu(customId, Arrays.asList(options), null, 1, 1, false);
 	}
