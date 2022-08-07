@@ -31,7 +31,8 @@ public interface ActionComponent extends Component {
 	 *
 	 * @return Custom id of the component, or null for link style buttons
 	 */
-	@Nullable String getCustomId();
+	@Nullable
+	String getCustomId();
 
 	/**
 	 * Changes the disabled status of button
