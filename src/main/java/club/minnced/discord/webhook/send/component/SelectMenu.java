@@ -106,5 +106,4 @@ public class SelectMenu implements ActionComponent{
 		json.put("disabled", this.disabled);
 		return json.toString();
 	}
-
 }
