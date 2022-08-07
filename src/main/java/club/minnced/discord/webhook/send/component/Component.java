@@ -26,9 +26,13 @@ import org.json.JSONString;
 public interface Component extends JSONString {
 
 	/**
+	 * Type enum representing the indivdual types of components.
+	 * <br>This includes both {@link LayoutComponent LayoutComponents} and {@link ActionComponent ActionComponents}.
+	 * 
 	 * @return The type of the component
 	 */
-	@NotNull Type getType();
+	@NotNull
+	Type getType();
 
 	enum Type {
 		ACTION_ROW(1),
