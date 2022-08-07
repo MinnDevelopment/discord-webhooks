@@ -30,7 +30,6 @@ public class PartialEmoji implements JSONString {
 		this(name, Long.parseLong(id), animated);
 	}
 
-
 	private PartialEmoji(@NotNull String name, long id, boolean animated) {
 		this.name = name;
 		this.id = id;
