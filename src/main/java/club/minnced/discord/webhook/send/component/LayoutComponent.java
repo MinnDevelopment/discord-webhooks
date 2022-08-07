@@ -21,7 +21,7 @@ import org.jetbrains.annotations.NotNull;
 import java.util.List;
 
 /**
- * A container for multiple {@link ActionComponent}
+ * Container for multiple {@link ActionComponent ActionComponents}.
  * A LayoutComponent cannot contain another LayoutComponent
  *
  * @see club.minnced.discord.webhook.send.WebhookMessageBuilder#addComponents(LayoutComponent...)
