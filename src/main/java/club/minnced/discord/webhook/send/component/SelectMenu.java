@@ -32,7 +32,6 @@ import java.util.List;
  */
 
 public class SelectMenu implements ActionComponent{
-
 	private final String customId;
 	private final List<SelectOption> options;
 	private final String placeholder;
