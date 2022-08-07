@@ -38,12 +38,17 @@ public class PartialEmoji implements JSONString {
 
 	/**
 	 * Emoji with only necessary features required by webhooks
+	 *
 	 * @param name
 	 *        the name of the emoji
 	 * @param id
 	 *        the id of the emoji
 	 * @param animated
 	 *        true if the emoji is animated
+	 *
+	 * @throws IllegalArgumentException
+	 *         If null is provided
+	 *
 	 * @return An instance of Partial emoji with the provided info
 	 */
 	@NotNull
