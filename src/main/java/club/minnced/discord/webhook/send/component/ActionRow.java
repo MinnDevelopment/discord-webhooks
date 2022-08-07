@@ -60,6 +60,7 @@ public class ActionRow implements LayoutComponent {
 	 *         If a select menu is added with any other component
 	 * @throws IllegalStateException
 	 *         If more than {@value LayoutComponent#MAX_COMPONENTS} buttons are added in the same action row
+	 *
 	 * @return An action row containing provided components, or null if the provided array is empty or null
 	 */
 	@Nullable
