@@ -53,5 +53,4 @@ public interface Component extends JSONString {
 		}
 
 	}
-
 }
