@@ -8,6 +8,7 @@ plugins {
     signing
 
     id("io.github.gradle-nexus.publish-plugin") version "1.1.0"
+    id("com.github.johnrengelman.shadow") version "7.1.2"
 }
 
 val major = "0"
