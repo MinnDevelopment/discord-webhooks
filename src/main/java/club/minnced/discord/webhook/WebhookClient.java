@@ -114,7 +114,7 @@ public class WebhookClient implements AutoCloseable {
      *         The error handler to use
      *
      * @throws NullPointerException
-     *         If null is povided
+     *         If null is provided
      */
     public static void setDefaultErrorHandler(@NotNull WebhookErrorHandler handler) {
         DEFAULT_ERROR_HANDLER = Objects.requireNonNull(handler, "Error Handler must not be null!");
