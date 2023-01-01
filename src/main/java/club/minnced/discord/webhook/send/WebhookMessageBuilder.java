@@ -17,7 +17,7 @@
 package club.minnced.discord.webhook.send;
 
 import club.minnced.discord.webhook.MessageFlags;
-import club.minnced.discord.webhook.send.component.LayoutComponent;
+import club.minnced.discord.webhook.send.component.ComponentLayout;
 import discord4j.core.spec.MessageCreateSpec;
 import discord4j.core.spec.MessageEditSpec;
 import discord4j.discordjson.json.AllowedMentionsData;
@@ -49,7 +49,7 @@ import java.util.stream.Collectors;
 public class WebhookMessageBuilder {
     protected final StringBuilder content = new StringBuilder();
     protected final List<WebhookEmbed> embeds = new LinkedList<>();
-    protected final List<LayoutComponent> components = new ArrayList<>();
+    protected final List<ComponentLayout> components = new ArrayList<>();
     protected final MessageAttachment[] files = new MessageAttachment[WebhookMessage.MAX_FILES];
     protected AllowedMentions allowedMentions = AllowedMentions.all();
     protected String username, avatarUrl;
@@ -63,7 +63,7 @@ public class WebhookMessageBuilder {
      * @return True, if this builder is empty
      */
     public boolean isEmpty() {
-        return content.length() == 0 && embeds.isEmpty() && getFileAmount() == 0;
+        return content.length() == 0 && embeds.isEmpty() && getFileAmount() == 0 && components.isEmpty();
     }
 
     /**
@@ -186,24 +186,25 @@ public class WebhookMessageBuilder {
     }
 
     /**
-     * Adds the provided embeds to the builder
+     * Adds the provided components to the builder
+     * <br>Note that most components are only usable by interactions.
      *
-     * @param components
+     * @param  components
      *         The layout components to add
-     *
-     * @return This builder for chaining convenience
      *
      * @throws java.lang.NullPointerException
      *         If provided with null
      * @throws java.lang.IllegalStateException
-     *         If more than {@value LayoutComponent#MAX_COMPONENTS} are added
+     *         If more than {@value ComponentLayout#MAX_COMPONENTS} are added
+     *
+     * @return This builder for chaining convenience
      */
     @NotNull
-    public WebhookMessageBuilder addComponents(@NotNull LayoutComponent... components) {
+    public WebhookMessageBuilder addComponents(@NotNull ComponentLayout... components) {
         Objects.requireNonNull(components, "Components");
-        if (this.components.size() + components.length > LayoutComponent.MAX_COMPONENTS)
-            throw new IllegalStateException("Cannot have more than " + LayoutComponent.MAX_COMPONENTS + " component layouts in a message");
-        for (LayoutComponent component : components) {
+        if (this.components.size() + components.length > ComponentLayout.MAX_COMPONENTS)
+            throw new IllegalStateException("Cannot have more than " + ComponentLayout.MAX_COMPONENTS + " component layouts in a message");
+        for (ComponentLayout component : components) {
             Objects.requireNonNull(component, "Component");
             this.components.add(component);
         }
@@ -211,29 +212,31 @@ public class WebhookMessageBuilder {
     }
 
     /**
-     * Adds the provided embeds to the builder
+     * Adds the provided components to the builder
+     * <br>Note that most components are only usable by interactions.
      *
-     * @param components
+     * @param  components
      *         The layout components to add
-     *
-     * @return This builder for chaining convenience
      *
      * @throws java.lang.NullPointerException
      *         If provided with null
      * @throws java.lang.IllegalStateException
-     *         If more than {@value LayoutComponent#MAX_COMPONENTS} are added
+     *         If more than {@value ComponentLayout#MAX_COMPONENTS} are added
+     *
+     * @return This builder for chaining convenience
      */
     @NotNull
-    public WebhookMessageBuilder addComponents(@NotNull Collection<? extends LayoutComponent> components) {
+    public WebhookMessageBuilder addComponents(@NotNull Collection<? extends ComponentLayout> components) {
         Objects.requireNonNull(components, "Components");
-        if (this.components.size() + components.size() > LayoutComponent.MAX_COMPONENTS)
-            throw new IllegalStateException("Cannot have more than " + LayoutComponent.MAX_COMPONENTS + " component layouts in a message");
-        for (LayoutComponent component : components) {
+        if (this.components.size() + components.size() > ComponentLayout.MAX_COMPONENTS)
+            throw new IllegalStateException("Cannot have more than " + ComponentLayout.MAX_COMPONENTS + " component layouts in a message");
+        for (ComponentLayout component : components) {
             Objects.requireNonNull(component, "Component");
             this.components.add(component);
         }
         return this;
     }
+
     /**
      * Configures the content for this builder
      *

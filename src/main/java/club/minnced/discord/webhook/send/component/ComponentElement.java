@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2020 Florian Spie�
+ * Copyright 2018-2020 Florian Spieß
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,22 +16,8 @@
 
 package club.minnced.discord.webhook.send.component;
 
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
-
-public interface SingleEmojiContainer <T>{
-
-	/**
-	 * Adds an emoji to the container. Replaces it if it already exists
-	 * @param emoji
-	 *        the emoji to add
-	 * @return this instance of container for chaining
-	 */
-	@NotNull T withEmoji(@NotNull PartialEmoji emoji);
-
-	/**
-	 * @return The emoji inside the container, null if there is no emoji
-	 */
-	@Nullable PartialEmoji getEmoji();
-
+/**
+ * Components which can be added to {@link ComponentLayout ComponentLayouts}
+ */
+public interface ComponentElement extends Component {
 }

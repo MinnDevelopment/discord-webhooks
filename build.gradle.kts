@@ -45,7 +45,7 @@ repositories {
 val versions = mapOf(
     "slf4j" to "1.7.32",
     "okhttp" to "4.10.0",
-    "json" to "20210307",
+    "json" to "20220924",
     "jda" to "5.0.0-alpha.13",
     "discord4j" to "3.2.2",
     "javacord" to "3.4.0",

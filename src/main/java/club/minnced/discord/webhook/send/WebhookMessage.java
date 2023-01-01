@@ -19,7 +19,7 @@ package club.minnced.discord.webhook.send;
 import club.minnced.discord.webhook.IOUtil;
 import club.minnced.discord.webhook.MessageFlags;
 import club.minnced.discord.webhook.receive.ReadonlyMessage;
-import club.minnced.discord.webhook.send.component.LayoutComponent;
+import club.minnced.discord.webhook.send.component.ComponentLayout;
 import okhttp3.MultipartBody;
 import okhttp3.RequestBody;
 import org.jetbrains.annotations.NotNull;
@@ -47,14 +47,14 @@ public class WebhookMessage {
 
     protected final String username, avatarUrl, content;
     protected final List<WebhookEmbed> embeds;
-    protected final List<LayoutComponent> components;
+    protected final List<ComponentLayout> components;
     protected final boolean isTTS;
     protected final MessageAttachment[] attachments;
     protected final AllowedMentions allowedMentions;
     protected final int flags;
 
     protected WebhookMessage(final String username, final String avatarUrl, final String content,
-                             final List<WebhookEmbed> embeds, List<LayoutComponent> components, final boolean isTTS,
+                             final List<WebhookEmbed> embeds, List<ComponentLayout> components, final boolean isTTS,
                              final MessageAttachment[] files, final AllowedMentions allowedMentions,
                              final int flags) {
         this.username = username;
@@ -282,20 +282,20 @@ public class WebhookMessage {
      * to the first 2 arguments.
      * <br>The allowed data types are {@code byte[] | InputStream | File}
      *
-     * @param name1
+     * @param  name1
      *         The alternative name of the first attachment
-     * @param data1
+     * @param  data1
      *         The first attachment, must be of type {@code byte[] | InputStream | File}
-     * @param attachments
+     * @param  attachments
      *         Optional additional attachments to add, pairs of {@literal String->Data}
-     *
-     * @return A WebhookMessage for the attachments
      *
      * @throws java.lang.NullPointerException
      *         If provided with null
      * @throws java.lang.IllegalArgumentException
      *         If no attachments are provided or more than {@value #MAX_FILES}
      *         or the additional arguments are not an even count or an invalid format
+     *
+     * @return A WebhookMessage for the attachments
      */
     @NotNull // forcing first pair as we expect at least one entry (Effective Java 3rd. Edition - Item 53)
     public static WebhookMessage files(@NotNull String name1, @NotNull Object data1, @NotNull Object... attachments) {
@@ -349,7 +349,7 @@ public class WebhookMessage {
         }
         if (components != null && !components.isEmpty()) {
             final JSONArray array = new JSONArray();
-            for (LayoutComponent component : components) {
+            for (ComponentLayout component : components) {
                 array.put(component);
             }
             payload.put("components", array);

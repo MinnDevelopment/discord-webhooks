@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2020 Florian Spie�
+ * Copyright 2018-2020 Florian Spieß
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,38 +16,42 @@
 
 package club.minnced.discord.webhook.send.component;
 
+import club.minnced.discord.webhook.send.component.layout.ActionRow;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Collection;
 import java.util.List;
 
 /**
  * Container for multiple {@link ActionComponent ActionComponents}.
  * A LayoutComponent cannot contain another LayoutComponent
  *
- * @see club.minnced.discord.webhook.send.WebhookMessageBuilder#addComponents(LayoutComponent...)
+ * @see club.minnced.discord.webhook.send.WebhookMessageBuilder#addComponents(ComponentLayout...)
  */
-public interface LayoutComponent extends Component {
+public interface ComponentLayout extends Component {
 	/**
-	 * Maximum allowed layout components (action rows) in a message
+	 * Maximum allowed component layouts (e.g. {@link ActionRow ActionRows}) in a message
 	 */
 	int MAX_COMPONENTS = 5;
 
 	/**
+	 * The currently applied {@link ActionComponent ActionComponents}.
+	 *
 	 * @return The action components (buttons and select menus)
 	 */
-	@NotNull List<ActionComponent> getComponents();
+	@NotNull List<ComponentElement> getComponents();
 
 	/**
 	 * Creates an action row with the given list of components
 	 *
-	 * @param  component
+	 * @param  components
 	 *         The component to be added to the layout component
-	 * @throws IllegalStateException
-	 *         If a select menu is added with any other component in total
-	 * @throws IllegalStateException
-	 *         If more than {@value LayoutComponent#MAX_COMPONENTS} buttons are added in the same action row in total
+	 *
+	 * @throws java.lang.NullPointerException
+	 * 	       If null is provided
+	 *
 	 * @return This instance of action component for chaining
 	 */
-	@NotNull LayoutComponent addComponent(ActionComponent component);
+	@NotNull ComponentLayout addComponents(@NotNull Collection<? extends ComponentElement> components);
 
 }
