@@ -234,6 +234,7 @@ public class MessageTest {
                 .put("avatar_url", "linkToImage")
                 .put("tts", true)
                 .put("embeds", new JSONArray().put(new JSONObject().put("description", "embed")))
+                .put("components", new JSONArray())
                 .put("allowed_mentions", allowedMentions)
                 .put("flags", 0)
                 .toMap();
@@ -301,6 +302,7 @@ public class MessageTest {
                         .put("allowed_mentions", allowedMentions)
                         .put("content", "CONTENT!")
                         .put("embeds", new JSONArray())
+                        .put("components", new JSONArray())
                         .put("tts", false)
                         .put("flags", 0)
                         .toMap(),
