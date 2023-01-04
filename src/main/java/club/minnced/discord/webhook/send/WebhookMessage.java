@@ -20,6 +20,7 @@ import club.minnced.discord.webhook.IOUtil;
 import club.minnced.discord.webhook.MessageFlags;
 import club.minnced.discord.webhook.receive.ReadonlyMessage;
 import club.minnced.discord.webhook.send.component.ComponentLayout;
+import club.minnced.discord.webhook.send.component.layout.ActionRow;
 import okhttp3.MultipartBody;
 import okhttp3.RequestBody;
 import org.jetbrains.annotations.NotNull;
@@ -44,6 +45,10 @@ public class WebhookMessage {
     public static final int MAX_FILES = 10;
     /** Maximum amount of embeds a single message can hold (10) */
     public static final int MAX_EMBEDS = 10;
+    /**
+     * Maximum allowed component layouts (e.g. {@link club.minnced.discord.webhook.send.component.layout.ActionRow ActionRows}) in a message
+     */
+    public static final int MAX_COMPONENTS = 5;
 
     protected final String username, avatarUrl, content;
     protected final List<WebhookEmbed> embeds;
@@ -234,6 +239,61 @@ public class WebhookMessage {
             throw new IllegalArgumentException("Cannot build an empty message");
         embeds.forEach(Objects::requireNonNull);
         return new WebhookMessage(null, null, null, new ArrayList<>(embeds), null, false, null, AllowedMentions.all(), 0);
+    }
+
+    /**
+     * Creates a WebhookMessage from
+     * the provided components. A message can hold up to {@value #MAX_COMPONENTS} components.
+     *
+     * @param  first
+     *         The first component layout (see {@link ActionRow})
+     * @param  components
+     *         Additional components for the message (see {@link ActionRow})
+     *
+     * @throws java.lang.NullPointerException
+     *         If provided with null
+     * @throws java.lang.IllegalArgumentException
+     *         If more than {@value WebhookMessage#MAX_COMPONENTS} are provided
+     *
+     * @return A WebhookMessage for the components
+     */
+    @NotNull
+    public static WebhookMessage components(@NotNull ComponentLayout first, @NotNull ComponentLayout... components) {
+        Objects.requireNonNull(components, "Components");
+        if (components.length >= WebhookMessage.MAX_COMPONENTS)
+            throw new IllegalArgumentException("Cannot add more than 5 components to a message");
+        for (ComponentLayout e : components) {
+            Objects.requireNonNull(e);
+        }
+        List<ComponentLayout> list = new ArrayList<>(1 + components.length);
+        list.add(first);
+        Collections.addAll(list, components);
+        return new WebhookMessage(null, null, null, null, list, false, null, AllowedMentions.all(), 0);
+    }
+
+    /**
+     * Creates a WebhookMessage from
+     * the provided components. A message can hold up to {@value #MAX_COMPONENTS} components.
+     *
+     * @param  components
+     *         Components for the message (see {@link ActionRow})
+     *
+     * @throws java.lang.NullPointerException
+     *         If provided with null
+     * @throws java.lang.IllegalArgumentException
+     *         If more than {@value WebhookMessage#MAX_COMPONENTS} are provided
+     *
+     * @return A WebhookMessage for the components
+     */
+    @NotNull
+    public static WebhookMessage components(@NotNull Collection<? extends ComponentLayout> components) {
+        Objects.requireNonNull(components, "Components");
+        if (components.size() > WebhookMessage.MAX_COMPONENTS)
+            throw new IllegalArgumentException("Cannot add more than 5 component layouts to a message");
+        if (components.isEmpty())
+            throw new IllegalArgumentException("Cannot build an empty message");
+        components.forEach(Objects::requireNonNull);
+        return new WebhookMessage(null, null, null, null, new ArrayList<>(components), false, null, AllowedMentions.all(), 0);
     }
 
     /**

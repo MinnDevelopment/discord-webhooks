@@ -195,15 +195,15 @@ public class WebhookMessageBuilder {
      * @throws java.lang.NullPointerException
      *         If provided with null
      * @throws java.lang.IllegalStateException
-     *         If more than {@value ComponentLayout#MAX_COMPONENTS} are added
+     *         If more than {@value WebhookMessage#MAX_COMPONENTS} are added
      *
      * @return This builder for chaining convenience
      */
     @NotNull
     public WebhookMessageBuilder addComponents(@NotNull ComponentLayout... components) {
         Objects.requireNonNull(components, "Components");
-        if (this.components.size() + components.length > ComponentLayout.MAX_COMPONENTS)
-            throw new IllegalStateException("Cannot have more than " + ComponentLayout.MAX_COMPONENTS + " component layouts in a message");
+        if (this.components.size() + components.length > WebhookMessage.MAX_COMPONENTS)
+            throw new IllegalStateException("Cannot have more than " + WebhookMessage.MAX_COMPONENTS + " component layouts in a message");
         for (ComponentLayout component : components) {
             Objects.requireNonNull(component, "Component");
             this.components.add(component);
@@ -221,15 +221,15 @@ public class WebhookMessageBuilder {
      * @throws java.lang.NullPointerException
      *         If provided with null
      * @throws java.lang.IllegalStateException
-     *         If more than {@value ComponentLayout#MAX_COMPONENTS} are added
+     *         If more than {@value WebhookMessage#MAX_COMPONENTS} are added
      *
      * @return This builder for chaining convenience
      */
     @NotNull
     public WebhookMessageBuilder addComponents(@NotNull Collection<? extends ComponentLayout> components) {
         Objects.requireNonNull(components, "Components");
-        if (this.components.size() + components.size() > ComponentLayout.MAX_COMPONENTS)
-            throw new IllegalStateException("Cannot have more than " + ComponentLayout.MAX_COMPONENTS + " component layouts in a message");
+        if (this.components.size() + components.size() > WebhookMessage.MAX_COMPONENTS)
+            throw new IllegalStateException("Cannot have more than " + WebhookMessage.MAX_COMPONENTS + " component layouts in a message");
         for (ComponentLayout component : components) {
             Objects.requireNonNull(component, "Component");
             this.components.add(component);

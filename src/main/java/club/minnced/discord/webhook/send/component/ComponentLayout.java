@@ -16,7 +16,6 @@
 
 package club.minnced.discord.webhook.send.component;
 
-import club.minnced.discord.webhook.send.component.layout.ActionRow;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Collection;
@@ -29,11 +28,6 @@ import java.util.List;
  * @see club.minnced.discord.webhook.send.WebhookMessageBuilder#addComponents(ComponentLayout...)
  */
 public interface ComponentLayout extends Component {
-	/**
-	 * Maximum allowed component layouts (e.g. {@link ActionRow ActionRows}) in a message
-	 */
-	int MAX_COMPONENTS = 5;
-
 	/**
 	 * The currently applied {@link ActionComponent ActionComponents}.
 	 *
