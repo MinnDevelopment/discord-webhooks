@@ -150,7 +150,7 @@ public class JavacordWebhookClient extends WebhookClient {
      */
     @NotNull
     public CompletableFuture<ReadonlyMessage> send(@NotNull org.javacord.api.entity.message.embed.Embed embed) {
-        return send(WebhookEmbedBuilder.fromJavacord(embed).build());
+        return sendEmbeds(WebhookEmbedBuilder.fromJavacord(embed).build());
     }
 
     /**

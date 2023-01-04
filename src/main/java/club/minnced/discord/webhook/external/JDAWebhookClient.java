@@ -151,7 +151,7 @@ public class JDAWebhookClient extends WebhookClient {
      */
     @NotNull
     public CompletableFuture<ReadonlyMessage> send(@NotNull net.dv8tion.jda.api.entities.MessageEmbed embed) {
-        return send(WebhookEmbedBuilder.fromJDA(embed).build());
+        return sendEmbeds(WebhookEmbedBuilder.fromJDA(embed).build());
     }
 
     /**

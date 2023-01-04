@@ -462,7 +462,7 @@ public class WebhookCluster implements AutoCloseable { //TODO: tests
     @NotNull
     public List<CompletableFuture<ReadonlyMessage>> broadcast(@NotNull Collection<WebhookEmbed> embeds) {
         return webhooks.stream()
-                .map(w -> w.sendComponents(embeds))
+                .map(w -> w.sendEmbeds(embeds))
                 .collect(Collectors.toList());
     }
 
