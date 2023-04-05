@@ -25,24 +25,30 @@ import club.minnced.discord.webhook.send.WebhookMessage;
 import club.minnced.discord.webhook.send.WebhookMessageBuilder;
 import club.minnced.discord.webhook.util.ThreadPools;
 import club.minnced.discord.webhook.util.WebhookErrorHandler;
+
 import okhttp3.OkHttpClient;
 import okhttp3.RequestBody;
 import okhttp3.Response;
+
+import org.checkerframework.checker.index.qual.NonNegative;
+
 import org.jetbrains.annotations.Async;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+
 import org.json.JSONException;
 import org.json.JSONObject;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.annotation.Nonnegative;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.*;
 import java.util.concurrent.*;
 import java.util.regex.Matcher;
+
 
 /**
  * Client used to execute webhooks. All send methods are async and return a {@link java.util.concurrent.CompletableFuture}
@@ -249,7 +255,7 @@ public class WebhookClient implements AutoCloseable {
      */
     @NotNull
     @SuppressWarnings("ConstantConditions") // we still need a runtime check for negative numbers
-    public WebhookClient setTimeout(@Nonnegative long millis) {
+    public WebhookClient setTimeout(@NonNegative long millis) {
         if (millis < 0)
             throw new IllegalArgumentException("Cannot set a negative timeout");
         this.defaultTimeout = millis;

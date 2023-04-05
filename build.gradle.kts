@@ -47,14 +47,14 @@ val versions = mapOf(
     "slf4j" to "1.7.32",
     "okhttp" to "4.10.0",
     "json" to "20210307",
-    "jda" to "5.0.0-alpha.13",
+    "jda" to "5.0.0-beta.6",
     "discord4j" to "3.2.2",
     "javacord" to "3.4.0",
     "junit" to "4.13.2",
     "mockito" to "3.12.4", // must be compatible with powermock
     "powermock" to "2.0.9",
     "logback" to "1.2.3",
-    "annotations" to "22.0.0"
+    "annotations" to "24.0.1"
 )
 
 dependencies {
