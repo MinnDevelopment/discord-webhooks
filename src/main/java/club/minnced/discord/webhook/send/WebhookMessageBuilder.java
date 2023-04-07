@@ -434,10 +434,10 @@ public class WebhookMessageBuilder {
     }
 
     /**
-     * Converts a JDA {@link Message} into a compatible WebhookMessageBuilder.
+     * Converts a JDA {@link MessageCreateData} into a compatible WebhookMessageBuilder.
      *
      * @param  message
-     *         The message
+     *         The {@link MessageCreateData} to convert
      *
      * @return WebhookMessageBuilder with the converted data
      */
