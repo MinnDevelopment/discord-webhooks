@@ -54,7 +54,8 @@ val versions = mapOf(
     "mockito" to "3.12.4", // must be compatible with powermock
     "powermock" to "2.0.9",
     "logback" to "1.2.3",
-    "annotations" to "24.0.1"
+    "annotations" to "22.0.0",
+    "jsr305" to "3.0.2"
 )
 
 dependencies {
@@ -62,6 +63,7 @@ dependencies {
     api("com.squareup.okhttp3:okhttp:${versions["okhttp"]}")
     api("org.json:json:${versions["json"]}")
     implementation("org.jetbrains:annotations:${versions["annotations"]}")
+    compileOnly("com.google.code.findbugs:jsr305:${versions["jsr305"]}")
 
     compileOnly("net.dv8tion:JDA:${versions["jda"]}")
     compileOnly("com.discord4j:discord4j-core:${versions["discord4j"]}")

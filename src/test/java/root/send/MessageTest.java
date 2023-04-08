@@ -21,7 +21,6 @@ import club.minnced.discord.webhook.send.WebhookEmbed;
 import club.minnced.discord.webhook.send.WebhookEmbedBuilder;
 import club.minnced.discord.webhook.send.WebhookMessage;
 import club.minnced.discord.webhook.send.WebhookMessageBuilder;
-
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Mentions;
 import net.dv8tion.jda.api.entities.Message;
@@ -29,17 +28,13 @@ import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.utils.messages.MessageCreateBuilder;
 import net.dv8tion.jda.api.utils.messages.MessageCreateData;
 import net.dv8tion.jda.internal.entities.ReceivedMessage;
-
 import okhttp3.RequestBody;
-
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-
 import root.IOTestUtil;
-
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -52,7 +47,6 @@ import java.util.Map;
 import static org.mockito.Answers.RETURNS_DEFAULTS;
 import static org.mockito.Mockito.CALLS_REAL_METHODS;
 import static org.powermock.api.mockito.PowerMockito.*;
-
 
 public class MessageTest {
     private WebhookMessageBuilder builder;
@@ -168,7 +162,8 @@ public class MessageTest {
         Assert.assertEquals(webhookEmbed.getTitle().getText(), "myEmbed");
     }
 
-    /*TODO: This is broken
+    /* ReceivedMessage runs checkIntent when getContentRaw and getEmbeds are called
+     * This would require the test to have a JDA instance, as checkIntent needs it
     @Test
     public void buildMessageWithReceivedMessage() {
         MessageEmbed jdaEmbed = new EmbedBuilder()

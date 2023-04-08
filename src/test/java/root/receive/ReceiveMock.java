@@ -35,7 +35,6 @@ import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import root.IOTestUtil;
-
 import java.util.Collections;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
@@ -75,36 +74,36 @@ public class ReceiveMock {
     @Test
     public void testPassedEntity() throws InterruptedException, ExecutionException, TimeoutException {
         ReadonlyMessage mockMessage = setupFakeResponse(ReceiveMessageTest.getMockMessageJson().toString(), false);
-        /*TODO: Broken, ReadonlyMessage readMessage = client.send("dummy").get(5, TimeUnit.SECONDS);
+        ReadonlyMessage readMessage = client.send("dummy").get(5, TimeUnit.SECONDS);
 
         assertNotNull("Returned message is null", readMessage);
-        assertSame("Returned message not same as result of EntityFactory.makeMessage", mockMessage, readMessage);*/
+        assertSame("Returned message not same as result of EntityFactory.makeMessage", mockMessage, readMessage);
     }
 
     @Test
     public void testNonGzip() throws InterruptedException, ExecutionException, TimeoutException {
         JSONObject json = ReceiveMessageTest.getMockMessageJson();
         setupFakeResponse(json.toString(), false);
-        /*TODO: Broken, client.send("dummy").get(5, TimeUnit.SECONDS);
+        client.send("dummy").get(5, TimeUnit.SECONDS);
 
         PowerMockito.verifyStatic(EntityFactory.class, only());
         EntityFactory.makeMessage(any());
         JSONObject value = jsonCaptor.getValue();
         assertNotNull("Null json passed to EntityFactory", value);
-        assertEquals("Json passed to EntityFactory is not 1:1 http response", json.toMap(), value.toMap());*/
+        assertEquals("Json passed to EntityFactory is not 1:1 http response", json.toMap(), value.toMap());
     }
 
     @Test
     public void testGzip() throws InterruptedException, ExecutionException, TimeoutException {
         JSONObject json = ReceiveMessageTest.getMockMessageJson();
         setupFakeResponse(json.toString(), true);
-        /*TODO: Broken, client.send("dummy").get(5, TimeUnit.SECONDS);
+        client.send("dummy").get(5, TimeUnit.SECONDS);
 
         PowerMockito.verifyStatic(EntityFactory.class, only());
         EntityFactory.makeMessage(any());
         JSONObject value = jsonCaptor.getValue();
         assertNotNull("Null json passed to EntityFactory", value);
-        assertEquals("Json passed to EntityFactory is not 1:1 http response", json.toMap(), value.toMap());*/
+        assertEquals("Json passed to EntityFactory is not 1:1 http response", json.toMap(), value.toMap());
     }
 
     private ReadonlyMessage setupFakeResponse(String json, boolean useGzip) {

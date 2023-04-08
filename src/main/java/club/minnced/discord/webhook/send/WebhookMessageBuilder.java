@@ -17,30 +17,22 @@
 package club.minnced.discord.webhook.send;
 
 import club.minnced.discord.webhook.MessageFlags;
-
 import discord4j.core.spec.MessageCreateSpec;
 import discord4j.core.spec.MessageEditSpec;
 import discord4j.discordjson.json.*;
 import discord4j.discordjson.possible.Possible;
 import discord4j.rest.util.MultipartRequest;
-
 import net.dv8tion.jda.api.entities.Message;
-import net.dv8tion.jda.api.utils.FileUpload;
 import net.dv8tion.jda.api.utils.messages.MessageCreateBuilder;
-import net.dv8tion.jda.api.utils.messages.MessageCreateData;
-
 import org.javacord.api.entity.DiscordEntity;
-
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.*;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
-
 
 /**
  * Constructs a {@link club.minnced.discord.webhook.send.WebhookMessage}
@@ -425,19 +417,14 @@ public class WebhookMessageBuilder {
      */
     @NotNull
     public static WebhookMessageBuilder fromJDA(@NotNull net.dv8tion.jda.api.entities.Message message) {
-        return fromJDA(new MessageCreateBuilder()
-                .applyMessage(message)
-                .setFiles(message.getAttachments().stream()
-                        .map(attachment -> FileUpload.fromData(attachment.getProxy().download().join(), attachment.getFileName()))
-                        .collect(Collectors.toList()))
-                .build());
+        return fromJDA(MessageCreateBuilder.fromMessage(message).build());
     }
 
     /**
-     * Converts a JDA {@link MessageCreateData} into a compatible WebhookMessageBuilder.
+     * Converts a JDA {@link net.dv8tion.jda.api.utils.messages.MessageCreateData MessageCreateData} into a compatible WebhookMessageBuilder.
      *
      * @param  message
-     *         The {@link MessageCreateData} to convert
+     *         The {@link net.dv8tion.jda.api.utils.messages.MessageCreateData MessageCreateData} to convert
      *
      * @return WebhookMessageBuilder with the converted data
      */
