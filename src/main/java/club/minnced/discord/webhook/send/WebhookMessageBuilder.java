@@ -99,6 +99,9 @@ public class WebhookMessageBuilder {
      * Clears all embeds currently added this builder
      *
      * @return This builder for chaining convenience
+     *
+     * @throws NullPointerException
+     *         If provided null
      */
     @NotNull
     public WebhookMessageBuilder resetEmbeds() {
@@ -393,6 +396,9 @@ public class WebhookMessageBuilder {
      * from the current configurations.
      *
      * @return The resulting {@link club.minnced.discord.webhook.send.WebhookMessage}
+     *
+     * @throws NullPointerException
+     *         If provided null
      */
     @NotNull
     public WebhookMessage build() {
@@ -414,8 +420,11 @@ public class WebhookMessageBuilder {
      *         The message
      *
      * @return WebhookMessageBuilder with the converted data
+     *
+     * @deprecated Use {@link #fromJDA(net.dv8tion.jda.api.utils.messages.MessageCreateData)} instead
      */
     @NotNull
+    @Deprecated
     public static WebhookMessageBuilder fromJDA(@NotNull net.dv8tion.jda.api.entities.Message message) {
         return fromJDA(MessageCreateBuilder.fromMessage(message).build());
     }
