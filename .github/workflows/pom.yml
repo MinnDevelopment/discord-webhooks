@@ -17,7 +17,7 @@ jobs:
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
       - name: Generate pom.xml
-        uses: gradle/gradle-build-action@v2
+        uses: gradle/gradle-build-action@v2.4.2
         with:
           arguments: generatePomFileForReleasePublication
       - name: Move pom file to github folder
