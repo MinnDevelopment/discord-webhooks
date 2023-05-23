@@ -17,6 +17,7 @@
 package club.minnced.discord.webhook.send;
 
 import club.minnced.discord.webhook.MessageFlags;
+import club.minnced.discord.webhook.send.component.ComponentLayout;
 import discord4j.core.spec.MessageCreateSpec;
 import discord4j.core.spec.MessageEditSpec;
 import discord4j.discordjson.json.AllowedMentionsData;
@@ -48,6 +49,7 @@ import java.util.stream.Collectors;
 public class WebhookMessageBuilder {
     protected final StringBuilder content = new StringBuilder();
     protected final List<WebhookEmbed> embeds = new LinkedList<>();
+    protected final List<ComponentLayout> components = new ArrayList<>();
     protected final MessageAttachment[] files = new MessageAttachment[WebhookMessage.MAX_FILES];
     protected AllowedMentions allowedMentions = AllowedMentions.all();
     protected String username, avatarUrl;
@@ -61,7 +63,7 @@ public class WebhookMessageBuilder {
      * @return True, if this builder is empty
      */
     public boolean isEmpty() {
-        return content.length() == 0 && embeds.isEmpty() && getFileAmount() == 0;
+        return content.length() == 0 && embeds.isEmpty() && getFileAmount() == 0 && components.isEmpty();
     }
 
     /**
@@ -179,6 +181,58 @@ public class WebhookMessageBuilder {
         for (WebhookEmbed embed : embeds) {
             Objects.requireNonNull(embed, "Embed");
             this.embeds.add(embed);
+        }
+        return this;
+    }
+
+    /**
+     * Adds the provided components to the builder
+     * <br>Note that most components are only usable by interactions.
+     *
+     * @param  components
+     *         The layout components to add
+     *
+     * @throws java.lang.NullPointerException
+     *         If provided with null
+     * @throws java.lang.IllegalStateException
+     *         If more than {@value WebhookMessage#MAX_COMPONENTS} are added
+     *
+     * @return This builder for chaining convenience
+     */
+    @NotNull
+    public WebhookMessageBuilder addComponents(@NotNull ComponentLayout... components) {
+        Objects.requireNonNull(components, "Components");
+        if (this.components.size() + components.length > WebhookMessage.MAX_COMPONENTS)
+            throw new IllegalStateException("Cannot have more than " + WebhookMessage.MAX_COMPONENTS + " component layouts in a message");
+        for (ComponentLayout component : components) {
+            Objects.requireNonNull(component, "Component");
+            this.components.add(component);
+        }
+        return this;
+    }
+
+    /**
+     * Adds the provided components to the builder
+     * <br>Note that most components are only usable by interactions.
+     *
+     * @param  components
+     *         The layout components to add
+     *
+     * @throws java.lang.NullPointerException
+     *         If provided with null
+     * @throws java.lang.IllegalStateException
+     *         If more than {@value WebhookMessage#MAX_COMPONENTS} are added
+     *
+     * @return This builder for chaining convenience
+     */
+    @NotNull
+    public WebhookMessageBuilder addComponents(@NotNull Collection<? extends ComponentLayout> components) {
+        Objects.requireNonNull(components, "Components");
+        if (this.components.size() + components.size() > WebhookMessage.MAX_COMPONENTS)
+            throw new IllegalStateException("Cannot have more than " + WebhookMessage.MAX_COMPONENTS + " component layouts in a message");
+        for (ComponentLayout component : components) {
+            Objects.requireNonNull(component, "Component");
+            this.components.add(component);
         }
         return this;
     }
@@ -409,7 +463,7 @@ public class WebhookMessageBuilder {
     public WebhookMessage build() {
         if (isEmpty())
             throw new IllegalStateException("Cannot build an empty message!");
-        return new WebhookMessage(username, avatarUrl, content.toString(), embeds, isTTS,
+        return new WebhookMessage(username, avatarUrl, content.toString(), embeds, components, isTTS,
                 fileIndex == 0 ? null : Arrays.copyOf(files, fileIndex), allowedMentions, flags);
     }
 
@@ -452,13 +506,13 @@ public class WebhookMessageBuilder {
             AllowedMentions allowedMentions = AllowedMentions.none();
             Mentions mentions = message.getMentions();
             allowedMentions.withRoles(
-                mentions.getRoles().stream()
-                    .map(Role::getId)
-                    .collect(Collectors.toList()));
+                    mentions.getRoles().stream()
+                            .map(Role::getId)
+                            .collect(Collectors.toList()));
             allowedMentions.withUsers(
-                mentions.getUsers().stream()
-                    .map(User::getId)
-                    .collect(Collectors.toList()));
+                    mentions.getUsers().stream()
+                            .map(User::getId)
+                            .collect(Collectors.toList()));
             allowedMentions.withParseEveryone(mentions.mentionsEveryone());
             builder.setAllowedMentions(allowedMentions);
             builder.setEphemeral(message.isEphemeral());
@@ -486,13 +540,13 @@ public class WebhookMessageBuilder {
 
         AllowedMentions allowedMentions = AllowedMentions.none();
         allowedMentions.withUsers(
-            message.getMentionedUsers().stream()
-                .map(DiscordEntity::getIdAsString)
-                .collect(Collectors.toList()));
+                message.getMentionedUsers().stream()
+                        .map(DiscordEntity::getIdAsString)
+                        .collect(Collectors.toList()));
         allowedMentions.withRoles(
-            message.getMentionedRoles().stream()
-                .map(DiscordEntity::getIdAsString)
-                .collect(Collectors.toList()));
+                message.getMentionedRoles().stream()
+                        .map(DiscordEntity::getIdAsString)
+                        .collect(Collectors.toList()));
         allowedMentions.withParseEveryone(message.mentionsEveryone());
         builder.setAllowedMentions(allowedMentions);
         return builder;
@@ -548,10 +602,10 @@ public class WebhookMessageBuilder {
             builder.setTTS(tts.get());
         if (!embeds.isAbsent()) {
             builder.addEmbeds(
-                embeds.get().stream()
-                    .map(WebhookEmbedBuilder::fromD4J)
-                    .map(WebhookEmbedBuilder::build)
-                    .collect(Collectors.toList())
+                    embeds.get().stream()
+                            .map(WebhookEmbedBuilder::fromD4J)
+                            .map(WebhookEmbedBuilder::build)
+                            .collect(Collectors.toList())
             );
         }
 

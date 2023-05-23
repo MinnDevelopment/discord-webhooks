@@ -23,6 +23,7 @@ import club.minnced.discord.webhook.send.AllowedMentions;
 import club.minnced.discord.webhook.send.WebhookEmbed;
 import club.minnced.discord.webhook.send.WebhookMessage;
 import club.minnced.discord.webhook.send.WebhookMessageBuilder;
+import club.minnced.discord.webhook.send.component.ComponentLayout;
 import club.minnced.discord.webhook.util.ThreadPools;
 import club.minnced.discord.webhook.util.WebhookErrorHandler;
 import okhttp3.OkHttpClient;
@@ -406,9 +407,53 @@ public class WebhookClient implements AutoCloseable {
      *
      * @see    #isWait()
      * @see    #send(club.minnced.discord.webhook.send.WebhookMessage)
+     *
+     * @deprecated Use {@link #sendEmbeds(club.minnced.discord.webhook.send.WebhookEmbed, club.minnced.discord.webhook.send.WebhookEmbed...)} instead
      */
     @NotNull
+    @Deprecated
     public CompletableFuture<ReadonlyMessage> send(@NotNull WebhookEmbed first, @NotNull WebhookEmbed... embeds) {
+        return send(WebhookMessage.embeds(first, embeds));
+    }
+
+    /**
+     * Sends the provided {@link club.minnced.discord.webhook.send.WebhookEmbed} to the webhook.
+     * <br>The returned future receives {@code null} if {@link club.minnced.discord.webhook.WebhookClientBuilder#setWait(boolean)}
+     * was set to false.
+     *
+     * @param  embeds
+     *         The embeds to send
+     *
+     * @return {@link java.util.concurrent.CompletableFuture}
+     *
+     * @see    #isWait()
+     * @see    #send(club.minnced.discord.webhook.send.WebhookMessage)
+     *
+     * @deprecated Use {@link #sendEmbeds(java.util.Collection)} instead
+     */
+    @NotNull
+    @Deprecated
+    public CompletableFuture<ReadonlyMessage> send(@NotNull Collection<WebhookEmbed> embeds) {
+        return send(WebhookMessage.embeds(embeds));
+    }
+
+    /**
+     * Sends the provided {@link club.minnced.discord.webhook.send.WebhookEmbed} to the webhook.
+     * <br>The returned future receives {@code null} if {@link club.minnced.discord.webhook.WebhookClientBuilder#setWait(boolean)}
+     * was set to false.
+     *
+     * @param  first
+     *         The first embed to send
+     * @param  embeds
+     *         Optional additional embeds to send, up to 10
+     *
+     * @return {@link java.util.concurrent.CompletableFuture}
+     *
+     * @see    #isWait()
+     * @see    #send(club.minnced.discord.webhook.send.WebhookMessage)
+     */
+    @NotNull
+    public CompletableFuture<ReadonlyMessage> sendEmbeds(@NotNull WebhookEmbed first, @NotNull WebhookEmbed... embeds) {
         return send(WebhookMessage.embeds(first, embeds));
     }
 
@@ -426,8 +471,46 @@ public class WebhookClient implements AutoCloseable {
      * @see    #send(club.minnced.discord.webhook.send.WebhookMessage)
      */
     @NotNull
-    public CompletableFuture<ReadonlyMessage> send(@NotNull Collection<WebhookEmbed> embeds) {
+    public CompletableFuture<ReadonlyMessage> sendEmbeds(@NotNull Collection<WebhookEmbed> embeds) {
         return send(WebhookMessage.embeds(embeds));
+    }
+
+    /**
+     * Sends the provided {@link club.minnced.discord.webhook.send.component.ComponentLayout} to the webhook.
+     * <br>The returned future receives {@code null} if {@link club.minnced.discord.webhook.WebhookClientBuilder#setWait(boolean)}
+     * was set to false.
+     *
+     * @param  first
+     *         The first embed to send
+     * @param  components
+     *         Optional additional components to send, up to 5
+     *
+     * @return {@link java.util.concurrent.CompletableFuture}
+     *
+     * @see    #isWait()
+     * @see    #send(club.minnced.discord.webhook.send.WebhookMessage)
+     */
+    @NotNull
+    public CompletableFuture<ReadonlyMessage> sendComponents(@NotNull ComponentLayout first, @NotNull ComponentLayout... components) {
+        return send(WebhookMessage.components(first, components));
+    }
+
+    /**
+     * Sends the provided {@link club.minnced.discord.webhook.send.component.ComponentLayout} to the webhook.
+     * <br>The returned future receives {@code null} if {@link club.minnced.discord.webhook.WebhookClientBuilder#setWait(boolean)}
+     * was set to false.
+     *
+     * @param  components
+     *         The components to send
+     *
+     * @return {@link java.util.concurrent.CompletableFuture}
+     *
+     * @see    #isWait()
+     * @see    #send(club.minnced.discord.webhook.send.WebhookMessage)
+     */
+    @NotNull
+    public CompletableFuture<ReadonlyMessage> sendComponents(@NotNull Collection<? extends ComponentLayout> components) {
+        return send(WebhookMessage.components(components));
     }
 
     /**

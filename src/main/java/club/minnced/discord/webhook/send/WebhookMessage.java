@@ -19,6 +19,8 @@ package club.minnced.discord.webhook.send;
 import club.minnced.discord.webhook.IOUtil;
 import club.minnced.discord.webhook.MessageFlags;
 import club.minnced.discord.webhook.receive.ReadonlyMessage;
+import club.minnced.discord.webhook.send.component.ComponentLayout;
+import club.minnced.discord.webhook.send.component.layout.ActionRow;
 import okhttp3.MultipartBody;
 import okhttp3.RequestBody;
 import org.jetbrains.annotations.NotNull;
@@ -43,22 +45,28 @@ public class WebhookMessage {
     public static final int MAX_FILES = 10;
     /** Maximum amount of embeds a single message can hold (10) */
     public static final int MAX_EMBEDS = 10;
+    /**
+     * Maximum allowed component layouts (e.g. {@link club.minnced.discord.webhook.send.component.layout.ActionRow ActionRows}) in a message
+     */
+    public static final int MAX_COMPONENTS = 5;
 
     protected final String username, avatarUrl, content;
     protected final List<WebhookEmbed> embeds;
+    protected final List<ComponentLayout> components;
     protected final boolean isTTS;
     protected final MessageAttachment[] attachments;
     protected final AllowedMentions allowedMentions;
     protected final int flags;
 
     protected WebhookMessage(final String username, final String avatarUrl, final String content,
-                             final List<WebhookEmbed> embeds, final boolean isTTS,
+                             final List<WebhookEmbed> embeds, List<ComponentLayout> components, final boolean isTTS,
                              final MessageAttachment[] files, final AllowedMentions allowedMentions,
                              final int flags) {
         this.username = username;
         this.avatarUrl = avatarUrl;
         this.content = content;
         this.embeds = embeds;
+        this.components = components;
         this.isTTS = isTTS;
         this.attachments = files;
         this.allowedMentions = allowedMentions;
@@ -149,7 +157,7 @@ public class WebhookMessage {
             flags |= MessageFlags.EPHEMERAL;
         else
             flags &= ~MessageFlags.EPHEMERAL;
-        return new WebhookMessage(username, avatarUrl, content, embeds, isTTS, attachments, allowedMentions, flags);
+        return new WebhookMessage(username, avatarUrl, content, embeds, components, isTTS, attachments, allowedMentions, flags);
     }
 
     /**
@@ -205,7 +213,7 @@ public class WebhookMessage {
         List<WebhookEmbed> list = new ArrayList<>(1 + embeds.length);
         list.add(first);
         Collections.addAll(list, embeds);
-        return new WebhookMessage(null, null, null, list, false, null, AllowedMentions.all(), 0);
+        return new WebhookMessage(null, null, null, list, null, false, null, AllowedMentions.all(), 0);
     }
 
     /**
@@ -230,7 +238,62 @@ public class WebhookMessage {
         if (embeds.isEmpty())
             throw new IllegalArgumentException("Cannot build an empty message");
         embeds.forEach(Objects::requireNonNull);
-        return new WebhookMessage(null, null, null, new ArrayList<>(embeds), false, null, AllowedMentions.all(), 0);
+        return new WebhookMessage(null, null, null, new ArrayList<>(embeds), null, false, null, AllowedMentions.all(), 0);
+    }
+
+    /**
+     * Creates a WebhookMessage from
+     * the provided components. A message can hold up to {@value #MAX_COMPONENTS} components.
+     *
+     * @param  first
+     *         The first component layout (see {@link ActionRow})
+     * @param  components
+     *         Additional components for the message (see {@link ActionRow})
+     *
+     * @throws java.lang.NullPointerException
+     *         If provided with null
+     * @throws java.lang.IllegalArgumentException
+     *         If more than {@value WebhookMessage#MAX_COMPONENTS} are provided
+     *
+     * @return A WebhookMessage for the components
+     */
+    @NotNull
+    public static WebhookMessage components(@NotNull ComponentLayout first, @NotNull ComponentLayout... components) {
+        Objects.requireNonNull(components, "Components");
+        if (components.length >= WebhookMessage.MAX_COMPONENTS)
+            throw new IllegalArgumentException("Cannot add more than 5 components to a message");
+        for (ComponentLayout e : components) {
+            Objects.requireNonNull(e);
+        }
+        List<ComponentLayout> list = new ArrayList<>(1 + components.length);
+        list.add(first);
+        Collections.addAll(list, components);
+        return new WebhookMessage(null, null, null, null, list, false, null, AllowedMentions.all(), 0);
+    }
+
+    /**
+     * Creates a WebhookMessage from
+     * the provided components. A message can hold up to {@value #MAX_COMPONENTS} components.
+     *
+     * @param  components
+     *         Components for the message (see {@link ActionRow})
+     *
+     * @throws java.lang.NullPointerException
+     *         If provided with null
+     * @throws java.lang.IllegalArgumentException
+     *         If more than {@value WebhookMessage#MAX_COMPONENTS} are provided
+     *
+     * @return A WebhookMessage for the components
+     */
+    @NotNull
+    public static WebhookMessage components(@NotNull Collection<? extends ComponentLayout> components) {
+        Objects.requireNonNull(components, "Components");
+        if (components.size() > WebhookMessage.MAX_COMPONENTS)
+            throw new IllegalArgumentException("Cannot add more than 5 component layouts to a message");
+        if (components.isEmpty())
+            throw new IllegalArgumentException("Cannot build an empty message");
+        components.forEach(Objects::requireNonNull);
+        return new WebhookMessage(null, null, null, null, new ArrayList<>(components), false, null, AllowedMentions.all(), 0);
     }
 
     /**
@@ -267,7 +330,7 @@ public class WebhookMessage {
             Object data = attachment.getValue();
             files[i++] = convertAttachment(name, data);
         }
-        return new WebhookMessage(null, null, null, null, false, files, AllowedMentions.all(), 0);
+        return new WebhookMessage(null, null, null, null, null, false, files, AllowedMentions.all(), 0);
     }
 
     /**
@@ -279,20 +342,20 @@ public class WebhookMessage {
      * to the first 2 arguments.
      * <br>The allowed data types are {@code byte[] | InputStream | File}
      *
-     * @param name1
+     * @param  name1
      *         The alternative name of the first attachment
-     * @param data1
+     * @param  data1
      *         The first attachment, must be of type {@code byte[] | InputStream | File}
-     * @param attachments
+     * @param  attachments
      *         Optional additional attachments to add, pairs of {@literal String->Data}
-     *
-     * @return A WebhookMessage for the attachments
      *
      * @throws java.lang.NullPointerException
      *         If provided with null
      * @throws java.lang.IllegalArgumentException
      *         If no attachments are provided or more than {@value #MAX_FILES}
      *         or the additional arguments are not an even count or an invalid format
+     *
+     * @return A WebhookMessage for the attachments
      */
     @NotNull // forcing first pair as we expect at least one entry (Effective Java 3rd. Edition - Item 53)
     public static WebhookMessage files(@NotNull String name1, @NotNull Object data1, @NotNull Object... attachments) {
@@ -313,7 +376,7 @@ public class WebhookMessage {
                 throw new IllegalArgumentException("Provided arguments must be pairs for (String, Data). Expected String and found " + (name == null ? null : name.getClass().getName()));
             files[j] = convertAttachment((String) name, data);
         }
-        return new WebhookMessage(null, null, null, null, false, files, AllowedMentions.all(), 0);
+        return new WebhookMessage(null, null, null, null, null, false, files, AllowedMentions.all(), 0);
     }
 
     /**
@@ -343,6 +406,15 @@ public class WebhookMessage {
             payload.put("embeds", array);
         } else {
             payload.put("embeds", new JSONArray());
+        }
+        if (components != null && !components.isEmpty()) {
+            final JSONArray array = new JSONArray();
+            for (ComponentLayout component : components) {
+                array.put(component);
+            }
+            payload.put("components", array);
+        } else {
+            payload.put("components", new JSONArray());
         }
         if (avatarUrl != null)
             payload.put("avatar_url", avatarUrl);
