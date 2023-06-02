@@ -54,6 +54,7 @@ public class WebhookMessageBuilder {
     protected boolean isTTS;
     protected int flags;
     private int fileIndex = 0;
+    private boolean hasFiles = false;
 
     /**
      * Whether this builder is currently empty
@@ -100,6 +101,7 @@ public class WebhookMessageBuilder {
             files[i] = null;
         }
         fileIndex = 0;
+        hasFiles = false;
         return this;
     }
 
@@ -293,16 +295,79 @@ public class WebhookMessageBuilder {
     }
 
     /**
-     * Adds the provided file as an attachment to this message.
-     * <br>A single message can have up to {@value WebhookMessage#MAX_FILES} attachments.
+     * Remove all attachments from the message, unless included in the provided collection.
      *
-     * @param file
-     *         The file to attach
+     * <p>This can be used inplace of {@link #addFile(MessageAttachment)} overloads to entirely remove files.
      *
-     * @return This builder for chaining convenience
+     * @param  attachments
+     *         The attachments to retain (or empty to remove all)
      *
      * @throws java.lang.NullPointerException
      *         If provided with null
+     * @throws java.lang.IllegalStateException
+     *         If more than {@value WebhookMessage#MAX_FILES} are added
+     *
+     * @return This builder for chaining convenience
+     *
+     * @see    MessageAttachment#fromId(long)
+     * @see    MessageAttachment#fromId(long, String)
+     */
+    @NotNull
+    public WebhookMessageBuilder retainAttachments(@NotNull Collection<? extends MessageAttachment> attachments) {
+        Objects.requireNonNull(attachments, "Attachments");
+        if (fileIndex + attachments.size() >= WebhookMessage.MAX_FILES)
+            throw new IllegalStateException("Cannot add more than " + WebhookMessage.MAX_FILES + " attachments to a message");
+        hasFiles = true;
+        for (MessageAttachment attachment : attachments) {
+            Objects.requireNonNull(attachment, "MessageAttachment");
+            files[fileIndex++] = attachment;
+        }
+        return this;
+    }
+
+    /**
+     * Adds the provided file as an attachment to this message.
+     * <br>A single message can have up to {@value WebhookMessage#MAX_FILES} attachments.
+     *
+     * <p>As of recent API updates, adding new files also requires specifying all existing files to keep attached.
+     * If the existing attachments are not provided in addition to new files, they will instead be removed from the message.
+     *
+     * @param  attachment
+     *         The file attachment to add
+     *
+     * @throws java.lang.NullPointerException
+     *         If provided with null
+     * @throws java.lang.IllegalStateException
+     *         If more than {@value WebhookMessage#MAX_FILES} are added
+     *
+     * @return This builder for chaining convenience
+     */
+    @NotNull
+    public WebhookMessageBuilder addFile(@NotNull MessageAttachment attachment) {
+        Objects.requireNonNull(attachment, "MessageAttachment");
+        if (fileIndex >= WebhookMessage.MAX_FILES)
+            throw new IllegalStateException("Cannot add more than " + WebhookMessage.MAX_FILES + " attachments to a message");
+        files[fileIndex++] = attachment;
+        return this;
+    }
+
+    /**
+     * Adds the provided file as an attachment to this message.
+     * <br>A single message can have up to {@value WebhookMessage#MAX_FILES} attachments.
+     *
+     * <p>As of recent API updates, adding new files also requires specifying all existing files to keep attached.
+     * If the existing attachments are not provided in addition to new files, they will instead be removed from the message.
+     * Use {@link #retainAttachments(java.util.Collection)} or {@link #addFile(MessageAttachment)} to add all existing attachments.
+     *
+     * @param  file
+     *         The file to attach
+     *
+     * @throws java.lang.NullPointerException
+     *         If provided with null
+     * @throws java.lang.IllegalStateException
+     *         If more than {@value WebhookMessage#MAX_FILES} are added
+     *
+     * @return This builder for chaining convenience
      */
     @NotNull
     public WebhookMessageBuilder addFile(@NotNull File file) {
@@ -314,6 +379,10 @@ public class WebhookMessageBuilder {
      * Adds the provided file as an attachment to this message.
      * <br>A single message can have up to {@value WebhookMessage#MAX_FILES} attachments.
      *
+     * <p>As of recent API updates, adding new files also requires specifying all existing files to keep attached.
+     * If the existing attachments are not provided in addition to new files, they will instead be removed from the message.
+     * Use {@link #retainAttachments(java.util.Collection)} or {@link #addFile(MessageAttachment)} to add all existing attachments.
+     *
      * @param  name
      *         The alternative name that should be used instead
      * @param  file
@@ -321,6 +390,8 @@ public class WebhookMessageBuilder {
      *
      * @throws java.lang.NullPointerException
      *         If provided with null
+     * @throws java.lang.IllegalStateException
+     *         If more than {@value WebhookMessage#MAX_FILES} are added
      *
      * @return This builder for chaining convenience
      */
@@ -345,6 +416,10 @@ public class WebhookMessageBuilder {
     /**
      * Adds the provided data as a file attachment to this message.
      * <br>A single message can have up to {@value WebhookMessage#MAX_FILES} attachments.
+     *
+     * <p>As of recent API updates, adding new files also requires specifying all existing files to keep attached.
+     * If the existing attachments are not provided in addition to new files, they will instead be removed from the message.
+     * Use {@link #retainAttachments(java.util.Collection)} or {@link #addFile(MessageAttachment)} to add all existing attachments.
      *
      * @param  name
      *         The alternative name that should be used
@@ -372,6 +447,10 @@ public class WebhookMessageBuilder {
      * Adds the provided data as a file attachment to this message.
      * <br>A single message can have up to {@value WebhookMessage#MAX_FILES} attachments.
      *
+     * <p>As of recent API updates, adding new files also requires specifying all existing files to keep attached.
+     * If the existing attachments are not provided in addition to new files, they will instead be removed from the message.
+     * Use {@link #retainAttachments(java.util.Collection)} or {@link #addFile(MessageAttachment)} to add all existing attachments.
+     *
      * @param  name
      *         The alternative name that should be used
      * @param  data
@@ -379,6 +458,8 @@ public class WebhookMessageBuilder {
      *
      * @throws java.lang.NullPointerException
      *         If provided with null
+     * @throws java.lang.IllegalStateException
+     *         If more than {@value WebhookMessage#MAX_FILES} are added
      *
      * @return This builder for chaining convenience
      */
@@ -410,7 +491,7 @@ public class WebhookMessageBuilder {
         if (isEmpty())
             throw new IllegalStateException("Cannot build an empty message!");
         return new WebhookMessage(username, avatarUrl, content.toString(), embeds, isTTS,
-                fileIndex == 0 ? null : Arrays.copyOf(files, fileIndex), allowedMentions, flags);
+                fileIndex == 0 && !hasFiles ? null : Arrays.copyOf(files, fileIndex), allowedMentions, flags);
     }
 
 
