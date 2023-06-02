@@ -16,6 +16,7 @@
 
 package club.minnced.discord.webhook.receive;
 
+import club.minnced.discord.webhook.send.MessageAttachment;
 import org.jetbrains.annotations.NotNull;
 import org.json.JSONObject;
 import org.json.JSONPropertyName;
@@ -26,7 +27,7 @@ import org.json.JSONString;
  * <br>This does not actually contain the file but only meta-data
  * useful to retrieve the actual attachment.
  */
-public class ReadonlyAttachment implements JSONString {
+public class ReadonlyAttachment extends MessageAttachment implements JSONString {
     private final String url;
     private final String proxyUrl;
     private final String fileName;
@@ -37,6 +38,7 @@ public class ReadonlyAttachment implements JSONString {
     public ReadonlyAttachment(
             @NotNull String url, @NotNull String proxyUrl, @NotNull String fileName,
             int width, int height, int size, long id) {
+        super(id, fileName);
         this.url = url;
         this.proxyUrl = proxyUrl;
         this.fileName = fileName;

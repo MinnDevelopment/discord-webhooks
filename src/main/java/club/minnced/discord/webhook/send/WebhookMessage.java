@@ -250,12 +250,37 @@ public class WebhookMessage {
      * @return A WebhookMessage for the attachments
      */
     @NotNull
+    public static WebhookMessage files(@NotNull Collection<? extends MessageAttachment> attachments) {
+        Objects.requireNonNull(attachments, "Attachments");
+
+        int fileAmount = attachments.size();
+        if (fileAmount > WebhookMessage.MAX_FILES)
+            throw new IllegalArgumentException("Cannot add more than " + WebhookMessage.MAX_FILES + " files to a message");
+        MessageAttachment[] files = attachments.toArray(new MessageAttachment[0]);
+        return new WebhookMessage(null, null, null, null, false, files, AllowedMentions.all(), 0);
+    }
+
+    /**
+     * Creates a WebhookMessage from the provided attachments.
+     * <br>A message can hold up to {@value #MAX_FILES} attachments
+     * and a total of 8MiB of data.
+     *
+     * @param  attachments
+     *         The attachments to add, keys are the alternative names
+     *         for each attachment
+     *
+     * @throws java.lang.NullPointerException
+     *         If provided with null
+     * @throws java.lang.IllegalArgumentException
+     *         If no attachments are provided or more than {@value #MAX_FILES}
+     *
+     * @return A WebhookMessage for the attachments
+     */
+    @NotNull
     public static WebhookMessage files(@NotNull Map<String, ?> attachments) {
         Objects.requireNonNull(attachments, "Attachments");
 
         int fileAmount = attachments.size();
-        if (fileAmount == 0)
-            throw new IllegalArgumentException("Cannot build an empty message");
         if (fileAmount > WebhookMessage.MAX_FILES)
             throw new IllegalArgumentException("Cannot add more than " + WebhookMessage.MAX_FILES + " files to a message");
         Set<? extends Map.Entry<String, ?>> entries = attachments.entrySet();
@@ -351,19 +376,28 @@ public class WebhookMessage {
         payload.put("tts", isTTS);
         payload.put("allowed_mentions", allowedMentions);
         payload.put("flags", flags);
-        String json = payload.toString();
         if (isFile()) {
             final MultipartBody.Builder builder = new MultipartBody.Builder().setType(MultipartBody.FORM);
+            JSONArray attachmentArray = new JSONArray(attachments.length);
 
             for (int i = 0; i < attachments.length; i++) {
                 final MessageAttachment attachment = attachments[i];
                 if (attachment == null)
                     break;
-                builder.addFormDataPart("file" + i, attachment.getName(), new IOUtil.OctetBody(attachment.getData()));
+
+                JSONObject attachmentJson = attachment.toJSON();
+                if (attachment.getId() == 0) {
+                    builder.addFormDataPart("files[" + i + "]", attachment.getName(), new IOUtil.OctetBody(attachment.getData()));
+                    attachmentJson.put("id", i);
+                }
+
+                attachmentArray.put(attachmentJson);
             }
-            return builder.addFormDataPart("payload_json", json).build();
+
+            payload.put("attachments", attachmentArray);
+            return builder.addFormDataPart("payload_json", payload.toString()).build();
         }
-        return RequestBody.create(IOUtil.JSON, json);
+        return RequestBody.create(IOUtil.JSON, payload.toString());
     }
 
     @NotNull
@@ -372,7 +406,9 @@ public class WebhookMessage {
         Objects.requireNonNull(data, "Data");
         try {
             MessageAttachment a;
-            if (data instanceof File)
+            if (data instanceof MessageAttachment)
+                a = (MessageAttachment) data;
+            else if (data instanceof File)
                 a = new MessageAttachment(name, (File) data);
             else if (data instanceof InputStream)
                 a = new MessageAttachment(name, (InputStream) data);

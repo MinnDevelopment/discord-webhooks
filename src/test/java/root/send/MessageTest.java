@@ -301,17 +301,21 @@ public class MessageTest {
                         .put("allowed_mentions", allowedMentions)
                         .put("content", "CONTENT!")
                         .put("embeds", new JSONArray())
+                        .put("attachments", new JSONArray()
+                            .put(new JSONObject()
+                                 .put("id", 0)
+                                 .put("name", "myFile.txt")))
                         .put("tts", false)
                         .put("flags", 0)
                         .toMap(),
                 new JSONObject((String) multiPart.get("payload_json")).toMap()
         );
 
-        Assert.assertTrue("Multipart doesn't contain file", multiPart.containsKey("file0"));
-        Assert.assertTrue("Multipart file is not of correct type", multiPart.get("file0") instanceof IOTestUtil.MultiPartFile);
+        Assert.assertTrue("Multipart doesn't contain file", multiPart.containsKey("files[0]"));
+        Assert.assertTrue("Multipart file is not of correct type", multiPart.get("files[0]") instanceof IOTestUtil.MultiPartFile);
         Assert.assertEquals("Multipart file mismatches",
                 fileContent,
-                new String(((IOTestUtil.MultiPartFile) multiPart.get("file0")).content, StandardCharsets.UTF_8)
+                new String(((IOTestUtil.MultiPartFile) multiPart.get("files[0]")).content, StandardCharsets.UTF_8)
         );
     }
 
