@@ -363,7 +363,7 @@ public class WebhookMessage {
             }
             return builder.addFormDataPart("payload_json", json).build();
         }
-        return RequestBody.create(IOUtil.JSON, json);
+        return RequestBody.create(json, IOUtil.JSON);
     }
 
     @NotNull

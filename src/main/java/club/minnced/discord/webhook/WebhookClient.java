@@ -723,7 +723,7 @@ public class WebhookClient implements AutoCloseable {
 
     @NotNull
     protected static RequestBody newBody(String object) {
-        return RequestBody.create(IOUtil.JSON, object);
+        return RequestBody.create(object, IOUtil.JSON);
     }
 
     @NotNull
