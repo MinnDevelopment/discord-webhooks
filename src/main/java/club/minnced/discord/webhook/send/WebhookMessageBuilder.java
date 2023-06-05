@@ -447,10 +447,6 @@ public class WebhookMessageBuilder {
 
         builder.addEmbeds(embeds);
 
-        AllowedMentions allowedMentions = AllowedMentions.none()
-                .withUsers(message.getMentionedUsers())
-                .withRoles(message.getMentionedRoles());
-
         EnumSet<Message.MentionType> mentionTypes = message.getAllowedMentions();
 
         boolean bParseUsers = mentionTypes.contains(Message.MentionType.USER);
@@ -458,7 +454,10 @@ public class WebhookMessageBuilder {
         boolean bParseEveryone = mentionTypes.contains(Message.MentionType.EVERYONE)
                 || mentionTypes.contains(Message.MentionType.HERE);
 
-        allowedMentions.withParseUsers(bParseUsers)
+        AllowedMentions allowedMentions = AllowedMentions.none()
+                .withUsers(message.getMentionedUsers())
+                .withRoles(message.getMentionedRoles())
+                .withParseUsers(bParseUsers)
                 .withParseRoles(bParseRoles)
                 .withParseEveryone(bParseEveryone);
 
