@@ -441,8 +441,8 @@ public class WebhookMessageBuilder {
 
         List<WebhookEmbed> embeds = message.getEmbeds()
                 .stream()
-                .map(it -> WebhookEmbedBuilder.fromJDA(it)
-                        .build())
+                .map(WebhookEmbedBuilder::fromJDA)
+                .map(WebhookEmbedBuilder::build)
                 .collect(Collectors.toList());
 
         builder.addEmbeds(embeds);
@@ -483,8 +483,8 @@ public class WebhookMessageBuilder {
 
         List<WebhookEmbed> embeds = message.getEmbeds()
                 .stream()
-                .map(it -> WebhookEmbedBuilder.fromJDA(it)
-                        .build())
+                .map(WebhookEmbedBuilder::fromJDA)
+                .map(WebhookEmbedBuilder::build)
                 .collect(Collectors.toList());
 
         builder.addEmbeds(embeds);
