@@ -47,13 +47,14 @@ val versions = mapOf(
     "slf4j" to "1.7.32",
     "okhttp" to "4.10.0",
     "json" to "20210307",
-    "jda" to "5.0.0-alpha.13",
+    "jda" to "5.0.0-beta.10",
     "discord4j" to "3.2.2",
     "javacord" to "3.4.0",
     "junit" to "4.13.2",
     "mockito" to "3.12.4", // must be compatible with powermock
     "powermock" to "2.0.9",
     "logback" to "1.2.3",
+    "jsr305" to "3.0.2",
     "annotations" to "22.0.0"
 )
 
@@ -61,7 +62,6 @@ dependencies {
     api("org.slf4j:slf4j-api:${versions["slf4j"]}")
     api("com.squareup.okhttp3:okhttp:${versions["okhttp"]}")
     api("org.json:json:${versions["json"]}")
-    implementation("org.jetbrains:annotations:${versions["annotations"]}")
 
     compileOnly("net.dv8tion:JDA:${versions["jda"]}")
     compileOnly("com.discord4j:discord4j-core:${versions["discord4j"]}")
@@ -75,6 +75,9 @@ dependencies {
     testImplementation("com.discord4j:discord4j-core:${versions["discord4j"]}")
     testImplementation("org.javacord:javacord:${versions["javacord"]}")
     //testCompile("ch.qos.logback:logback-classic:${versions["logback"]}")
+
+    compileOnly("com.google.code.findbugs:jsr305:${versions["jsr305"]}")
+    compileOnly("org.jetbrains:annotations:${versions["annotations"]}")
 }
 
 fun getProjectProperty(name: String) = project.properties[name] as? String

@@ -22,11 +22,12 @@ import club.minnced.discord.webhook.send.WebhookEmbedBuilder;
 import club.minnced.discord.webhook.send.WebhookMessage;
 import club.minnced.discord.webhook.send.WebhookMessageBuilder;
 import net.dv8tion.jda.api.EmbedBuilder;
-import net.dv8tion.jda.api.MessageBuilder;
 import net.dv8tion.jda.api.entities.Mentions;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageEmbed;
-import net.dv8tion.jda.internal.entities.DataMessage;
+import net.dv8tion.jda.api.utils.messages.MessageCreateBuilder;
+import net.dv8tion.jda.api.utils.messages.MessageCreateData;
+import net.dv8tion.jda.api.utils.messages.MessageData;
 import net.dv8tion.jda.internal.entities.ReceivedMessage;
 import okhttp3.RequestBody;
 import org.json.JSONArray;
@@ -138,52 +139,52 @@ public class MessageTest {
         Assert.assertEquals("dog.png", message.getAttachments()[1].getName());
         Assert.assertEquals("bird.png", message.getAttachments()[2].getName());
     }
-    
+
     @Test
     public void buildMessageWithDataMessage() {
         MessageEmbed jdaEmbed = new EmbedBuilder()
               .setTitle("myEmbed")
               .build();
-        
-        Message jdaMessage = new MessageBuilder()
+
+        MessageData jdaMessage = new MessageCreateBuilder()
               .setTTS(true)
               .setContent("myContent")
               .setEmbeds(jdaEmbed)
               .build();
-        
+
         WebhookMessage webhookMessage = WebhookMessageBuilder.fromJDA(jdaMessage).build();
         List<WebhookEmbed> webhookEmbeds = webhookMessage.getEmbeds();
-        
+
         Assert.assertEquals(webhookEmbeds.size(), 1);
-        
+
         WebhookEmbed webhookEmbed = webhookEmbeds.get(0);
-        
-        Assert.assertTrue(jdaMessage instanceof DataMessage);
+
+        Assert.assertTrue(jdaMessage instanceof MessageCreateData);
         Assert.assertTrue(webhookMessage.isTTS());
         Assert.assertEquals(webhookMessage.getContent(), "myContent");
         Assert.assertEquals(webhookEmbed.getTitle().getText(), "myEmbed");
     }
-    
+
     @Test
     public void buildMessageWithReceivedMessage() {
         MessageEmbed jdaEmbed = new EmbedBuilder()
               .setTitle("myEmbed")
               .build();
-    
+
         Message jdaMessage = mock(ReceivedMessage.class, CALLS_REAL_METHODS);
         Mentions mentions = mock(Mentions.class, RETURNS_DEFAULTS);
-        when(jdaMessage.isTTS()).thenReturn(true);
-        when(jdaMessage.getContentRaw()).thenReturn("myContent");
-        when(jdaMessage.getEmbeds()).thenReturn(Arrays.asList(jdaEmbed));
-        when(jdaMessage.getMentions()).thenReturn(mentions);
+        doReturn(true).when(jdaMessage).isTTS();
+        doReturn("myContent").when(jdaMessage).getContentRaw();
+        doReturn(Arrays.asList(jdaEmbed)).when(jdaMessage).getEmbeds();
+        doReturn(mentions).when(jdaMessage).getMentions();
 
         WebhookMessage webhookMessage = WebhookMessageBuilder.fromJDA(jdaMessage).build();
         List<WebhookEmbed> webhookEmbeds = webhookMessage.getEmbeds();
-        
+
         Assert.assertEquals(webhookEmbeds.size(), 1);
-        
+
         WebhookEmbed webhookEmbed = webhookEmbeds.get(0);
-        
+
         Assert.assertTrue(jdaMessage instanceof ReceivedMessage);
         Assert.assertTrue(webhookMessage.isTTS());
         Assert.assertEquals(webhookMessage.getContent(), "myContent");
