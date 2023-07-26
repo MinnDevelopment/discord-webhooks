@@ -64,7 +64,8 @@ public class ReadonlyMessage implements JSONString {
     }
 
     /**
-     * The id of this message
+     * The id of this message.
+     * <br>If this message is the beginning of a thread, then this is the thread id.
      *
      * @return The id
      */
