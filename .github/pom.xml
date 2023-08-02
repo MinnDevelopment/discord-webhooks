@@ -48,14 +48,8 @@
     <dependency>
       <groupId>org.json</groupId>
       <artifactId>json</artifactId>
-      <version>20210307</version>
+      <version>20230618</version>
       <scope>compile</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.jetbrains</groupId>
-      <artifactId>annotations</artifactId>
-      <version>22.0.0</version>
-      <scope>runtime</scope>
     </dependency>
   </dependencies>
 </project>
