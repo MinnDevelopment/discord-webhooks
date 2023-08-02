@@ -171,8 +171,7 @@ This library also supports sending webhook messages with integration from other 
 
 ```java
 public void sendWebhook(Webhook webhook) {
-    Message message = new MessageBuilder();
-    message.append("Hello World!");
+    MessageCreateData message = new MessageCreateBuilder().setContent("Hello World").build();
     try (JDAWebhookClient client = JDAWebhookClient.from(webhook)) { // create a client instance from the JDA webhook
         client.send(message); // send a JDA message instance
     }
