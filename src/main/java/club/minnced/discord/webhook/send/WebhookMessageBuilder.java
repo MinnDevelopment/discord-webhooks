@@ -403,12 +403,15 @@ public class WebhookMessageBuilder {
 
     /**
      * Sets the provided name as the name for a newly created thread.
-     * <br>This is only valid for forum channels.
+     * <br>This is only valid for forum/media channels.
      *
-     * @param name The name that should be used
+     * @param  name
+     *         The name that should be used
+     *
      * @return This builder for chaining convenience
      */
-    public WebhookMessageBuilder setThreadName(String name) {
+    @NotNull
+    public WebhookMessageBuilder setThreadName(@Nullable String name) {
         this.threadName = name;
         return this;
     }
