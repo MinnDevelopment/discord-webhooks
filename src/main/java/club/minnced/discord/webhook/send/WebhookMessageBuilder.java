@@ -47,6 +47,7 @@ public class WebhookMessageBuilder {
     protected final MessageAttachment[] files = new MessageAttachment[WebhookMessage.MAX_FILES];
     protected AllowedMentions allowedMentions = AllowedMentions.all();
     protected String username, avatarUrl;
+    protected String threadName;
     protected boolean isTTS;
     protected int flags;
     private int fileIndex = 0;
@@ -82,6 +83,7 @@ public class WebhookMessageBuilder {
         username = null;
         avatarUrl = null;
         isTTS = false;
+        threadName = null;
         return this;
     }
 
@@ -396,6 +398,21 @@ public class WebhookMessageBuilder {
     }
 
     /**
+     * Sets the provided name as the name for a newly created thread.
+     * <br>This is only valid for forum/media channels.
+     *
+     * @param  name
+     *         The name that should be used
+     *
+     * @return This builder for chaining convenience
+     */
+    @NotNull
+    public WebhookMessageBuilder setThreadName(@Nullable String name) {
+        this.threadName = name;
+        return this;
+    }
+
+    /**
      * Constructs the {@link club.minnced.discord.webhook.send.WebhookMessage}
      * from the current configurations.
      *
@@ -406,7 +423,7 @@ public class WebhookMessageBuilder {
         if (isEmpty())
             throw new IllegalStateException("Cannot build an empty message!");
         return new WebhookMessage(username, avatarUrl, content.toString(), embeds, isTTS,
-                fileIndex == 0 ? null : Arrays.copyOf(files, fileIndex), allowedMentions, flags);
+                fileIndex == 0 ? null : Arrays.copyOf(files, fileIndex), allowedMentions, flags, threadName);
     }
 
 

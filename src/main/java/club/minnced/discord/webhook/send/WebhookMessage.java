@@ -50,11 +50,12 @@ public class WebhookMessage {
     protected final MessageAttachment[] attachments;
     protected final AllowedMentions allowedMentions;
     protected final int flags;
+    protected final String threadName;
 
     protected WebhookMessage(final String username, final String avatarUrl, final String content,
                              final List<WebhookEmbed> embeds, final boolean isTTS,
                              final MessageAttachment[] files, final AllowedMentions allowedMentions,
-                             final int flags) {
+                             final int flags, final String threadName) {
         this.username = username;
         this.avatarUrl = avatarUrl;
         this.content = content;
@@ -63,6 +64,7 @@ public class WebhookMessage {
         this.attachments = files;
         this.allowedMentions = allowedMentions;
         this.flags = flags;
+        this.threadName = threadName;
     }
 
     /**
@@ -149,7 +151,7 @@ public class WebhookMessage {
             flags |= MessageFlags.EPHEMERAL;
         else
             flags &= ~MessageFlags.EPHEMERAL;
-        return new WebhookMessage(username, avatarUrl, content, embeds, isTTS, attachments, allowedMentions, flags);
+        return new WebhookMessage(username, avatarUrl, content, embeds, isTTS, attachments, allowedMentions, flags, threadName);
     }
 
     /**
@@ -205,7 +207,7 @@ public class WebhookMessage {
         List<WebhookEmbed> list = new ArrayList<>(1 + embeds.length);
         list.add(first);
         Collections.addAll(list, embeds);
-        return new WebhookMessage(null, null, null, list, false, null, AllowedMentions.all(), 0);
+        return new WebhookMessage(null, null, null, list, false, null, AllowedMentions.all(), 0, null);
     }
 
     /**
@@ -230,7 +232,7 @@ public class WebhookMessage {
         if (embeds.isEmpty())
             throw new IllegalArgumentException("Cannot build an empty message");
         embeds.forEach(Objects::requireNonNull);
-        return new WebhookMessage(null, null, null, new ArrayList<>(embeds), false, null, AllowedMentions.all(), 0);
+        return new WebhookMessage(null, null, null, new ArrayList<>(embeds), false, null, AllowedMentions.all(), 0, null);
     }
 
     /**
@@ -267,7 +269,7 @@ public class WebhookMessage {
             Object data = attachment.getValue();
             files[i++] = convertAttachment(name, data);
         }
-        return new WebhookMessage(null, null, null, null, false, files, AllowedMentions.all(), 0);
+        return new WebhookMessage(null, null, null, null, false, files, AllowedMentions.all(), 0, null);
     }
 
     /**
@@ -313,7 +315,7 @@ public class WebhookMessage {
                 throw new IllegalArgumentException("Provided arguments must be pairs for (String, Data). Expected String and found " + (name == null ? null : name.getClass().getName()));
             files[j] = convertAttachment((String) name, data);
         }
-        return new WebhookMessage(null, null, null, null, false, files, AllowedMentions.all(), 0);
+        return new WebhookMessage(null, null, null, null, false, files, AllowedMentions.all(), 0, null);
     }
 
     /**
@@ -351,6 +353,8 @@ public class WebhookMessage {
         payload.put("tts", isTTS);
         payload.put("allowed_mentions", allowedMentions);
         payload.put("flags", flags);
+        if (threadName != null)
+            payload.put("thread_name", threadName);
         String json = payload.toString();
         if (isFile()) {
             final MultipartBody.Builder builder = new MultipartBody.Builder().setType(MultipartBody.FORM);
