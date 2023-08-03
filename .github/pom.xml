@@ -9,7 +9,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>club.minnced</groupId>
   <artifactId>discord-webhooks</artifactId>
-  <version>0.8.3</version>
+  <version>0.8.4</version>
   <name>discord-webhooks</name>
   <description>Provides easy to use bindings for the Discord Webhook API</description>
   <url>https://github.com/MinnDevelopment/discord-webhooks</url>
