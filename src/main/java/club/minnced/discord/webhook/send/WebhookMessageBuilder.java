@@ -114,19 +114,19 @@ public class WebhookMessageBuilder {
 
     /**
      * The mention whitelist.
-     * <br>
-     * See {@link AllowedMentions} for more details.
+     * <br>See {@link AllowedMentions} for more details.
      *
-     * @param mentions
-     *                 The mention whitelist
+     * @param  mentions
+     *         The mention whitelist
      *
      * @throws NullPointerException
-     *                              If provided null
+     *         If provided null
      *
      * @return This builder for chaining convenience
      */
     @NotNull
-    public WebhookMessageBuilder setAllowedMentions(@NotNull AllowedMentions mentions) {
+    public WebhookMessageBuilder setAllowedMentions(@NotNull AllowedMentions mentions)
+    {
         this.allowedMentions = Objects.requireNonNull(mentions);
         return this;
     }
@@ -135,16 +135,14 @@ public class WebhookMessageBuilder {
      * Adds the provided embeds to the builder
      *
      * @param embeds
-     *               The embeds to add
+     *         The embeds to add
      *
      * @return This builder for chaining convenience
      *
      * @throws java.lang.NullPointerException
-     *                                         If provided with null
+     *         If provided with null
      * @throws java.lang.IllegalStateException
-     *                                         If more than
-     *                                         {@value WebhookMessage#MAX_EMBEDS}
-     *                                         are added
+     *         If more than {@value WebhookMessage#MAX_EMBEDS} are added
      */
     @NotNull
     public WebhookMessageBuilder addEmbeds(@NotNull WebhookEmbed... embeds) {
@@ -161,17 +159,15 @@ public class WebhookMessageBuilder {
     /**
      * Adds the provided embeds to the builder
      *
-     * @param embeds
-     *               The embeds to add
+     * @param  embeds
+     *         The embeds to add
      *
      * @return This builder for chaining convenience
      *
      * @throws java.lang.NullPointerException
-     *                                         If provided with null
+     *         If provided with null
      * @throws java.lang.IllegalStateException
-     *                                         If more than
-     *                                         {@value WebhookMessage#MAX_EMBEDS}
-     *                                         are added
+     *         If more than {@value WebhookMessage#MAX_EMBEDS} are added
      */
     @NotNull
     public WebhookMessageBuilder addEmbeds(@NotNull Collection<? extends WebhookEmbed> embeds) {
@@ -188,14 +184,13 @@ public class WebhookMessageBuilder {
     /**
      * Configures the content for this builder
      *
-     * @param content
-     *                The (nullable) content to use
+     * @param  content
+     *         The (nullable) content to use
      *
      * @return This builder for chaining convenience
      *
      * @throws java.lang.IllegalArgumentException
-     *                                            If the content is larger than 2000
-     *                                            characters
+     *         If the content is larger than 2000 characters
      */
     @NotNull
     public WebhookMessageBuilder setContent(@Nullable String content) {
@@ -211,16 +206,15 @@ public class WebhookMessageBuilder {
      * Appends the provided content to the already
      * present content in this message.
      *
-     * @param content
-     *                The content to append
+     * @param  content
+     *         The content to append
      *
      * @return This builder for chaining convenience
      *
      * @throws java.lang.NullPointerException
-     *                                            If provided with null
+     *         If provided with null
      * @throws java.lang.IllegalArgumentException
-     *                                            If the content exceeds 2000
-     *                                            characters
+     *         If the content exceeds 2000 characters
      */
     @NotNull
     public WebhookMessageBuilder append(@NotNull String content) {
@@ -233,13 +227,12 @@ public class WebhookMessageBuilder {
 
     /**
      * The username to use for this message.
-     * <br>
-     * Each message by a webhook can have a different user appearance.
+     * <br>Each message by a webhook can have a different user appearance.
      * If this is not set it will default the user appearance in the settings of
      * the webhook.
      *
-     * @param username
-     *                 The (nullable) username to use
+     * @param  username
+     *         The (nullable) username to use
      *
      * @return This builder for chaining convenience
      */
@@ -251,13 +244,12 @@ public class WebhookMessageBuilder {
 
     /**
      * The avatar url to use for this message.
-     * <br>
-     * Each message by a webhook can have a different user appearance.
+     * <br>Each message by a webhook can have a different user appearance.
      * If this is not set it will default the user appearance in the settings of
      * the webhook.
      *
-     * @param avatarUrl
-     *                  The (nullable) avatar url to use
+     * @param  avatarUrl
+     *         The (nullable) avatar url to use
      *
      * @return This builder for chaining convenience
      */
@@ -270,8 +262,8 @@ public class WebhookMessageBuilder {
     /**
      * Whether this message should use Text-to-Speech (TTS)
      *
-     * @param tts
-     *            True, if this message should use tts
+     * @param  tts
+     *         True, if this message should use tts
      *
      * @return This builder for chaining convenience
      */
@@ -282,11 +274,10 @@ public class WebhookMessageBuilder {
     }
 
     /**
-     * Whether the message should be ephemeral (only works for interaction
-     * webhooks).
+     * Whether the message should be ephemeral (only works for interaction webhooks).
      *
-     * @param ephemeral
-     *                  True if the message should be ephemeral, false otherwise
+     * @param  ephemeral
+     *         True if the message should be ephemeral, false otherwise
      *
      * @return This builder for chaining convenience
      */
@@ -300,35 +291,16 @@ public class WebhookMessageBuilder {
     }
 
     /**
-     * Whether the message should be silent
-     *
-     * @param silent
-     *               True if the message should be sent silently, false otherwise
-     *
-     * @return This builder for chaining convenience
-     */
-    @NotNull
-    public WebhookMessageBuilder setSilent(boolean silent) {
-        if (silent)
-            flags |= MessageFlags.SUPPRESS_NOTIFICATIONS;
-        else
-            flags &= ~MessageFlags.SUPPRESS_NOTIFICATIONS;
-        return this;
-    }
-
-    /**
      * Adds the provided file as an attachment to this message.
-     * <br>
-     * A single message can have up to {@value WebhookMessage#MAX_FILES}
-     * attachments.
+     * <br>A single message can have up to {@value WebhookMessage#MAX_FILES} attachments.
      *
      * @param file
-     *             The file to attach
+     *         The file to attach
      *
      * @return This builder for chaining convenience
      *
      * @throws java.lang.NullPointerException
-     *                                        If provided with null
+     *         If provided with null
      */
     @NotNull
     public WebhookMessageBuilder addFile(@NotNull File file) {
@@ -338,17 +310,15 @@ public class WebhookMessageBuilder {
 
     /**
      * Adds the provided file as an attachment to this message.
-     * <br>
-     * A single message can have up to {@value WebhookMessage#MAX_FILES}
-     * attachments.
+     * <br>A single message can have up to {@value WebhookMessage#MAX_FILES} attachments.
      *
-     * @param name
-     *             The alternative name that should be used instead
-     * @param file
-     *             The file to attach
+     * @param  name
+     *         The alternative name that should be used instead
+     * @param  file
+     *         The file to attach
      *
      * @throws java.lang.NullPointerException
-     *                                        If provided with null
+     *         If provided with null
      *
      * @return This builder for chaining convenience
      */
@@ -356,34 +326,31 @@ public class WebhookMessageBuilder {
     public WebhookMessageBuilder addFile(@NotNull String name, @NotNull File file) {
         Objects.requireNonNull(file, "File");
         Objects.requireNonNull(name, "Name");
-        if (!file.exists() || !file.canRead())
-            throw new IllegalArgumentException("File must exist and be readable");
+        if (!file.exists() || !file.canRead()) throw new IllegalArgumentException("File must exist and be readable");
         if (fileIndex >= WebhookMessage.MAX_FILES)
-            throw new IllegalStateException(
-                    "Cannot add more than " + WebhookMessage.MAX_FILES + " attachments to a message");
+            throw new IllegalStateException("Cannot add more than " + WebhookMessage.MAX_FILES + " attachments to a message");
 
         try {
             MessageAttachment attachment = new MessageAttachment(name, file);
             files[fileIndex++] = attachment;
             return this;
-        } catch (IOException ex) {
+        }
+        catch (IOException ex) {
             throw new IllegalArgumentException(ex);
         }
     }
 
     /**
      * Adds the provided data as a file attachment to this message.
-     * <br>
-     * A single message can have up to {@value WebhookMessage#MAX_FILES}
-     * attachments.
+     * <br>A single message can have up to {@value WebhookMessage#MAX_FILES} attachments.
      *
-     * @param name
-     *             The alternative name that should be used
-     * @param data
-     *             The data to attach as a file
+     * @param  name
+     *         The alternative name that should be used
+     * @param  data
+     *         The data to attach as a file
      *
      * @throws java.lang.NullPointerException
-     *                                        If provided with null
+     *         If provided with null
      *
      * @return This builder for chaining convenience
      */
@@ -392,8 +359,7 @@ public class WebhookMessageBuilder {
         Objects.requireNonNull(data, "Data");
         Objects.requireNonNull(name, "Name");
         if (fileIndex >= WebhookMessage.MAX_FILES)
-            throw new IllegalStateException(
-                    "Cannot add more than " + WebhookMessage.MAX_FILES + " attachments to a message");
+            throw new IllegalStateException("Cannot add more than " + WebhookMessage.MAX_FILES + " attachments to a message");
 
         MessageAttachment attachment = new MessageAttachment(name, data);
         files[fileIndex++] = attachment;
@@ -402,17 +368,15 @@ public class WebhookMessageBuilder {
 
     /**
      * Adds the provided data as a file attachment to this message.
-     * <br>
-     * A single message can have up to {@value WebhookMessage#MAX_FILES}
-     * attachments.
+     * <br>A single message can have up to {@value WebhookMessage#MAX_FILES} attachments.
      *
-     * @param name
-     *             The alternative name that should be used
-     * @param data
-     *             The data to attach as a file
+     * @param  name
+     *         The alternative name that should be used
+     * @param  data
+     *         The data to attach as a file
      *
      * @throws java.lang.NullPointerException
-     *                                        If provided with null
+     *         If provided with null
      *
      * @return This builder for chaining convenience
      */
@@ -421,25 +385,24 @@ public class WebhookMessageBuilder {
         Objects.requireNonNull(data, "InputStream");
         Objects.requireNonNull(name, "Name");
         if (fileIndex >= WebhookMessage.MAX_FILES)
-            throw new IllegalStateException(
-                    "Cannot add more than " + WebhookMessage.MAX_FILES + " attachments to a message");
+            throw new IllegalStateException("Cannot add more than " + WebhookMessage.MAX_FILES + " attachments to a message");
 
         try {
             MessageAttachment attachment = new MessageAttachment(name, data);
             files[fileIndex++] = attachment;
             return this;
-        } catch (IOException ex) {
+        }
+        catch (IOException ex) {
             throw new IllegalArgumentException(ex);
         }
     }
 
     /**
      * Sets the provided name as the name for a newly created thread.
-     * <br>
-     * This is only valid for forum/media channels.
+     * <br>This is only valid for forum/media channels.
      *
-     * @param name
-     *             The name that should be used
+     * @param  name
+     *         The name that should be used
      *
      * @return This builder for chaining convenience
      */
@@ -453,8 +416,7 @@ public class WebhookMessageBuilder {
      * Constructs the {@link club.minnced.discord.webhook.send.WebhookMessage}
      * from the current configurations.
      *
-     * @return The resulting
-     *         {@link club.minnced.discord.webhook.send.WebhookMessage}
+     * @return The resulting {@link club.minnced.discord.webhook.send.WebhookMessage}
      */
     @NotNull
     public WebhookMessage build() {
@@ -464,6 +426,7 @@ public class WebhookMessageBuilder {
                 fileIndex == 0 ? null : Arrays.copyOf(files, fileIndex), allowedMentions, flags, threadName);
     }
 
+
     /////////////////////////////////
     /// Third-party compatibility ///
     /////////////////////////////////
@@ -471,11 +434,11 @@ public class WebhookMessageBuilder {
     /**
      * Converts a JDA {@link Message} into a compatible WebhookMessageBuilder.
      *
-     * @param message
-     *                The message
+     * @param  message
+     *         The message
      *
      * @throws NullPointerException
-     *                              If null is provided
+     *         If null is provided
      *
      * @return WebhookMessageBuilder with the converted data
      */
@@ -487,11 +450,11 @@ public class WebhookMessageBuilder {
     /**
      * Converts a JDA {@link Message} into a compatible WebhookMessageBuilder.
      *
-     * @param message
-     *                The message
+     * @param  message
+     *         The message
      *
      * @throws NullPointerException
-     *                              If null is provided
+     *         If null is provided
      *
      * @return WebhookMessageBuilder with the converted data
      */
@@ -506,25 +469,26 @@ public class WebhookMessageBuilder {
         Set<String> mentionedUsers = message.getMentionedUsers();
         Set<String> mentionedRoles = message.getMentionedRoles();
         builder.setAllowedMentions(
-                AllowedMentions.none()
-                        .withUsers(mentionedUsers)
-                        .withRoles(mentionedRoles)
-                        .withParseEveryone(allowedMentions.contains(Message.MentionType.EVERYONE))
-                        .withParseRoles(allowedMentions.contains(Message.MentionType.ROLE))
-                        .withParseUsers(allowedMentions.contains(Message.MentionType.USER)));
+            AllowedMentions.none()
+                .withUsers(mentionedUsers)
+                .withRoles(mentionedRoles)
+                .withParseEveryone(allowedMentions.contains(Message.MentionType.EVERYONE))
+                .withParseRoles(allowedMentions.contains(Message.MentionType.ROLE))
+                .withParseUsers(allowedMentions.contains(Message.MentionType.USER))
+        );
+
 
         return builder;
     }
 
     /**
-     * Converts a Javacord {@link org.javacord.api.entity.message.Message Message}
-     * into a compatible WebhookMessageBuilder.
+     * Converts a Javacord {@link org.javacord.api.entity.message.Message Message} into a compatible WebhookMessageBuilder.
      *
-     * @param message
-     *                The message
+     * @param  message
+     *         The message
      *
      * @throws NullPointerException
-     *                              If null is provided
+     *         If null is provided
      *
      * @return WebhookMessageBuilder with the converted data
      */
@@ -537,27 +501,26 @@ public class WebhookMessageBuilder {
 
         AllowedMentions allowedMentions = AllowedMentions.none();
         allowedMentions.withUsers(
-                message.getMentionedUsers().stream()
-                        .map(DiscordEntity::getIdAsString)
-                        .collect(Collectors.toList()));
+            message.getMentionedUsers().stream()
+                .map(DiscordEntity::getIdAsString)
+                .collect(Collectors.toList()));
         allowedMentions.withRoles(
-                message.getMentionedRoles().stream()
-                        .map(DiscordEntity::getIdAsString)
-                        .collect(Collectors.toList()));
+            message.getMentionedRoles().stream()
+                .map(DiscordEntity::getIdAsString)
+                .collect(Collectors.toList()));
         allowedMentions.withParseEveryone(message.mentionsEveryone());
         builder.setAllowedMentions(allowedMentions);
         return builder;
     }
 
     /**
-     * Converts a Discord4J {@link MessageCreateSpec} into a compatible
-     * WebhookMessageBuilder.
+     * Converts a Discord4J {@link MessageCreateSpec} into a compatible WebhookMessageBuilder.
      *
-     * @param callback
-     *                 The callback used to specify the desired message settings
+     * @param  callback
+     *         The callback used to specify the desired message settings
      *
      * @throws NullPointerException
-     *                              If null is provided
+     *         If null is provided
      *
      * @return WebhookMessageBuilder with the converted data
      *
@@ -566,20 +529,17 @@ public class WebhookMessageBuilder {
     @NotNull
     @Deprecated
     public static WebhookMessageBuilder fromD4J(@NotNull Consumer<? super MessageCreateSpec> callback) {
-        throw new UnsupportedOperationException(
-                "Cannot build messages via consumers in Discord4J 3.2.0! Please change to fromD4J(spec)");
+        throw new UnsupportedOperationException("Cannot build messages via consumers in Discord4J 3.2.0! Please change to fromD4J(spec)");
     }
 
     /**
-     * Converts a Discord4J {@link MessageCreateSpec} into a compatible
-     * WebhookMessageBuilder.
+     * Converts a Discord4J {@link MessageCreateSpec} into a compatible WebhookMessageBuilder.
      *
-     * @param spec
-     *             The message create spec used to specify the desired message
-     *             settings
+     * @param  spec
+     *         The message create spec used to specify the desired message settings
      *
      * @throws NullPointerException
-     *                              If null is provided
+     *         If null is provided
      *
      * @return WebhookMessageBuilder with the converted data
      */
@@ -603,10 +563,11 @@ public class WebhookMessageBuilder {
             builder.setTTS(tts.get());
         if (!embeds.isAbsent()) {
             builder.addEmbeds(
-                    embeds.get().stream()
-                            .map(WebhookEmbedBuilder::fromD4J)
-                            .map(WebhookEmbedBuilder::build)
-                            .collect(Collectors.toList()));
+                embeds.get().stream()
+                    .map(WebhookEmbedBuilder::fromD4J)
+                    .map(WebhookEmbedBuilder::build)
+                    .collect(Collectors.toList())
+            );
         }
 
         if (!allowedMentions.isAbsent()) {
@@ -629,15 +590,13 @@ public class WebhookMessageBuilder {
     }
 
     /**
-     * Converts a Discord4J {@link MessageCreateSpec} into a compatible
-     * WebhookMessageBuilder.
+     * Converts a Discord4J {@link MessageCreateSpec} into a compatible WebhookMessageBuilder.
      *
-     * @param spec
-     *             The message create spec used to specify the desired message
-     *             settings
+     * @param  spec
+     *         The message create spec used to specify the desired message settings
      *
      * @throws NullPointerException
-     *                              If null is provided
+     *         If null is provided
      *
      * @return WebhookMessageBuilder with the converted data
      */
@@ -661,7 +620,8 @@ public class WebhookMessageBuilder {
                     embeds.get().get().stream()
                             .map(WebhookEmbedBuilder::fromD4J)
                             .map(WebhookEmbedBuilder::build)
-                            .collect(Collectors.toList()));
+                            .collect(Collectors.toList())
+            );
         }
 
         if (!allowedMentions.isAbsent() && allowedMentions.get().isPresent()) {

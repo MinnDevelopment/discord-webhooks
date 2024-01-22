@@ -33,10 +33,8 @@ import java.util.*;
 
 /**
  * Send-only message for a {@link club.minnced.discord.webhook.WebhookClient}
- * <br>
- * A {@link club.minnced.discord.webhook.receive.ReadonlyMessage} can be sent
- * by first converting it to a WebhookMessage with
- * {@link #from(club.minnced.discord.webhook.receive.ReadonlyMessage)}.
+ * <br>A {@link club.minnced.discord.webhook.receive.ReadonlyMessage} can be sent
+ * by first converting it to a WebhookMessage with {@link #from(club.minnced.discord.webhook.receive.ReadonlyMessage)}.
  */
 public class WebhookMessage {
     /**
@@ -55,9 +53,9 @@ public class WebhookMessage {
     protected final String threadName;
 
     protected WebhookMessage(final String username, final String avatarUrl, final String content,
-            final List<WebhookEmbed> embeds, final boolean isTTS,
-            final MessageAttachment[] files, final AllowedMentions allowedMentions,
-            final int flags, final String threadName) {
+                             final List<WebhookEmbed> embeds, final boolean isTTS,
+                             final MessageAttachment[] files, final AllowedMentions allowedMentions,
+                             final int flags, final String threadName) {
         this.username = username;
         this.avatarUrl = avatarUrl;
         this.content = content;
@@ -138,13 +136,11 @@ public class WebhookMessage {
     }
 
     /**
-     * Returns a new WebhookMessage instance with the ephemeral flag turned on/off
-     * (true/false).
-     * <br>
-     * This instance remains unchanged and a new instance is returned.
+     * Returns a new WebhookMessage instance with the ephemeral flag turned on/off (true/false).
+     * <br>This instance remains unchanged and a new instance is returned.
      *
-     * @param ephemeral
-     *                  Whether to make this message ephemeral
+     * @param  ephemeral
+     *         Whether to make this message ephemeral
      *
      * @return New WebhookMessage instance
      */
@@ -155,43 +151,19 @@ public class WebhookMessage {
             flags |= MessageFlags.EPHEMERAL;
         else
             flags &= ~MessageFlags.EPHEMERAL;
-        return new WebhookMessage(username, avatarUrl, content, embeds, isTTS, attachments, allowedMentions, flags,
-                threadName);
-    }
-
-    /**
-     * Returns a new WebhookMessage instance with the silent flag turned on/off
-     * (true/false).
-     * <br>
-     * This instance remains unchanged and a new instance is returned.
-     * 
-     * @param silent
-     *               Whether to make this message silent
-     * 
-     * @return New WebhookMessage instance
-     */
-    @NotNull
-    public WebhookMessage asSilent(boolean silent) {
-        int flags = this.flags;
-        if (silent)
-            flags |= MessageFlags.SUPPRESS_NOTIFICATIONS;
-        else
-            flags &= ~MessageFlags.SUPPRESS_NOTIFICATIONS;
-        return new WebhookMessage(username, avatarUrl, content, embeds, isTTS, attachments, allowedMentions, flags,
-                threadName);
+        return new WebhookMessage(username, avatarUrl, content, embeds, isTTS, attachments, allowedMentions, flags, threadName);
     }
 
     /**
      * Converts a {@link club.minnced.discord.webhook.receive.ReadonlyMessage} to a
      * WebhookMessage.
-     * <br>
-     * This does not convert attachments.
+     * <br>This does not convert attachments.
      *
-     * @param message
-     *                The message to convert
+     * @param  message
+     *         The message to convert
      *
      * @throws java.lang.NullPointerException
-     *                                        If provided with null
+     *         If provided with null
      *
      * @return A WebhookMessage copy
      */
@@ -204,7 +176,6 @@ public class WebhookMessage {
         builder.setContent(message.getContent());
         builder.setTTS(message.isTTS());
         builder.setEphemeral((message.getFlags() & MessageFlags.EPHEMERAL) != 0);
-        builder.setSilent((message.getFlags() & MessageFlags.SUPPRESS_NOTIFICATIONS) != 0);
         builder.addEmbeds(message.getEmbeds());
         return builder.build();
     }
@@ -214,21 +185,18 @@ public class WebhookMessage {
      * the provided embeds. A message can hold up to {@value #MAX_EMBEDS} embeds.
      *
      * @param first
-     *               The first embed
+     *         The first embed
      * @param embeds
-     *               Optional additional embeds for the message
+     *         Optional additional embeds for the message
      *
      * @return A WebhookMessage for the embeds
      *
      * @throws java.lang.NullPointerException
-     *                                            If provided with null
+     *         If provided with null
      * @throws java.lang.IllegalArgumentException
-     *                                            If more than
-     *                                            {@value WebhookMessage#MAX_EMBEDS}
-     *                                            are provided
+     *         If more than {@value WebhookMessage#MAX_EMBEDS} are provided
      */
-    @NotNull // forcing first embed as we expect at least one entry (Effective Java 3rd.
-             // Edition - Item 53)
+    @NotNull // forcing first embed as we expect at least one entry (Effective Java 3rd. Edition - Item 53)
     public static WebhookMessage embeds(@NotNull WebhookEmbed first, @NotNull WebhookEmbed... embeds) {
         Objects.requireNonNull(embeds, "Embeds");
         if (embeds.length >= WebhookMessage.MAX_EMBEDS)
@@ -246,15 +214,13 @@ public class WebhookMessage {
      * Creates a WebhookMessage from
      * the provided embeds. A message can hold up to {@value #MAX_EMBEDS} embeds.
      *
-     * @param embeds
-     *               Embeds for the message
+     * @param  embeds
+     *         Embeds for the message
      *
      * @throws java.lang.NullPointerException
-     *                                            If provided with null
+     *         If provided with null
      * @throws java.lang.IllegalArgumentException
-     *                                            If more than
-     *                                            {@value WebhookMessage#MAX_EMBEDS}
-     *                                            are provided
+     *         If more than {@value WebhookMessage#MAX_EMBEDS} are provided
      *
      * @return A WebhookMessage for the embeds
      */
@@ -266,25 +232,22 @@ public class WebhookMessage {
         if (embeds.isEmpty())
             throw new IllegalArgumentException("Cannot build an empty message");
         embeds.forEach(Objects::requireNonNull);
-        return new WebhookMessage(null, null, null, new ArrayList<>(embeds), false, null, AllowedMentions.all(), 0,
-                null);
+        return new WebhookMessage(null, null, null, new ArrayList<>(embeds), false, null, AllowedMentions.all(), 0, null);
     }
 
     /**
      * Creates a WebhookMessage from the provided attachments.
-     * <br>
-     * A message can hold up to {@value #MAX_FILES} attachments
+     * <br>A message can hold up to {@value #MAX_FILES} attachments
      * and a total of 8MiB of data.
      *
-     * @param attachments
-     *                    The attachments to add, keys are the alternative names
-     *                    for each attachment
+     * @param  attachments
+     *         The attachments to add, keys are the alternative names
+     *         for each attachment
      *
      * @throws java.lang.NullPointerException
-     *                                            If provided with null
+     *         If provided with null
      * @throws java.lang.IllegalArgumentException
-     *                                            If no attachments are provided or
-     *                                            more than {@value #MAX_FILES}
+     *         If no attachments are provided or more than {@value #MAX_FILES}
      *
      * @return A WebhookMessage for the attachments
      */
@@ -296,8 +259,7 @@ public class WebhookMessage {
         if (fileAmount == 0)
             throw new IllegalArgumentException("Cannot build an empty message");
         if (fileAmount > WebhookMessage.MAX_FILES)
-            throw new IllegalArgumentException(
-                    "Cannot add more than " + WebhookMessage.MAX_FILES + " files to a message");
+            throw new IllegalArgumentException("Cannot add more than " + WebhookMessage.MAX_FILES + " files to a message");
         Set<? extends Map.Entry<String, ?>> entries = attachments.entrySet();
         MessageAttachment[] files = new MessageAttachment[fileAmount];
         int i = 0;
@@ -312,38 +274,29 @@ public class WebhookMessage {
 
     /**
      * Creates a WebhookMessage from the provided attachments.
-     * <br>
-     * A message can hold up to {@value #MAX_FILES} attachments
+     * <br>A message can hold up to {@value #MAX_FILES} attachments
      * and a total of 8MiB of data.
      *
-     * <p>
-     * The files are provided in pairs of {@literal Name->Data} similar
+     * <p>The files are provided in pairs of {@literal Name->Data} similar
      * to the first 2 arguments.
-     * <br>
-     * The allowed data types are {@code byte[] | InputStream | File}
+     * <br>The allowed data types are {@code byte[] | InputStream | File}
      *
      * @param name1
-     *                    The alternative name of the first attachment
+     *         The alternative name of the first attachment
      * @param data1
-     *                    The first attachment, must be of type
-     *                    {@code byte[] | InputStream | File}
+     *         The first attachment, must be of type {@code byte[] | InputStream | File}
      * @param attachments
-     *                    Optional additional attachments to add, pairs of
-     *                    {@literal String->Data}
+     *         Optional additional attachments to add, pairs of {@literal String->Data}
      *
      * @return A WebhookMessage for the attachments
      *
      * @throws java.lang.NullPointerException
-     *                                            If provided with null
+     *         If provided with null
      * @throws java.lang.IllegalArgumentException
-     *                                            If no attachments are provided or
-     *                                            more than {@value #MAX_FILES}
-     *                                            or the additional arguments are
-     *                                            not an even count or an invalid
-     *                                            format
+     *         If no attachments are provided or more than {@value #MAX_FILES}
+     *         or the additional arguments are not an even count or an invalid format
      */
-    @NotNull // forcing first pair as we expect at least one entry (Effective Java 3rd.
-             // Edition - Item 53)
+    @NotNull // forcing first pair as we expect at least one entry (Effective Java 3rd. Edition - Item 53)
     public static WebhookMessage files(@NotNull String name1, @NotNull Object data1, @NotNull Object... attachments) {
         Objects.requireNonNull(name1, "Name");
         Objects.requireNonNull(data1, "Data");
@@ -352,17 +305,14 @@ public class WebhookMessage {
             throw new IllegalArgumentException("Must provide even number of varargs arguments");
         int fileAmount = 1 + attachments.length / 2;
         if (fileAmount > WebhookMessage.MAX_FILES)
-            throw new IllegalArgumentException(
-                    "Cannot add more than " + WebhookMessage.MAX_FILES + " files to a message");
+            throw new IllegalArgumentException("Cannot add more than " + WebhookMessage.MAX_FILES + " files to a message");
         MessageAttachment[] files = new MessageAttachment[fileAmount];
         files[0] = convertAttachment(name1, data1);
         for (int i = 0, j = 1; i < attachments.length; j++, i += 2) {
             Object name = attachments[i];
             Object data = attachments[i + 1];
             if (!(name instanceof String))
-                throw new IllegalArgumentException(
-                        "Provided arguments must be pairs for (String, Data). Expected String and found "
-                                + (name == null ? null : name.getClass().getName()));
+                throw new IllegalArgumentException("Provided arguments must be pairs for (String, Data). Expected String and found " + (name == null ? null : name.getClass().getName()));
             files[j] = convertAttachment((String) name, data);
         }
         return new WebhookMessage(null, null, null, null, false, files, AllowedMentions.all(), 0, null);
@@ -379,8 +329,7 @@ public class WebhookMessage {
 
     /**
      * Provides a {@link okhttp3.RequestBody} of this message.
-     * <br>
-     * This is used internally for executing webhooks through HTTP requests.
+     * <br>This is used internally for executing webhooks through HTTP requests.
      *
      * @return The request body
      */
@@ -434,11 +383,10 @@ public class WebhookMessage {
             else if (data instanceof byte[])
                 a = new MessageAttachment(name, (byte[]) data);
             else
-                throw new IllegalArgumentException(
-                        "Provided arguments must be pairs for (String, Data). Unexpected data type "
-                                + data.getClass().getName());
+                throw new IllegalArgumentException("Provided arguments must be pairs for (String, Data). Unexpected data type " + data.getClass().getName());
             return a;
-        } catch (IOException ex) {
+        }
+        catch (IOException ex) {
             throw new IllegalArgumentException(ex);
         }
     }
