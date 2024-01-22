@@ -154,6 +154,17 @@ public class WebhookMessage {
         return new WebhookMessage(username, avatarUrl, content, embeds, isTTS, attachments, allowedMentions, flags, threadName);
     }
 
+    //copy the above function but change it to be for the silent flag
+    @NotNull
+    public WebhookMessage asSilent(boolean silent) {
+        int flags = this.flags;
+        if (silent)
+            flags |= MessageFlags.SUPPRESS_NOTIFICATIONS;
+        else
+            flags &= ~MessageFlags.SUPPRESS_NOTIFICATIONS;
+        return new WebhookMessage(username, avatarUrl, content, embeds, isTTS, attachments, allowedMentions, flags, threadName);
+    }
+
     /**
      * Converts a {@link club.minnced.discord.webhook.receive.ReadonlyMessage} to a
      * WebhookMessage.
@@ -176,6 +187,7 @@ public class WebhookMessage {
         builder.setContent(message.getContent());
         builder.setTTS(message.isTTS());
         builder.setEphemeral((message.getFlags() & MessageFlags.EPHEMERAL) != 0);
+        builder.setSilent((message.getFlags() & MessageFlags.SUPPRESS_NOTIFICATIONS) != 0);
         builder.addEmbeds(message.getEmbeds());
         return builder.build();
     }
