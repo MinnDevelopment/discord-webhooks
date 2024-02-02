@@ -81,11 +81,12 @@ client.send(embed)
       .thenAccept((message) -> System.out.printf("Message with embed has been sent [%s]%n", message.getId()));
 
 // Change appearance of webhook message
-WebhookMessageBuilder builder = new WebhookMessageBuilder();
-builder.setUsername("Minn"); // use this username
-builder.setAvatarUrl(avatarUrl); // use this avatar
-builder.setContent("Hello World");
-client.send(builder.build());
+WebhookMessage message = new WebhookMessageBuilder()
+        .setUsername("Minn"); // use this username
+        .setAvatarUrl(avatarUrl); // use this avatar
+        .setContent("Hello World");
+        .build();
+client.send(message);
 ```
 
 ## Threads
