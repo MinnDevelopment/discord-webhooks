@@ -154,7 +154,15 @@ public class WebhookMessage {
         return new WebhookMessage(username, avatarUrl, content, embeds, isTTS, attachments, allowedMentions, flags, threadName);
     }
 
-    //copy the above function but change it to be for the silent flag
+    /**
+     * Returns a new WebhookMessage instance with the silent flag turned on/off (true/false).
+     * <br>This instance remains unchanged and a new instance is returned.
+     *
+     * @param  silent
+     *         Whether to make this message silent
+     *
+     * @return New WebhookMessage instance
+     */
     @NotNull
     public WebhookMessage asSilent(boolean silent) {
         int flags = this.flags;

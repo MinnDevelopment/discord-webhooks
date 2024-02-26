@@ -294,13 +294,13 @@ public class WebhookMessageBuilder {
      * Whether the message should be silent
      *
      * @param silent
-     *                  True if the message should be silent, false otherwise
+     *              True if the message should be silent, false otherwise
      *
      * @return This builder for chaining convenience
      */
     @NotNull
-    public WebhookMessageBuilder setSilent(boolean suppressNotifications) {
-        if (suppressNotifications)
+    public WebhookMessageBuilder setSilent(boolean silent) {
+        if (silent)
             flags |= MessageFlags.SUPPRESS_NOTIFICATIONS;
         else
             flags &= ~MessageFlags.SUPPRESS_NOTIFICATIONS;
