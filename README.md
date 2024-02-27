@@ -82,9 +82,9 @@ client.send(embed)
 
 // Change appearance of webhook message
 WebhookMessage message = new WebhookMessageBuilder()
-        .setUsername("Minn"); // use this username
-        .setAvatarUrl(avatarUrl); // use this avatar
-        .setContent("Hello World");
+        .setUsername("Minn") // use this username
+        .setAvatarUrl(avatarUrl) // use this avatar
+        .setContent("Hello World")
         .build();
 client.send(message);
 ```
