@@ -21,12 +21,15 @@ package club.minnced.discord.webhook;
  */
 @SuppressWarnings("PointlessBitwiseExpression")
 public class MessageFlags {
-    public static final int CROSSPOSTED            = 1 << 0;
-    public static final int IS_CROSSPOSTED         = 1 << 1;
-    public static final int SUPPRESS_EMBEDS        = 1 << 2;
-    public static final int SOURCE_MESSAGE_DELETED = 1 << 3;
-    public static final int URGENT                 = 1 << 4;
-    public static final int HAS_THREAD             = 1 << 5;
-    public static final int EPHEMERAL              = 1 << 6;
-    public static final int LOADING                = 1 << 7;
+    public static final int CROSSPOSTED                            = 1 << 0;
+    public static final int IS_CROSSPOSTED                         = 1 << 1;
+    public static final int SUPPRESS_EMBEDS                        = 1 << 2;
+    public static final int SOURCE_MESSAGE_DELETED                 = 1 << 3;
+    public static final int URGENT                                 = 1 << 4;
+    public static final int HAS_THREAD                             = 1 << 5;
+    public static final int EPHEMERAL                              = 1 << 6;
+    public static final int LOADING                                = 1 << 7;
+    public static final int FAILED_TO_MENTION_SOME_ROLES_IN_THREAD = 1 << 8;
+    public static final int SUPPRESS_NOTIFICATIONS                 = 1 << 12;
+    public static final int IS_VOICE_MESSAGE                       = 1 << 13;
 }
